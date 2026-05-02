@@ -1,3 +1,4 @@
+//admin/ui.js
 function addCacheBuster(url) {
   if (!url) return url;
   return url + (url.includes('?') ? '&' : '?') + 't=' + Date.now();

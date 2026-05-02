@@ -1,3 +1,4 @@
+//admin/api.js
 export function getCsrf() {
   const token = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
   const header = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content');
@@ -108,11 +109,11 @@ export async function cambiarEstadoProyecto(id, estado) {
 }
 
 export async function fetchUserDetail(id) {
-  return await fetchJson(`/api/admin/usuarios/${id}`, { cache: 'no-store' });
+  return await fetchJson(`admin/usuarios/${id}`, { cache: 'no-store' });
 }
 
 export async function createUser(payload) {
-  await fetchText('/api/admin/usuarios/crear', {
+  await fetchText('admin/usuarios/crear', {
     method: 'POST',
     headers: buildHeaders({ 'Content-Type': 'application/json' }),
     body: JSON.stringify(payload)
@@ -120,7 +121,7 @@ export async function createUser(payload) {
 }
 
 export async function updateUser(id, payload) {
-  await fetchText(`/api/admin/usuarios/${id}/actualizar`, {
+  await fetchText(`admin/usuarios/${id}/actualizar`, {
     method: 'POST',
     headers: buildHeaders({ 'Content-Type': 'application/json' }),
     body: JSON.stringify(payload)
@@ -128,7 +129,7 @@ export async function updateUser(id, payload) {
 }
 
 export async function deleteUser(id) {
-  await fetchText(`/api/admin/usuarios/${id}/eliminar`, {
+  await fetchText(`admin/usuarios/${id}/eliminar`, {
     method: 'POST',
     headers: buildHeaders()
   });

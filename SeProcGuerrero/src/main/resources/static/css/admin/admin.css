@@ -392,9 +392,9 @@ button,input,select,textarea{font:inherit;}
   background:var(--primary);
   border:none;
   padding:0;
-  display:grid;
   place-items:center;
   cursor:pointer;
+  justify-content: center;
 }
 
 .add-btn:hover{background:var(--primary-dark);}
@@ -1928,4 +1928,86 @@ button,input,select,textarea{font:inherit;}
 @media (max-width:1100px){
   .process-mini-school{font-size:15px;}
   .process-mini-stage-label{font-size:12px;}
+}
+
+/* ======================
+   BOTONES DE ACCIÓN (Modales)
+   ====================== */
+.action-row {
+  display: flex;
+  justify-content: flex-end; /* Alinea los botones a la derecha */
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.action-btn {
+  height: 40px;
+  border: none;
+  border-radius: 999px; /* Bordes redondeados */
+  padding: 0 20px;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease, transform 0.05s ease;
+}
+
+.action-btn:active {
+  transform: translateY(1px); /* Efecto al hacer clic */
+}
+
+/* Diseño para botones positivos (Aprobar, Crear, Guardar) */
+.action-btn.ok {
+  background: var(--primary);
+  color: #fff;
+}
+
+.action-btn.ok:hover {
+  background: var(--primary-dark);
+}
+
+/* Diseño para botones negativos (Rechazar, Eliminar) */
+.action-btn.bad {
+  background: rgb(165, 1, 1); /* Toma el rojo de las variables */
+  color: #fff;
+}
+
+.action-btn.bad:hover {
+  filter: brightness(0.9); /* Lo oscurece un poco al pasar el mouse */
+}
+
+/* ======================
+   TOGGLE PASSWORD (Ojo)
+   ====================== */
+.password-wrap {
+  position: relative; /* Necesario para posicionar el botón del ojo de forma absoluta */
+}
+
+.toggle-pass {
+  position: absolute;
+  right: 12px; /* Espaciado desde la derecha */
+  top: 32px;   /* Ajusta esto para centrarlo verticalmente respecto al input. Depende de la altura del label y campo */
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 24px;
+  width: 24px;
+}
+
+.toggle-pass img {
+  width: 20px;  /* Tamaño fijo para el icono del ojo */
+  height: 20px;
+  object-fit: contain;
+  opacity: 0.6; /* Un poco transparente para que no resalte tanto */
+  transition: opacity 0.2s ease;
+}
+
+.toggle-pass:hover img {
+  opacity: 1; /* Se hace sólido al pasar el mouse */
 }

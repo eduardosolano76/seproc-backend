@@ -51,7 +51,7 @@ public class AdminController {
 	//mostrando la vista del admin con la información del usuario logueado,
 	@GetMapping("/admin")
 	public String admin(Model model, Principal principal,
-			@RequestParam(value = "view", required = false, defaultValue = "proyectos") String view,
+			@RequestParam(value = "view", required = false, defaultValue = "solicitudes") String view,
 			@RequestHeader(value = "X-Requested-With", required = false) String requestedWith) {
 
 		// username del que inició sesión
