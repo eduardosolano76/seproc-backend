@@ -179,7 +179,6 @@ input{
   font-size:15px;
   font-weight:700;
   cursor:pointer;
-  box-shadow:0 10px 22px rgba(31,90,164,.20);
   transition:transform .12s ease, filter .18s ease;
 }
 
@@ -191,13 +190,21 @@ input{
   transform:translateY(1px);
 }
 
-.btn-register-link{
-  display:block;
-  margin-top:2px;
-  text-align:center;
-  color:#1f1f1f;
-  font-size:15px;
-  font-weight:500;
+.register-prompt {
+  margin-top: 2px;
+  text-align: center;
+  font-size: 15px;
+  color: #1f1f1f;
+}
+
+.btn-register-link {
+  font-weight: 600;
+  color: var(--blue-mid); 
+  text-decoration: none;
+}
+
+.btn-register-link:hover {
+  text-decoration: underline;
 }
 
 .btn-register-link:hover{

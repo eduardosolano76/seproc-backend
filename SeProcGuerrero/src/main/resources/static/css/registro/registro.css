@@ -128,7 +128,7 @@ input{
 .register-title{
   margin:0 0 22px;
   text-align:center;
-  font-size:19px;
+  font-size:20px;
   font-weight:500;
   color:#202020;
 }
@@ -192,7 +192,6 @@ input{
   font-size:15px;
   font-weight:700;
   cursor:pointer;
-  box-shadow:0 10px 22px rgba(31,90,164,.20);
   transition:transform .12s ease, filter .18s ease;
 }
 
@@ -204,13 +203,17 @@ input{
   transform:translateY(1px);
 }
 
+.login-prompt{
+  margin-top: 2px;
+  text-align: center;
+  font-size: 15px;
+  color: #1f1f1f;
+}
+
 .btn-login-link{
-  display:block;
-  margin-top:2px;
-  text-align:center;
-  color:#1f1f1f;
-  font-size:15px;
-  font-weight:500;
+  font-weight: 600;
+  color: var(--blue-mid); 
+  text-decoration: none;
 }
 
 .btn-login-link:hover{
@@ -325,4 +328,10 @@ input{
   .brand-copy{
     font-size:11px;
   }
+}
+
+.error-text{
+	color: #c62828;
+	font-size: 13px; 
+	margin-top: 4px;
 }
