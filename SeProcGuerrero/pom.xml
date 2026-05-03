@@ -127,60 +127,6 @@
 				</configuration>
 			</plugin>
 
-			<!--
-            <plugin>
-                <groupId>io.spring.javaformat</groupId>
-                <artifactId>spring-javaformat-maven-plugin</artifactId>
-                <version>0.0.47</version>
-                <executions>
-                    <execution>
-                        <phase>process-sources</phase>
-                        <inherited>true</inherited>
-                        <goals>
-                            <goal>apply</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            -->
-
-			<!--
-            <plugin>
-                <groupId>com.diffplug.spotless</groupId>
-                <artifactId>spotless-maven-plugin</artifactId>
-                <version>2.43.0</version>
-                <configuration>
-                    <formats>
-               
-                        <format>
-                            <includes>
-                                <include>src/main/resources/templates/**/*.html</include>
-                            </includes>
-                 
-                            <prettier>
-                                <devDependencies>
-                                    <prettier>2.8.8</prettier>
-                                    <plugin>@prettier/plugin-xml</plugin>
-                                </devDependencies>
-                                <config>
-                                    <printWidth>100</printWidth>
-                                    <tabWidth>4</tabWidth>
-                                </config>
-                            </prettier>
-                        </format>
-                    </formats>
-                </configuration>
-                <executions>
-                    <execution>
-                        <phase>process-sources</phase>
-                        <goals>
-                            <goal>apply</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-             -->
-
 		</plugins>
 	</build>
 

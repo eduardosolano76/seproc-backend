@@ -1,0 +1,221 @@
+<!-- seproc.html -->
+
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SeProc</title>
+<link rel="stylesheet" th:href="@{/css/seprocIndex/seproc.css}" />
+</head>
+<body>
+	<!-- NAVBAR -->
+	<div class="container">
+		<nav class="navbar">
+			<a th:href="@{/seproc}" class="logo" title="Ir al Inicio"> <!-- Primera imagen (Logo SEPROC Icono) -->
+				<div class="logo-mask mask-seproc-icono" role="img"
+					aria-label="Logo SEPROC"></div> <!-- Segunda imagen (Letras SeProc) -->
+				<div class="logo-mask mask-seproc-letras" role="img"
+					aria-label="Letras SeProc"></div>
+			</a>
+
+			<div class="nav-links">
+				<a id="nav-home" onclick="switchView('home')" class="active">Inicio</a>
+				<a id="nav-about" onclick="switchView('about')">Nosotros</a>
+
+				<!-- CONTENEDOR DEL DROPDOWN -->
+				<div class="dropdown">
+					<a class="dropdown-toggle"> Recursos <svg fill="none"
+							stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round"
+								stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+					</a>
+
+					<!-- EL MENÚ DESPLEGABLE -->
+					<div class="dropdown-menu">
+						<a href="#">Documentación</a>
+					</div>
+				</div>
+			</div>
+
+			<div>
+				<!-- Ahora ejecuta switchView en lugar de ir a /login -->
+				<a onclick="switchView('dependencias')" class="btn-outline">Portal de acceso</a>
+			</div>
+		</nav>
+	</div>
+
+	<!-- CONTENEDOR DINÁMICO (VISTAS SPA) -->
+	<main class="main-content container">
+		<!-- VISTA 1: INICIO (HERO & BENTO) -->
+		<div id="view-home" class="view-section hero-grid">
+			<div class="hero-text">
+				<h1>
+					La plataforma integral para transformar la <br /> <span>gestión
+						de obras</span>
+				</h1>
+				<p class="lead">Simplifica procesos, controla el avance de obra,
+					conecta a la dirección central y mejora la transparencia en la
+					construcción de infraestructura educativa.</p>
+				<p class="small-desc">SeProc es una plataforma flexible,
+					escalable y confiable capaz de adaptarse tanto a contratistas
+					independientes como a grandes supervisiones estatales.</p>
+
+				<a th:href="@{/registro}" class="btn-primary"> ¡Comenzar ahora!
+					<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round"
+							stroke-linejoin="round" stroke-width="2"
+							d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                        </svg>
+				</a>
+			</div>
+
+			<div class="bento-container">
+				<div class="bento-grid">
+					<div class="card card-1">
+						<h3>Supervisa y reporta</h3>
+						<p>con toda la comunidad operativa</p>
+					</div>
+					<div class="card card-2">
+						<img
+							src="https://images.unsplash.com/photo-1541888086425-d81bb19240f5?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80"
+							alt="Construcción" />
+					</div>
+					<div class="card card-3">
+						<img
+							src="https://images.unsplash.com/photo-1581092160562-40aa08e78837?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80"
+							alt="Ingeniero" />
+						<div class="card-3-overlay">
+							<span>Gestión completa en<br />una sola plataforma
+							</span>
+						</div>
+					</div>
+					<div class="card card-4">
+						<img
+							src="https://images.unsplash.com/photo-1503387762-592deb58ef4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80"
+							alt="Arquitecto" />
+						<div class="card-4-content">
+							<span>SeProc para<br />todos:
+							</span>
+							<h3>
+								Dirección<br />Central<br />Supervisores<br />Contratistas
+							</h3>
+						</div>
+					</div>
+					<div class="card card-5">
+						<h3>
+							Reportes<br />inteligentes y<br />automatizados
+						</h3>
+						<div class="blob-green"></div>
+					</div>
+					<div class="card card-6">
+						<span>Una plataforma para</span>
+						<h2>Todas las etapas de edificación</h2>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- VISTA 2: ACERCA DE (EL EQUIPO) -->
+		<div id="view-about" class="view-section about-section hidden">
+			<div class="about-header">
+				<h2>¿Quiénes conforman SeProc?</h2>
+				<p>Un equipo multidisciplinario comprometido con la innovación
+					en la gestión de infraestructura pública y privada.</p>
+			</div>
+
+			<div class="team-grid">
+				<div class="team-card">
+					<img
+						src="https://images.unsplash.com/photo-1560250097-0b93528c311a?ixlib=rb-4.0.3&auto=format&fit=crop&w=256&q=80"
+						alt="Foto perfil" class="team-avatar" />
+					<h4 class="team-name">Carlos Mendoza</h4>
+					<p class="team-role">Director de Proyecto</p>
+					<p class="team-desc">Especialista en obra pública y gestión de
+						recursos con más de 15 años de experiencia.</p>
+				</div>
+
+				<div class="team-card">
+					<img
+						src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-4.0.3&auto=format&fit=crop&w=256&q=80"
+						alt="Foto perfil" class="team-avatar" />
+					<h4 class="team-name">Ana Paola Ruíz</h4>
+					<p class="team-role">Líder de Desarrollo</p>
+					<p class="team-desc">Ingeniera de software encargada de la
+						arquitectura multitenant y la seguridad de SeProc.</p>
+				</div>
+
+				<div class="team-card">
+					<img
+						src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?ixlib=rb-4.0.3&auto=format&fit=crop&w=256&q=80"
+						alt="Foto perfil" class="team-avatar" />
+					<h4 class="team-name">Jorge Salinas</h4>
+					<p class="team-role">Supervisor Central</p>
+					<p class="team-desc">Coordinador de auditoría en sitio y
+						validador de reportes de contratistas.</p>
+				</div>
+
+				<div class="team-card">
+					<img
+						src="https://images.unsplash.com/photo-1580489944761-15a19d654956?ixlib=rb-4.0.3&auto=format&fit=crop&w=256&q=80"
+						alt="Foto perfil" class="team-avatar" />
+					<h4 class="team-name">Laura Gómez</h4>
+					<p class="team-role">Diseñadora UI/UX</p>
+					<p class="team-desc">Responsable de crear interfaces accesibles
+						y fáciles de usar para los ingenieros en campo.</p>
+				</div>
+			</div>
+		</div>
+		
+		<!-- VISTA 3: DEPENDENCIAS (ENTRAR) -->
+        <div id="view-dependencias" class="view-section dependencias-section hidden">
+            <div class="dependencias-header">
+                <h2>Acceso a la plataforma</h2>
+                <p>Elige la dependencia correspondiente para iniciar sesión y gestionar tus proyectos.</p>
+            </div>
+
+            <div class="dependencias-grid">
+                <!-- Institución 1 -->
+                <a th:href="@{/login}" class="dependencia-card">
+                    <img src="https://ui-avatars.com/api/?name=IG&background=155093&color=fff" alt="Logo" class="dependencia-logo" />
+                    <span class="dependencia-name">Instituto Guerrerense de la Infraestructura Física Educativa (IGIFE)</span>
+                </a>
+                	
+                <!-- Institución 2 -->
+                <a th:href="@{/login}" class="dependencia-card">
+                    <img src="https://ui-avatars.com/api/?name=SEP&background=155093&color=fff" alt="Logo" class="dependencia-logo" />
+                    <span class="dependencia-name">Secretaría de Educación Pública</span>
+                </a>  
+
+                <!-- Institución 3 -->
+                <a th:href="@{/login}" class="dependencia-card">
+                    <img src="https://ui-avatars.com/api/?name=UAG&background=155093&color=fff" alt="Logo" class="dependencia-logo" />
+                    <span class="dependencia-name">Universidad Autónoma de Guerrero</span>
+                </a>
+
+                <!-- Institución 4 -->
+                <a th:href="@{/login}" class="dependencia-card">
+                    <img src="https://ui-avatars.com/api/?name=TEC&background=155093&color=fff" alt="Logo" class="dependencia-logo" />
+                    <span class="dependencia-name">Instituto Tecnológico de Chilpancingo</span>
+                </a>
+
+                <!-- Institución 5 -->
+                <a th:href="@{/login}" class="dependencia-card">
+                    <img src="https://ui-avatars.com/api/?name=CB&background=155093&color=fff" alt="Logo" class="dependencia-logo" />
+                    <span class="dependencia-name">CBTIS 134</span>
+                </a>
+
+                <!-- Institución 6 -->
+                <a th:href="@{/login}" class="dependencia-card">
+                    <img src="https://ui-avatars.com/api/?name=CO&background=155093&color=fff" alt="Logo" class="dependencia-logo" />
+                    <span class="dependencia-name">CONALEP Plantel Chilpancingo</span>
+                </a>
+            </div>
+        </div>
+	</main>
+
+	<!-- Script -->
+	<script type="module" th:src="@{/js/seprocIndex/app.js}"></script>
+</body>
+</html>

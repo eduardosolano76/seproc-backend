@@ -8,7 +8,7 @@ public class SeprocController {
 
 	@GetMapping("/seproc")
 	public String seproc() {
-		return "seproc/seproc";
-	}
+		return "seprocIndex/seproc";
+	}  
 
 }
