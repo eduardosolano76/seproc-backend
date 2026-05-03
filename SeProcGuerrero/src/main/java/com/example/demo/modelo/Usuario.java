@@ -11,12 +11,10 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
-@Getter
-@Setter
 @Entity
+@Data
 @Table(name = "usuario")
 public class Usuario {
 
@@ -53,5 +51,9 @@ public class Usuario {
     
     @Column(name = "foto", length = 255, nullable = true)
     private String foto; // guarda la "key" tipo: usuarios/15/profile_xxx.jpg
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_institucion", nullable = false)
+    private Institucion institucion;
 
 }

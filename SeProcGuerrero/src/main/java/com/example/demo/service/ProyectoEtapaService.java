@@ -12,10 +12,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.example.demo.modelo.EtapaPlantilla;
+import com.example.demo.modelo.Institucion;
 import com.example.demo.modelo.Proyecto;
 import com.example.demo.modelo.ProyectoEtapa;
 import com.example.demo.modelo.ProyectoEtapaEntrega;
@@ -43,13 +46,16 @@ public class ProyectoEtapaService {
 	private final ProyectoEtapaEntregaRepository entregaRepo;
 	private final EtapaPlantillaRepository etapaPlantillaRepo;
 	private final ProyectoEtapaInteraccionRepository interaccionRepo;
+	private final SeguridadService seguridadService;
 
 	public ProyectoEtapaService(ProyectoEtapaRepository proyectoEtapaRepo, ProyectoEtapaEntregaRepository entregaRepo,
-			EtapaPlantillaRepository etapaPlantillaRepo, ProyectoEtapaInteraccionRepository interaccionRepo) {
+			EtapaPlantillaRepository etapaPlantillaRepo, ProyectoEtapaInteraccionRepository interaccionRepo,
+			SeguridadService seguridadService) {
 		this.proyectoEtapaRepo = proyectoEtapaRepo;
 		this.entregaRepo = entregaRepo;
 		this.etapaPlantillaRepo = etapaPlantillaRepo;
 		this.interaccionRepo = interaccionRepo;
+		this.seguridadService = seguridadService;
 	}
 
 	public void inicializarEtapasProyecto(Proyecto proyecto) {
@@ -68,8 +74,10 @@ public class ProyectoEtapaService {
 		String tipoObra = proyecto.getSolicitud() != null && proyecto.getSolicitud().getTipoObra() != null
 				? proyecto.getSolicitud().getTipoObra()
 				: "Edificación";
-
-		List<EtapaPlantilla> plantillas = obtenerTerminalesEnSecuencia(tipoObra, nivelesProyecto);
+		
+		// Pasamos la institución del proyecto para buscar sus plantillas específicas
+        Institucion institucion = proyecto.getInstitucion();
+        List<EtapaPlantilla> plantillas = obtenerTerminalesEnSecuencia(tipoObra, nivelesProyecto, institucion);
 		List<EtapaProgramada> secuencia = construirSecuenciaProgramada(plantillas, nivelesProyecto);
 
 		int orden = 1;
@@ -114,8 +122,15 @@ public class ProyectoEtapaService {
 			}
 		}
 
-		return proyectoEtapaRepo.findByClaveInternaAndNivel(idProyecto, claveInterna, numeroNivel)
-				.orElseThrow(() -> new RuntimeException("No se encontro la etapa para la clave: " + claveVisual));
+		ProyectoEtapa etapa = proyectoEtapaRepo.findByClaveInternaAndNivel(idProyecto, claveInterna, numeroNivel)
+                .orElseThrow(() -> new RuntimeException("No se encontro la etapa para la clave: " + claveVisual));
+		
+		Institucion miInstitucion = seguridadService.getInstitucionActual();
+        if (miInstitucion != null && !etapa.getProyecto().getInstitucion().getIdInstitucion().equals(miInstitucion.getIdInstitucion())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Acceso denegado a las etapas de este proyecto.");
+        }
+        
+        return etapa;
 	}
 
 	public void validarSubidaPermitida(ProyectoEtapa etapa) {
@@ -197,7 +212,7 @@ public class ProyectoEtapaService {
 		String[] urls = entrega.getArchivoUrl() != null ? entrega.getArchivoUrl().split("\\|") : new String[0];
 		String[] names = entrega.getNombreArchivoOriginal() != null ? entrega.getNombreArchivoOriginal().split("\\|")
 				: new String[0];
-		String[] notas = entrega.getComentarioConstructor() != null ? entrega.getComentarioConstructor().split("\\|") 
+		String[] notas = entrega.getComentarioConstructor() != null ? entrega.getComentarioConstructor().split("\\|")
 				: new String[0];
 
 		List<String> newPaths = new ArrayList<>();
@@ -213,7 +228,7 @@ public class ProyectoEtapaService {
 					newUrls.add(urls[i]);
 				if (i < names.length)
 					newNames.add(names[i]);
-				if (i < notas.length) 
+				if (i < notas.length)
 					newNotas.add(notas[i]);
 			} else {
 				found = true; // Encontramos el archivo a eliminar
@@ -238,38 +253,41 @@ public class ProyectoEtapaService {
 			entregaRepo.save(entrega);
 		}
 	}
-	
+
 	public void actualizarNotaDeBorrador(ProyectoEtapa etapa, String storagePathTarget, String nuevaNota) {
-	    ProyectoEtapaEntrega entrega = entregaRepo
-	            .findFirstByProyectoEtapa_IdProyectoEtapaOrderByVersionDesc(etapa.getIdProyectoEtapa())
-	            .orElseThrow(() -> new IllegalArgumentException("No hay entregas para esta etapa."));
+		ProyectoEtapaEntrega entrega = entregaRepo
+				.findFirstByProyectoEtapa_IdProyectoEtapaOrderByVersionDesc(etapa.getIdProyectoEtapa())
+				.orElseThrow(() -> new IllegalArgumentException("No hay entregas para esta etapa."));
 
-	    if (!"BORRADOR".equalsIgnoreCase(entrega.getEstadoEntrega())) {
-	        throw new IllegalArgumentException("Solo se pueden editar notas en estado BORRADOR.");
-	    }
+		if (!"BORRADOR".equalsIgnoreCase(entrega.getEstadoEntrega())) {
+			throw new IllegalArgumentException("Solo se pueden editar notas en estado BORRADOR.");
+		}
 
-	    String[] paths = entrega.getArchivoStoragePath() != null ? entrega.getArchivoStoragePath().split("\\|") : new String[0];
-	    String[] notas = entrega.getComentarioConstructor() != null ? entrega.getComentarioConstructor().split("\\|") : new String[0];
-	    String notaSegura = (nuevaNota == null || nuevaNota.trim().isEmpty()) ? "SIN_NOTA" : nuevaNota.trim().replace("|", " ");
+		String[] paths = entrega.getArchivoStoragePath() != null ? entrega.getArchivoStoragePath().split("\\|")
+				: new String[0];
+		String[] notas = entrega.getComentarioConstructor() != null ? entrega.getComentarioConstructor().split("\\|")
+				: new String[0];
+		String notaSegura = (nuevaNota == null || nuevaNota.trim().isEmpty()) ? "SIN_NOTA"
+				: nuevaNota.trim().replace("|", " ");
 
-	    List<String> newNotas = new ArrayList<>();
-	    boolean found = false;
+		List<String> newNotas = new ArrayList<>();
+		boolean found = false;
 
-	    for (int i = 0; i < paths.length; i++) {
-	        if (paths[i].equals(storagePathTarget)) {
-	            newNotas.add(notaSegura); 
-	            found = true;
-	        } else {
-	            newNotas.add(i < notas.length ? notas[i] : "SIN_NOTA"); 
-	        }
-	    }
+		for (int i = 0; i < paths.length; i++) {
+			if (paths[i].equals(storagePathTarget)) {
+				newNotas.add(notaSegura);
+				found = true;
+			} else {
+				newNotas.add(i < notas.length ? notas[i] : "SIN_NOTA");
+			}
+		}
 
-	    if (!found) {
-	        throw new IllegalArgumentException("El archivo no se encontró en el borrador.");
-	    }
+		if (!found) {
+			throw new IllegalArgumentException("El archivo no se encontró en el borrador.");
+		}
 
-	    entrega.setComentarioConstructor(String.join("|", newNotas));
-	    entregaRepo.save(entrega);
+		entrega.setComentarioConstructor(String.join("|", newNotas));
+		entregaRepo.save(entrega);
 	}
 
 	public void confirmarEntregaAlSupervisor(ProyectoEtapa etapa, Usuario constructor) {
@@ -384,7 +402,14 @@ public class ProyectoEtapaService {
 
 	public Map<String, String> obtenerEstadosVisuales(Integer idProyecto) {
 		List<ProyectoEtapa> etapas = proyectoEtapaRepo.findByProyecto_IdProyectoOrderByOrdenVisualAsc(idProyecto);
-
+		
+		if (!etapas.isEmpty()) {
+            Institucion miInstitucion = seguridadService.getInstitucionActual();
+            if (miInstitucion != null && !etapas.get(0).getProyecto().getInstitucion().getIdInstitucion().equals(miInstitucion.getIdInstitucion())) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Acceso denegado a este proyecto.");
+            }
+        }
+		
 		Map<String, String> mapa = new LinkedHashMap<>();
 
 		for (ProyectoEtapa pe : etapas) {
@@ -434,16 +459,19 @@ public class ProyectoEtapaService {
 			if (entrega.getNombreArchivoOriginal() != null && !entrega.getNombreArchivoOriginal().isEmpty()) {
 				String[] names = entrega.getNombreArchivoOriginal().split("\\|");
 				String[] urls = entrega.getArchivoUrl() != null ? entrega.getArchivoUrl().split("\\|") : new String[0];
-				String[] paths = entrega.getArchivoStoragePath() != null ? entrega.getArchivoStoragePath().split("\\|") : new String[0];
-				String[] notas = entrega.getComentarioConstructor() != null ? entrega.getComentarioConstructor().split("\\|") : new String[0];
-				
+				String[] paths = entrega.getArchivoStoragePath() != null ? entrega.getArchivoStoragePath().split("\\|")
+						: new String[0];
+				String[] notas = entrega.getComentarioConstructor() != null
+						? entrega.getComentarioConstructor().split("\\|")
+						: new String[0];
+
 				for (int i = 0; i < names.length; i++) {
 					Map<String, String> archObj = new HashMap<>();
 					archObj.put("nombre", names[i]);
 					archObj.put("url", i < urls.length ? urls[i] : "");
 					archObj.put("path", i < paths.length ? paths[i] : "");
 					String notaReal = (i < notas.length && !notas[i].equals("SIN_NOTA")) ? notas[i] : "";
-			        archObj.put("nota", notaReal);
+					archObj.put("nota", notaReal);
 					archivosList.add(archObj);
 				}
 			}
@@ -515,15 +543,17 @@ public class ProyectoEtapaService {
 				String[] names = entrega.getNombreArchivoOriginal() != null
 						? entrega.getNombreArchivoOriginal().split("\\|")
 						: new String[urls.length];
-				String[] notas = entrega.getComentarioConstructor() != null ? entrega.getComentarioConstructor().split("\\|") : new String[0];
-				
+				String[] notas = entrega.getComentarioConstructor() != null
+						? entrega.getComentarioConstructor().split("\\|")
+						: new String[0];
+
 				for (int i = 0; i < urls.length; i++) {
 					Map<String, String> arch = new HashMap<>();
 					arch.put("url", urls[i]);
 					arch.put("nombre", i < names.length && names[i] != null ? names[i] : "Imagen " + (i + 1));
 					String notaReal = (i < notas.length && !notas[i].equals("SIN_NOTA")) ? notas[i] : "";
-                    arch.put("nota", notaReal);
-					
+					arch.put("nota", notaReal);
+
 					listaArchivos.add(arch);
 				}
 			}
@@ -631,24 +661,24 @@ public class ProyectoEtapaService {
 		return true;
 	}
 
-	private List<EtapaPlantilla> obtenerTerminalesEnSecuencia(String tipoObra, int nivelesProyecto) {
+	private List<EtapaPlantilla> obtenerTerminalesEnSecuencia(String tipoObra, int nivelesProyecto, Institucion institucion) {
 		List<EtapaPlantilla> roots = etapaPlantillaRepo
-				.findByEtapaPadreIsNullAndTipoObraAndActivoTrueOrderByOrdenVisualAsc(tipoObra);
+				.findByInstitucionAndEtapaPadreIsNullAndTipoObraAndActivoTrueOrderByOrdenVisualAsc(institucion,tipoObra);
 
 		List<EtapaPlantilla> terminales = new ArrayList<>();
 		for (EtapaPlantilla root : roots) {
-			appendTerminales(root, nivelesProyecto, terminales);
+			appendTerminales(root, nivelesProyecto, terminales, institucion);
 		}
 		return terminales;
 	}
 
-	private void appendTerminales(EtapaPlantilla plantilla, int nivelesProyecto, List<EtapaPlantilla> destino) {
+	private void appendTerminales(EtapaPlantilla plantilla, int nivelesProyecto, List<EtapaPlantilla> destino, Institucion institucion) {
 		if (!aplicaANiveles(plantilla, nivelesProyecto)) {
 			return;
 		}
 
 		List<EtapaPlantilla> hijos = etapaPlantillaRepo
-				.findByEtapaPadre_IdEtapaPlantillaOrderByOrdenVisualAsc(plantilla.getIdEtapaPlantilla());
+				.findByInstitucionAndEtapaPadre_IdEtapaPlantillaOrderByOrdenVisualAsc(institucion, plantilla.getIdEtapaPlantilla());
 
 		if (hijos == null || hijos.isEmpty()) {
 			if (Boolean.TRUE.equals(plantilla.getEsTerminal())) {
@@ -658,7 +688,7 @@ public class ProyectoEtapaService {
 		}
 
 		for (EtapaPlantilla hijo : hijos) {
-			appendTerminales(hijo, nivelesProyecto, destino);
+			appendTerminales(hijo, nivelesProyecto, destino, institucion);
 		}
 	}
 

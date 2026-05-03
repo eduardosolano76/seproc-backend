@@ -1,9 +1,21 @@
 package com.example.demo.modelo;
 
-import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.Table;
+import lombok.Data;
+
 @Entity
+@Data
 @Table(name = "solicitud_proyecto")
 public class SolicitudProyecto {
 
@@ -85,172 +97,8 @@ public class SolicitudProyecto {
             estadoSolicitud = "PENDIENTE";
         }
     }
-
-    public Integer getIdSolicitud() {
-        return idSolicitud;
-    }
-
-    public void setIdSolicitud(Integer idSolicitud) {
-        this.idSolicitud = idSolicitud;
-    }
-
-    public Long getIdUsuarioContratista() {
-        return idUsuarioContratista;
-    }
-
-    public void setIdUsuarioContratista(Long idUsuarioContratista) {
-        this.idUsuarioContratista = idUsuarioContratista;
-    }
-
-    public Long getIdUsuarioCentral() {
-        return idUsuarioCentral;
-    }
-
-    public void setIdUsuarioCentral(Long idUsuarioCentral) {
-        this.idUsuarioCentral = idUsuarioCentral;
-    }
-
-    public String getEstadoSolicitud() {
-        return estadoSolicitud;
-    }
-
-    public void setEstadoSolicitud(String estadoSolicitud) {
-        this.estadoSolicitud = estadoSolicitud;
-    }
-
-    public String getMotivoRechazo() {
-        return motivoRechazo;
-    }
-
-    public void setMotivoRechazo(String motivoRechazo) {
-        this.motivoRechazo = motivoRechazo;
-    }
-
-    public LocalDateTime getFechaSolicitud() {
-        return fechaSolicitud;
-    }
-
-    public void setFechaSolicitud(LocalDateTime fechaSolicitud) {
-        this.fechaSolicitud = fechaSolicitud;
-    }
-
-    public LocalDateTime getFechaResolucion() {
-        return fechaResolucion;
-    }
-
-    public void setFechaResolucion(LocalDateTime fechaResolucion) {
-        this.fechaResolucion = fechaResolucion;
-    }
-
-    public String getNombreEscuela() {
-        return nombreEscuela;
-    }
-
-    public void setNombreEscuela(String nombreEscuela) {
-        this.nombreEscuela = nombreEscuela;
-    }
-
-    public String getCct1() {
-        return cct1;
-    }
-
-    public void setCct1(String cct1) {
-        this.cct1 = cct1;
-    }
-
-    public String getCct2() {
-        return cct2;
-    }
-
-    public void setCct2(String cct2) {
-        this.cct2 = cct2;
-    }
-
-    public CatEstado getEstado() {
-        return estado;
-    }
-
-    public void setEstado(CatEstado estado) {
-        this.estado = estado;
-    }
-
-    public CatMunicipio getMunicipio() {
-        return municipio;
-    }
-
-    public void setMunicipio(CatMunicipio municipio) {
-        this.municipio = municipio;
-    }
-
-    public CatLocalidad getLocalidad() {
-        return localidad;
-    }
-
-    public void setLocalidad(CatLocalidad localidad) {
-        this.localidad = localidad;
-    }
-
-    public String getCalleNumero() {
-        return calleNumero;
-    }
-
-    public void setCalleNumero(String calleNumero) {
-        this.calleNumero = calleNumero;
-    }
-
-    public String getCp() {
-        return cp;
-    }
-
-    public void setCp(String cp) {
-        this.cp = cp;
-    }
-
-    public String getResponsableInmueble() {
-        return responsableInmueble;
-    }
-
-    public void setResponsableInmueble(String responsableInmueble) {
-        this.responsableInmueble = responsableInmueble;
-    }
-
-    public String getContacto() {
-        return contacto;
-    }
-
-    public void setContacto(String contacto) {
-        this.contacto = contacto;
-    }
-
-    public Integer getNumInmueblesEvaluar() {
-        return numInmueblesEvaluar;
-    }
-
-    public void setNumInmueblesEvaluar(Integer numInmueblesEvaluar) {
-        this.numInmueblesEvaluar = numInmueblesEvaluar;
-    }
-
-    public Integer getNumEntreEjes() {
-        return numEntreEjes;
-    }
-
-    public void setNumEntreEjes(Integer numEntreEjes) {
-        this.numEntreEjes = numEntreEjes;
-    }
-
-    public TipoEdificacion getTipoEdificacion() {
-        return tipoEdificacion;
-    }
-
-    public void setTipoEdificacion(TipoEdificacion tipoEdificacion) {
-        this.tipoEdificacion = tipoEdificacion;
-    }
-
-    public String getTipoObra() {
-        return tipoObra;
-    }
-
-    public void setTipoObra(String tipoObra) {
-        this.tipoObra = tipoObra;
-    }
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_institucion", nullable = false)
+    private Institucion institucion;
 }

@@ -78,5 +78,9 @@ public class EtapaPlantilla {
 
     @Column(name = "activo")
     private Boolean activo;
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_institucion", nullable = false)
+    private Institucion institucion;
 
 }

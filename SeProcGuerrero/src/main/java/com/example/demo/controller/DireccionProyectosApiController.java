@@ -1,120 +1,152 @@
 package com.example.demo.controller;
 
+import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.example.demo.modelo.Institucion;
 import com.example.demo.modelo.Proyecto;
 import com.example.demo.modelo.ProyectoEtapa;
 import com.example.demo.modelo.SolicitudProyecto;
 import com.example.demo.repository.ProyectoRepository;
 import com.example.demo.repository.UsuarioRepository;
 import com.example.demo.service.ProyectoEtapaService;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
+import com.example.demo.service.SeguridadService;
 
 @RestController
 @RequestMapping("/api/direccion/proyectos")
 public class DireccionProyectosApiController {
 
-    private final ProyectoRepository proyectoRepo;
-    private final UsuarioRepository usuarioRepo;
-    private final ProyectoEtapaService proyectoEtapaService;
+	private final ProyectoRepository proyectoRepo;
+	private final UsuarioRepository usuarioRepo;
+	private final ProyectoEtapaService proyectoEtapaService;
+	private final SeguridadService seguridadService;
 
-    public DireccionProyectosApiController(ProyectoRepository proyectoRepo,
-                                           UsuarioRepository usuarioRepo,
-                                           ProyectoEtapaService proyectoEtapaService) {
-        this.proyectoRepo = proyectoRepo;
-        this.usuarioRepo = usuarioRepo;
-        this.proyectoEtapaService = proyectoEtapaService;
-    }
+	public DireccionProyectosApiController(ProyectoRepository proyectoRepo, UsuarioRepository usuarioRepo,
+			ProyectoEtapaService proyectoEtapaService, SeguridadService seguridadService) {
+		this.proyectoRepo = proyectoRepo;
+		this.usuarioRepo = usuarioRepo;
+		this.proyectoEtapaService = proyectoEtapaService;
+		this.seguridadService = seguridadService;
+	}
 
-    @GetMapping
-    public ResponseEntity<?> listar(@RequestParam("estado") String estado) {
-        var items = proyectoRepo.findByEstadoProyectoOrderByFechaAprobacionDesc(estado.toUpperCase())
-                .stream()
-                .map(p -> {
-                    SolicitudProyecto s = p.getSolicitud();
-                    var contratista = usuarioRepo.findById(s.getIdUsuarioContratista()).orElse(null);
-                    var supervisor = usuarioRepo.findById(p.getIdUsuarioSupervisor()).orElse(null);
+	@GetMapping
+	public ResponseEntity<?> listar(@RequestParam("estado") String estado) {
+		Institucion miInstitucion = seguridadService.getInstitucionActual();
 
-                    return new HashMap<String, Object>() {{
-                        put("idProyecto", p.getIdProyecto());
-                        put("idSolicitud", s.getIdSolicitud());
-                        put("nombreEscuela", s.getNombreEscuela());
-                        put("constructor", contratista != null ? (contratista.getNombre() + " " + contratista.getApellido()) : "—");
-                        put("supervisor", supervisor != null ? (supervisor.getNombre() + " " + supervisor.getApellido()) : "—");
-                        put("fechaAprobacion", p.getFechaAprobacion() != null
-                                ? p.getFechaAprobacion().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))
-                                : "");
-                        put("estadoProyecto", p.getEstadoProyecto());
-                    }};
-                })
-                .toList();
+		var items = proyectoRepo
+				.findByInstitucionAndEstadoProyectoOrderByFechaAprobacionDesc(miInstitucion, estado.toUpperCase())
+				.stream().map(p -> {
+					SolicitudProyecto s = p.getSolicitud();
+					var contratista = usuarioRepo.findById(s.getIdUsuarioContratista()).orElse(null);
+					var supervisor = usuarioRepo.findById(p.getIdUsuarioSupervisor()).orElse(null);
 
-        return ResponseEntity.ok(items);
-    }
+					return new HashMap<String, Object>() {
+						{
+							put("idProyecto", p.getIdProyecto());
+							put("idSolicitud", s.getIdSolicitud());
+							put("nombreEscuela", s.getNombreEscuela());
+							put("constructor",
+									contratista != null ? (contratista.getNombre() + " " + contratista.getApellido())
+											: "—");
+							put("supervisor",
+									supervisor != null ? (supervisor.getNombre() + " " + supervisor.getApellido())
+											: "—");
+							put("fechaAprobacion", p.getFechaAprobacion() != null
+									? p.getFechaAprobacion().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))
+									: "");
+							put("estadoProyecto", p.getEstadoProyecto());
+						}
+					};
+				}).toList();
 
-    @GetMapping("/{id}")
-    public ResponseEntity<?> detalle(@PathVariable Integer id) {
-        var pOpt = proyectoRepo.findById(id);
-        if (pOpt.isEmpty()) return ResponseEntity.notFound().build();
+		return ResponseEntity.ok(items);
+	}
 
-        Proyecto p = pOpt.get();
-        SolicitudProyecto s = p.getSolicitud();
+	@GetMapping("/{id}")
+	public ResponseEntity<?> detalle(@PathVariable Integer id) {
+		var pOpt = proyectoRepo.findById(id);
+		if (pOpt.isEmpty())
+			return ResponseEntity.notFound().build();
 
-        var contratista = usuarioRepo.findById(s.getIdUsuarioContratista()).orElse(null);
-        var supervisor = usuarioRepo.findById(p.getIdUsuarioSupervisor()).orElse(null);
+		Proyecto p = pOpt.get();
 
-        var dto = new HashMap<String, Object>();
-        dto.put("idProyecto", p.getIdProyecto());
-        dto.put("idSolicitud", s.getIdSolicitud());
-        dto.put("estadoProyecto", p.getEstadoProyecto());
-        dto.put("fechaAprobacion", p.getFechaAprobacion() != null
-                ? p.getFechaAprobacion().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))
-                : null);
+		Institucion miInstitucion = seguridadService.getInstitucionActual();
+		if (miInstitucion != null && !p.getInstitucion().getIdInstitucion().equals(miInstitucion.getIdInstitucion())) {
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Acceso denegado al proyecto.");
+		}
 
-        dto.put("quienEnvia", contratista != null
-                ? (contratista.getNombre() + " " + contratista.getApellido())
-                : "—");
-        dto.put("supervisorAsignado", supervisor != null
-                ? (supervisor.getNombre() + " " + supervisor.getApellido())
-                : "—");
+		SolicitudProyecto s = p.getSolicitud();
 
-        dto.put("nombreEscuela", s.getNombreEscuela());
-        dto.put("tipoObra", s.getTipoObra());
-        dto.put("tipoEdificacion", s.getTipoEdificacion() != null
-                ? s.getTipoEdificacion().getNombre()
-                : "");
+		var contratista = usuarioRepo.findById(s.getIdUsuarioContratista()).orElse(null);
+		var supervisor = usuarioRepo.findById(p.getIdUsuarioSupervisor()).orElse(null);
 
-        dto.put("estadosEtapa", proyectoEtapaService.obtenerEstadosVisuales(id));
-        dto.put("soloLectura", true);
+		var dto = new HashMap<String, Object>();
+		dto.put("idProyecto", p.getIdProyecto());
+		dto.put("idSolicitud", s.getIdSolicitud());
+		dto.put("estadoProyecto", p.getEstadoProyecto());
+		dto.put("fechaAprobacion",
+				p.getFechaAprobacion() != null
+						? p.getFechaAprobacion().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))
+						: null);
 
-        return ResponseEntity.ok(dto);
-    }
+		dto.put("quienEnvia", contratista != null ? (contratista.getNombre() + " " + contratista.getApellido()) : "—");
+		dto.put("supervisorAsignado",
+				supervisor != null ? (supervisor.getNombre() + " " + supervisor.getApellido()) : "—");
 
-    @GetMapping("/{id}/etapas/{etapa}")
-    public ResponseEntity<?> detalleEtapa(@PathVariable Integer id, @PathVariable String etapa) {
-        var pOpt = proyectoRepo.findById(id);
-        if (pOpt.isEmpty()) return ResponseEntity.notFound().build();
+		dto.put("nombreEscuela", s.getNombreEscuela());
+		dto.put("tipoObra", s.getTipoObra());
+		dto.put("tipoEdificacion", s.getTipoEdificacion() != null ? s.getTipoEdificacion().getNombre() : "");
 
-        try {
-            ProyectoEtapa etapaActual = proyectoEtapaService.obtenerEtapaPorClaveVisual(id, etapa);
-            return ResponseEntity.ok(proyectoEtapaService.obtenerDetalleActualEtapa(etapaActual));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
+		dto.put("estadosEtapa", proyectoEtapaService.obtenerEstadosVisuales(id));
+		dto.put("soloLectura", true);
 
-    @GetMapping("/{id}/etapas/{etapa}/historial")
-    public ResponseEntity<?> historialEtapa(@PathVariable Integer id, @PathVariable String etapa) {
-        var pOpt = proyectoRepo.findById(id);
-        if (pOpt.isEmpty()) return ResponseEntity.notFound().build();
+		return ResponseEntity.ok(dto);
+	}
 
-        try {
-            ProyectoEtapa etapaActual = proyectoEtapaService.obtenerEtapaPorClaveVisual(id, etapa);
-            return ResponseEntity.ok(proyectoEtapaService.obtenerHistorialEtapa(etapaActual));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
+	@GetMapping("/{id}/etapas/{etapa}")
+	public ResponseEntity<?> detalleEtapa(@PathVariable Integer id, @PathVariable String etapa) {
+		var pOpt = proyectoRepo.findById(id);
+		if (pOpt.isEmpty())
+			return ResponseEntity.notFound().build();
+
+		Institucion miInstitucion = seguridadService.getInstitucionActual();
+		if (miInstitucion != null
+				&& !pOpt.get().getInstitucion().getIdInstitucion().equals(miInstitucion.getIdInstitucion())) {
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Acceso denegado.");
+		}
+
+		try {
+			ProyectoEtapa etapaActual = proyectoEtapaService.obtenerEtapaPorClaveVisual(id, etapa);
+			return ResponseEntity.ok(proyectoEtapaService.obtenerDetalleActualEtapa(etapaActual));
+		} catch (IllegalArgumentException e) {
+			return ResponseEntity.badRequest().body(e.getMessage());
+		}
+	}
+
+	@GetMapping("/{id}/etapas/{etapa}/historial")
+	public ResponseEntity<?> historialEtapa(@PathVariable Integer id, @PathVariable String etapa) {
+		var pOpt = proyectoRepo.findById(id);
+		if (pOpt.isEmpty())
+			return ResponseEntity.notFound().build();
+
+		Institucion miInstitucion = seguridadService.getInstitucionActual();
+		if (miInstitucion != null
+				&& !pOpt.get().getInstitucion().getIdInstitucion().equals(miInstitucion.getIdInstitucion())) {
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Acceso denegado.");
+		}
+		try {
+			ProyectoEtapa etapaActual = proyectoEtapaService.obtenerEtapaPorClaveVisual(id, etapa);
+			return ResponseEntity.ok(proyectoEtapaService.obtenerHistorialEtapa(etapaActual));
+		} catch (IllegalArgumentException e) {
+			return ResponseEntity.badRequest().body(e.getMessage());
+		}
+	}
 }

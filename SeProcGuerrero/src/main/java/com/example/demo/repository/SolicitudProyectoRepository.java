@@ -1,15 +1,26 @@
 package com.example.demo.repository;
 
-import com.example.demo.modelo.SolicitudProyecto;
-import org.springframework.data.jpa.repository.JpaRepository;
-
 import java.util.List;
 
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.example.demo.modelo.Institucion;
+import com.example.demo.modelo.SolicitudProyecto;
+
 public interface SolicitudProyectoRepository extends JpaRepository<SolicitudProyecto, Integer> {
+    
+	// Metodos multitenant (Blindados por Institución)
+    
+    // Obtener todas las solicitudes de la empresa 
+    List<SolicitudProyecto> findByInstitucion(Institucion institucion);
 
-    // para el central lista por estado de solicitud
-    List<SolicitudProyecto> findByEstadoSolicitudOrderByFechaSolicitudDesc(String estadoSolicitud);
+    // Para el rol Central/Administrador: Lista solicitudes por estado, DENTRO de la institución
+    List<SolicitudProyecto> findByInstitucionAndEstadoSolicitudOrderByFechaSolicitudDesc(
+            Institucion institucion, String estadoSolicitud
+    );
 
-    // para el constructor ve sus solicitudes
-    List<SolicitudProyecto> findByIdUsuarioContratistaOrderByFechaSolicitudDesc(Integer idUsuarioContratista);
+    // Para el Constructor: Ve SUS solicitudes DENTRO de la institución
+    List<SolicitudProyecto> findByInstitucionAndIdUsuarioContratistaOrderByFechaSolicitudDesc(
+            Institucion institucion, Long idUsuarioContratista
+    );
 }
