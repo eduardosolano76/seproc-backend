@@ -1,234 +1,333 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Módulo Supervisor</title>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Módulo Supervisor</title>
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link
-	href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"
-	rel="stylesheet">
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"
+            rel="stylesheet"
+        />
 
-<!-- CSS del módulo -->
-<link rel="stylesheet" th:href="@{/css/supervisor/supervisor.css}">
+        <!-- CSS del módulo -->
+        <link rel="stylesheet" th:href="@{/css/supervisor/supervisor.css}" />
 
-<!-- CSRF -->
-<meta name="_csrf" th:content="${_csrf.token}" />
-<meta name="_csrf_header" th:content="${_csrf.headerName}" />
-</head>
+        <!-- CSRF -->
+        <meta name="_csrf" th:content="${_csrf.token}" />
+        <meta name="_csrf_header" th:content="${_csrf.headerName}" />
+    </head>
 
-<body>
-	<div class="layout">
+    <body>
+        <div class="layout">
+            <!-- SIDEBAR -->
+            <aside class="sidebar" id="sidebar">
+                <div class="brand">
+                    <div class="logo">
+                        <img th:src="@{/assets/logo.jpg}" alt="Logo" />
+                    </div>
+                </div>
 
-		<!-- SIDEBAR -->
-		<aside class="sidebar" id="sidebar">
-			<div class="brand">
-				<div class="logo">
-					<img th:src="@{/assets/logo.jpg}" alt="Logo">
-				</div>
-			</div>
+                <nav class="nav" aria-label="Menú Supervisor">
+                    <!-- Proyectos -->
+                    <a
+                        id="navProyectos"
+                        class="nav-item"
+                        th:classappend="${view == 'proyectos'} ? ' active' : ''"
+                        th:href="@{/supervisor(view='proyectos')}"
+                    >
+                        <span class="icon">
+                            <img th:src="@{/assets/iconos/proyectos.png}" alt="" />
+                        </span>
+                        <span class="label">Proyectos</span>
+                    </a>
 
-			<nav class="nav" aria-label="Menú Supervisor">
+                    <!-- Cambiar contraseña -->
+                    <a
+                        id="navPassword"
+                        class="nav-item"
+                        th:classappend="${view == 'password'} ? ' active' : ''"
+                        th:href="@{/supervisor(view='password')}"
+                    >
+                        <span class="icon">
+                            <img th:src="@{/assets/iconos/cambiar-contrasena.png}" alt="" />
+                        </span>
+                        <span class="label">Cambiar contraseña</span>
+                    </a>
 
-				<!-- Proyectos -->
-				<a id="navProyectos" class="nav-item"
-					th:classappend="${view == 'proyectos'} ? ' active' : ''"
-					th:href="@{/supervisor(view='proyectos')}"> <span class="icon">
-						<img th:src="@{/assets/iconos/proyectos.png}" alt="">
-				</span> <span class="label">Proyectos</span>
-				</a>
+                    <!-- Cerrar sesión -->
+                    <form th:action="@{/logout}" method="post" style="margin: 0">
+                        <input
+                            type="hidden"
+                            th:name="${_csrf.parameterName}"
+                            th:value="${_csrf.token}"
+                        />
+                        <button class="nav-item" type="submit">
+                            <span class="icon">
+                                <img th:src="@{/assets/iconos/salir.png}" alt="" />
+                            </span>
+                            <span class="label">Cerrar sesión</span>
+                        </button>
+                    </form>
+                </nav>
+            </aside>
 
-				<!-- Cambiar contraseña -->
-				<a id="navPassword" class="nav-item"
-					th:classappend="${view == 'password'} ? ' active' : ''"
-					th:href="@{/supervisor(view='password')}"> <span class="icon">
-						<img th:src="@{/assets/iconos/cambiar-contrasena.png}" alt="">
-				</span> <span class="label">Cambiar contraseña</span>
-				</a>
+            <!-- CONTENT -->
+            <main id="mainContent" class="content">
+                <header class="topbar">
+                    <!-- Buscador visual-->
+                    <div class="search" role="search">
+                        <span class="s-icon" aria-hidden="true">
+                            <img th:src="@{/assets/iconos/buscar.png}" alt="" />
+                        </span>
+                        <input
+                            id="searchSupervisor"
+                            type="search"
+                            placeholder="Buscar proyecto..."
+                            autocomplete="off"
+                        />
+                    </div>
 
-				<!-- Cerrar sesión -->
-				<form th:action="@{/logout}" method="post" style="margin: 0;">
-					<input type="hidden" th:name="${_csrf.parameterName}"
-						th:value="${_csrf.token}" />
-					<button class="nav-item" type="submit">
-						<span class="icon"> <img
-							th:src="@{/assets/iconos/salir.png}" alt="">
-						</span> <span class="label">Cerrar sesión</span>
-					</button>
-				</form>
+                    <!-- Saludo -->
+                    <div class="userbox" style="position: relative">
+                        <div class="hello">
+                            <div class="hello-name">
+                                Hola, <span th:text="${nombreUsuario}">Usuario</span>!
+                            </div>
+                            <div class="hello-role">
+                                Rol:
+                                <span
+                                    th:text="${rolUsuario == 'supervisor' ? 'Supervisor' : rolUsuario}"
+                                    >supervisor</span
+                                >
+                            </div>
+                        </div>
 
-			</nav>
-		</aside>
+                        <input
+                            id="profileFile"
+                            type="file"
+                            accept="image/png,image/jpeg,image/webp"
+                            hidden
+                        />
 
-		<!-- CONTENT -->
-		<main id="mainContent" class="content">
+                        <button
+                            class="profile"
+                            id="profileBtn"
+                            type="button"
+                            title="Opciones de foto de perfil"
+                            th:attr="data-foto=${fotoUrl}"
+                        >
+                            <img id="profileImg" alt="Foto de perfil" style="display: none" />
+                            <img
+                                id="profileFallback"
+                                th:src="@{/assets/iconos/sinFotoPerfil.png}"
+                                alt="Foto por defecto"
+                            />
+                        </button>
 
-			<header class="topbar">
-				<!-- Buscador visual-->
-				<div class="search" role="search">
-					<span class="s-icon" aria-hidden="true"> <img
-						th:src="@{/assets/iconos/buscar.png}" alt="">
-					</span> <input id="searchSupervisor" type="search"
-						placeholder="Buscar proyecto..." autocomplete="off" />
-				</div>
+                        <div class="profile-dropdown" id="profileMenuDropdown">
+                            <div class="dropdown-item" id="btnViewPhoto">
+                                <img th:src="@{/assets/iconos/verFoto.png}" alt="Ver foto" />
+                                <span>Ver foto</span>
+                            </div>
+                            <div class="dropdown-item" id="btnUploadPhoto">
+                                <img th:src="@{/assets/iconos/subirFoto.png}" alt="Subir foto" />
+                                <span>Subir foto</span>
+                            </div>
+                            <div class="dropdown-item" id="btnDeletePhoto">
+                                <img th:src="@{/assets/iconos/eliminar.png}" alt="Quitar foto" />
+                                <span>Quitar foto</span>
+                            </div>
+                        </div>
+                    </div>
+                </header>
 
-				<!-- Saludo -->
-				<div class="userbox" style="position: relative;">
-					<div class="hello">
-						<div class="hello-name">
-							Hola, <span th:text="${nombreUsuario}">Usuario</span>!
-						</div>
-						<div class="hello-role">
-							Rol: <span
-								th:text="${rolUsuario == 'supervisor' ? 'Supervisor' : rolUsuario}">supervisor</span>
-						</div>
-					</div>
+                <section
+                    class="panel panel-scroll"
+                    id="panelContent"
+                    aria-label="Sección principal"
+                >
+                    <div
+                        id="supervisorProjectsView"
+                        th:style="${view == 'password'} ? 'display:none;' : 'display:block;'"
+                    >
+                        <div class="panel-head">
+                            <div>
+                                <h2 class="panel-title">Proyectos</h2>
+                                <div class="panel-sub">
+                                    Aquí se mostrarán únicamente los proyectos asignados al
+                                    supervisor
+                                </div>
+                            </div>
+                        </div>
 
-					<input id="profileFile" type="file"
-						accept="image/png,image/jpeg,image/webp" hidden>
+                        <div
+                            class="tabs"
+                            id="tabsSupervisor"
+                            role="tablist"
+                            aria-label="Filtros de proyectos"
+                        >
+                            <button class="tab active" type="button" data-estado="ACTIVO">
+                                Activos
+                            </button>
+                            <button class="tab" type="button" data-estado="INACTIVO">
+                                Inactivos
+                            </button>
+                            <button class="tab" type="button" data-estado="FINALIZADO">
+                                Finalizados
+                            </button>
+                        </div>
 
-					<button class="profile" id="profileBtn" type="button"
-						title="Opciones de foto de perfil" th:attr="data-foto=${fotoUrl}">
-						<img id="profileImg" alt="Foto de perfil" style="display: none;">
-						<img id="profileFallback"
-							th:src="@{/assets/iconos/sinFotoPerfil.png}"
-							alt="Foto por defecto">
-					</button>
+                        <div class="cards" id="supervisorProjectsList">
+                            <div class="empty" id="supervisorProjectsEmpty">
+                                Aún no hay proyectos asignados para mostrar.
+                            </div>
+                        </div>
+                    </div>
 
-					<div class="profile-dropdown" id="profileMenuDropdown">
-						<div class="dropdown-item" id="btnViewPhoto">
-							<img th:src="@{/assets/iconos/verFoto.png}" alt="Ver foto">
-							<span>Ver foto</span>
-						</div>
-						<div class="dropdown-item" id="btnUploadPhoto">
-							<img th:src="@{/assets/iconos/subirFoto.png}" alt="Subir foto">
-							<span>Subir foto</span>
-						</div>
-						<div class="dropdown-item" id="btnDeletePhoto">
-							<img th:src="@{/assets/iconos/eliminar.png}" alt="Quitar foto">
-							<span>Quitar foto</span>
-						</div>
-					</div>
-				</div>
-			</header>
+                    <div
+                        id="supervisorPasswordView"
+                        th:style="${view == 'password'} ? 'display:block;' : 'display:none;'"
+                    >
+                        <div class="password-card">
+                            <div class="password-head">
+                                <h3>Cambiar contraseña</h3>
+                            </div>
+                            <div class="password-body">
+                                <p class="text-primary">Los campos con * son obligatorios</p>
+                                <p class="text-muted">
+                                    En seguida podrás cambiar tu contraseña actual del sistema,
+                                    recuerda que debe tener 8 caracteres como mínimo, 1 número y 1
+                                    caracter especial.
+                                </p>
 
-			<section class="panel panel-scroll" id="panelContent" aria-label="Sección principal">
+                                <form id="formCambiarPassword" class="password-form">
+                                    <div class="form-group">
+                                        <label>Contraseña actual*</label>
+                                        <input
+                                            type="password"
+                                            id="passActual"
+                                            name="passActual"
+                                            required
+                                        />
+                                    </div>
 
-				<div id="supervisorProjectsView" th:style="${view == 'password'} ? 'display:none;' : 'display:block;'">
-    <div class="panel-head">
-        <div>
-            <h2 class="panel-title">Proyectos</h2>
-            <div class="panel-sub">Aquí se mostrarán únicamente los proyectos asignados al supervisor</div>
+                                    <div class="form-group">
+                                        <label>Contraseña nueva*</label>
+                                        <input
+                                            type="password"
+                                            id="passNueva"
+                                            name="passNueva"
+                                            required
+                                            minlength="8"
+                                        />
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label>Repite la contraseña nueva*</label>
+                                        <input
+                                            type="password"
+                                            id="passRepetida"
+                                            name="passRepetida"
+                                            required
+                                            minlength="8"
+                                        />
+                                    </div>
+
+                                    <div class="form-actions-right">
+                                        <button type="submit" class="btn-primary">Cambiar</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="supervisorProcesoView" style="display: none">
+                        <div id="supervisorProcesoContent"></div>
+                    </div>
+
+                    <div id="supervisorBloqueView" style="display: none">
+                        <div id="supervisorBloqueContent"></div>
+                    </div>
+
+                    <div id="supervisorEtapaView" style="display: none">
+                        <div id="supervisorEtapaContent"></div>
+                    </div>
+
+                    <div id="supervisorHistorialView" style="display: none">
+                        <div id="supervisorHistorialContent"></div>
+                    </div>
+                </section>
+            </main>
         </div>
-    </div>
+        <div class="modal-backdrop" id="detalleBackdrop" aria-hidden="true"></div>
 
-    <div class="tabs" id="tabsSupervisor" role="tablist" aria-label="Filtros de proyectos">
-        <button class="tab active" type="button" data-estado="ACTIVO">Activos</button>
-        <button class="tab" type="button" data-estado="INACTIVO">Inactivos</button>
-        <button class="tab" type="button" data-estado="FINALIZADO">Finalizados</button>
-    </div>
+        <div
+            class="modal"
+            id="detalleModal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="detalleTitle"
+            aria-hidden="true"
+        >
+            <div class="modal-card">
+                <div class="dg-head">
+                    <span class="dg-chip" id="detalleTitle">Detalle del proyecto</span>
+                    <div class="dg-actions">
+                        <button
+                            class="dg-close"
+                            type="button"
+                            id="btnCerrarDetalle"
+                            aria-label="Cerrar"
+                        >
+                            ✕
+                        </button>
+                    </div>
+                </div>
 
-    <div class="cards" id="supervisorProjectsList">
-        <div class="empty" id="supervisorProjectsEmpty">Aún no hay proyectos asignados para mostrar.</div>
-    </div>
-</div>
+                <div class="detalle-top">
+                    <div class="badge-state" id="badgeEstado">—</div>
+                    <div class="detalle-meta" id="detalleMeta"></div>
+                </div>
 
-<div id="supervisorPasswordView" th:style="${view == 'password'} ? 'display:block;' : 'display:none;'">
-    <div class="password-card">
-        <div class="password-head">
-            <h3>Cambiar contraseña</h3>
+                <div class="detalle-body" id="detalleBody"></div>
+            </div>
         </div>
-        <div class="password-body">
-            <p class="text-primary">Los campos con * son obligatorios</p>
-            <p class="text-muted">En seguida podrás cambiar tu contraseña actual del sistema, recuerda que debe tener 8 caracteres como mínimo, 1 número y 1 caracter especial.</p>
 
-            <form id="formCambiarPassword" class="password-form">
-                <div class="form-group">
-                    <label>Contraseña actual*</label>
-                    <input type="password" id="passActual" name="passActual" required>
-                </div>
+        <!-- Backdrop alerta -->
+        <div class="modal-backdrop" id="customAlertBackdrop" aria-hidden="true"></div>
 
-                <div class="form-group">
-                    <label>Contraseña nueva*</label>
-                    <input type="password" id="passNueva" name="passNueva" required minlength="8">
-                </div>
+        <!-- Modal alerta -->
+        <div class="modal" id="customAlert" aria-hidden="true">
+            <div
+                class="modal-card alert-card"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="customAlertTitle"
+            >
+                <div class="alert-body">
+                    <h3 id="customAlertTitle" class="alert-title">Atención</h3>
+                    <p id="customAlertMessage" class="alert-msg">Mensaje</p>
 
-                <div class="form-group">
-                    <label>Repite la contraseña nueva*</label>
-                    <input type="password" id="passRepetida" name="passRepetida" required minlength="8">
+                    <div class="alert-actions">
+                        <button
+                            class="btn-secondary"
+                            type="button"
+                            id="customAlertCancel"
+                            style="display: none"
+                        >
+                            Cancelar
+                        </button>
+                        <button class="btn-primary" type="button" id="customAlertOk">
+                            Aceptar
+                        </button>
+                    </div>
                 </div>
-
-                <div class="form-actions-right">
-                    <button type="submit" class="btn-primary">Cambiar</button>
-                </div>
-            </form>
+            </div>
         </div>
-    </div>
-</div>
 
-<div id="supervisorProcesoView" style="display:none;">
-    <div id="supervisorProcesoContent"></div>
-</div>
-
-<div id="supervisorBloqueView" style="display:none;">
-    <div id="supervisorBloqueContent"></div>
-</div>
-
-<div id="supervisorEtapaView" style="display:none;">
-    <div id="supervisorEtapaContent"></div>
-</div>
-
-<div id="supervisorHistorialView" style="display:none;">
-    <div id="supervisorHistorialContent"></div>
-</div>
-
-			</section>
-
-		</main>
-	</div>
-	<div class="modal-backdrop" id="detalleBackdrop" aria-hidden="true"></div>
-
-	<div class="modal" id="detalleModal" role="dialog" aria-modal="true"
-		aria-labelledby="detalleTitle" aria-hidden="true">
-		<div class="modal-card">
-			<div class="dg-head">
-				<span class="dg-chip" id="detalleTitle">Detalle del proyecto</span>
-				<div class="dg-actions">
-					<button class="dg-close" type="button" id="btnCerrarDetalle"
-						aria-label="Cerrar">✕</button>
-				</div>
-			</div>
-
-			<div class="detalle-top">
-				<div class="badge-state" id="badgeEstado">—</div>
-				<div class="detalle-meta" id="detalleMeta"></div>
-			</div>
-
-			<div class="detalle-body" id="detalleBody"></div>
-		</div>
-	</div>
-
-	<!-- Backdrop alerta -->
-	<div class="modal-backdrop" id="customAlertBackdrop" aria-hidden="true"></div>
-
-	<!-- Modal alerta -->
-	<div class="modal" id="customAlert" aria-hidden="true">
-		<div class="modal-card alert-card" role="dialog" aria-modal="true"
-			aria-labelledby="customAlertTitle">
-			<div class="alert-body">
-				<h3 id="customAlertTitle" class="alert-title">Atención</h3>
-				<p id="customAlertMessage" class="alert-msg">Mensaje</p>
-
-<div class="alert-actions">
-    <button class="btn-secondary" type="button" id="customAlertCancel" style="display: none;">Cancelar</button>
-    <button class="btn-primary" type="button" id="customAlertOk">Aceptar</button>
-</div>
-			</div>
-		</div>
-	</div>
-
-	<script type="module" th:src="@{/js/supervisor/app.js}" defer></script>
-</body>
+        <script type="module" th:src="@{/js/supervisor/app.js}" defer></script>
+    </body>
 </html>

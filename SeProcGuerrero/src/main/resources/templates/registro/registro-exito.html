@@ -1,34 +1,35 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="es">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SEPROC | Solicitud enviada</title>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>SEPROC | Solicitud enviada</title>
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap"
+            rel="stylesheet"
+        />
 
-  <link rel="stylesheet" th:href="@{/css/registro/registro-exito.css}">
-</head>
-<body class="success-page">
+        <link rel="stylesheet" th:href="@{/css/registro/registro-exito.css}" />
+    </head>
+    <body class="success-page">
+        <main class="success-shell">
+            <section class="success-card">
+                <h1 class="success-title">Solicitud enviada</h1>
 
-  <main class="success-shell">
-    <section class="success-card">
-      <h1 class="success-title">Solicitud enviada</h1>
+                <p class="success-text">
+                    Tu cuenta quedó <strong>pendiente de aprobación</strong>. Un administrador
+                    revisará tu solicitud y te asignará un rol.
+                </p>
 
-      <p class="success-text">
-        Tu cuenta quedó <strong>pendiente de aprobación</strong>. Un administrador
-        revisará tu solicitud y te asignará un rol.
-      </p>
+                <p class="success-text success-text-strong">
+                    Mientras tanto, no podrás iniciar sesión.
+                </p>
 
-      <p class="success-text success-text-strong">
-        Mientras tanto, no podrás iniciar sesión.
-      </p>
-
-      <a class="success-link" th:href="@{/login}">Regresar al login</a>
-    </section>
-  </main>
-
-</body>
+                <a class="success-link" th:href="@{/login}">Regresar al login</a>
+            </section>
+        </main>
+    </body>
 </html>

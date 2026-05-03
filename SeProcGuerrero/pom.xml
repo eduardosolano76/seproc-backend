@@ -126,6 +126,7 @@
                 </configuration>
             </plugin>
             
+            <!--
             <plugin>
                 <groupId>io.spring.javaformat</groupId>
                 <artifactId>spring-javaformat-maven-plugin</artifactId>
@@ -134,6 +135,43 @@
                     <execution>
                         <phase>process-sources</phase>
                         <inherited>true</inherited>
+                        <goals>
+                            <goal>apply</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            -->
+            
+            <!-- PLUGIN PARA FORMATO DE HTML Y OTROS ARCHIVOS -->
+            <plugin>
+                <groupId>com.diffplug.spotless</groupId>
+                <artifactId>spotless-maven-plugin</artifactId>
+                <version>2.43.0</version>
+                <configuration>
+                    <formats>
+                        <!-- Le decimos que busque tus plantillas Thymeleaf -->
+                        <format>
+                            <includes>
+                                <include>src/main/resources/templates/**/*.html</include>
+                            </includes>
+                            <!-- Usamos el formateador de Prettier por debajo -->
+                            <prettier>
+                                <devDependencies>
+                                    <prettier>2.8.8</prettier>
+                                    <plugin>@prettier/plugin-xml</plugin>
+                                </devDependencies>
+                                <config>
+                                    <printWidth>100</printWidth>
+                                    <tabWidth>4</tabWidth>
+                                </config>
+                            </prettier>
+                        </format>
+                    </formats>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>process-sources</phase>
                         <goals>
                             <goal>apply</goal>
                         </goals>

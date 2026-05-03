@@ -1,41 +1,42 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<body>
-  <div th:fragment="usuariosContent" id="panelContent">
+    <body>
+        <div th:fragment="usuariosContent" id="panelContent">
+            <div th:if="${#lists.isEmpty(usuarios)}" class="panel-sub">
+                No se ha registrado ningún usuario.
+            </div>
 
-    <div th:if="${#lists.isEmpty(usuarios)}" class="panel-sub">
-      No se ha registrado ningún usuario.
-    </div>
+            <div th:if="${!#lists.isEmpty(usuarios)}" style="margin-top: 14px">
+                <p class="panel-sub panel-note">
+                    Selecciona un usuario de la tabla para ver su detalle o actualizar su
+                    información.
+                </p>
 
-    <div th:if="${!#lists.isEmpty(usuarios)}" style="margin-top: 14px;">
-
-      <p class="panel-sub panel-note">
-        Selecciona un usuario de la tabla para ver su detalle o actualizar su información.
-      </p>
-
-      <div class="table-wrap">
-        <table class="table">
-          <thead>
-            <tr>
-              <th>Nombre</th>
-              <th>Username</th>
-              <th>Email</th>
-              <th>Rol</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr th:each="u : ${usuarios}" class="user-row" th:attr="data-id=${u.idUsuario}">
-              <td th:text="${u.nombre + ' ' + u.apellido}">Nombre</td>
-              <td th:text="${u.username}">username</td>
-              <td th:text="${u.email}">mail</td>
-              <td th:text="${u.rol != null ? u.rol.nombre : 'sin rol'}">rol</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-    </div>
-
-  </div>
-</body>
+                <div class="table-wrap">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Username</th>
+                                <th>Email</th>
+                                <th>Rol</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr
+                                th:each="u : ${usuarios}"
+                                class="user-row"
+                                th:attr="data-id=${u.idUsuario}"
+                            >
+                                <td th:text="${u.nombre + ' ' + u.apellido}">Nombre</td>
+                                <td th:text="${u.username}">username</td>
+                                <td th:text="${u.email}">mail</td>
+                                <td th:text="${u.rol != null ? u.rol.nombre : 'sin rol'}">rol</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </body>
 </html>
