@@ -24,127 +24,131 @@ import com.example.demo.storage.StorageService;
 @Controller
 public class SupervisorController {
 
-    private final UsuarioRepository usuarioRepo;
-    private final StorageService storageService;
-    private final PasswordEncoder passwordEncoder;
+	private final UsuarioRepository usuarioRepo;
 
-    public SupervisorController(UsuarioRepository usuarioRepo, StorageService storageService, PasswordEncoder passwordEncoder) {
-        this.usuarioRepo = usuarioRepo;
-        this.storageService = storageService;
-        this.passwordEncoder = passwordEncoder;
-    }
+	private final StorageService storageService;
 
-    @GetMapping("/supervisor")
-    public String supervisor(Model model, Principal principal,
-    		@RequestParam(value = "view", required = false, defaultValue = "proyectos") String view) {
+	private final PasswordEncoder passwordEncoder;
 
-        String username = principal.getName();
-        var usuario = usuarioRepo.findByUsername(username).orElse(null);
+	public SupervisorController(UsuarioRepository usuarioRepo, StorageService storageService,
+			PasswordEncoder passwordEncoder) {
+		this.usuarioRepo = usuarioRepo;
+		this.storageService = storageService;
+		this.passwordEncoder = passwordEncoder;
+	}
 
-        if (usuario != null) {
-            model.addAttribute("nombreUsuario", usuario.getNombre());
-            String rol = (usuario.getRol() != null) ? usuario.getRol().getNombre() : "sin rol";
-            model.addAttribute("rolUsuario", rol);
-            model.addAttribute("fotoUrl", storageService.publicUrl(usuario.getFoto()));
-        } else {
-            model.addAttribute("nombreUsuario", username);
-            model.addAttribute("rolUsuario", "sin rol");
-            model.addAttribute("fotoUrl", null);
-        }
-        
-        model.addAttribute("view", view);
+	@GetMapping("/supervisor")
+	public String supervisor(Model model, Principal principal,
+			@RequestParam(value = "view", required = false, defaultValue = "proyectos") String view) {
 
-        return "supervisor/supervisor";
-    }
-    
-    // Cambiar contraseña del perfil logueado
-    @PostMapping("/supervisor/perfil/password")
-    @ResponseBody
-    public ResponseEntity<?> cambiarPassword(@RequestBody Map<String, String> payload, Principal principal) {
-        String username = principal.getName();
-        Usuario usuario = usuarioRepo.findByUsername(username).orElse(null);
+		String username = principal.getName();
+		var usuario = usuarioRepo.findByUsername(username).orElse(null);
 
-        if (usuario == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuario no encontrado.");
-        }
+		if (usuario != null) {
+			model.addAttribute("nombreUsuario", usuario.getNombre());
+			String rol = (usuario.getRol() != null) ? usuario.getRol().getNombre() : "sin rol";
+			model.addAttribute("rolUsuario", rol);
+			model.addAttribute("fotoUrl", storageService.publicUrl(usuario.getFoto()));
+		}
+		else {
+			model.addAttribute("nombreUsuario", username);
+			model.addAttribute("rolUsuario", "sin rol");
+			model.addAttribute("fotoUrl", null);
+		}
 
-        String passActual = payload.get("passActual");
-        String passNueva = payload.get("passNueva");
+		model.addAttribute("view", view);
 
-        // 1. Verificar que la contraseña actual ingresada coincida con la de la BD
-        if (!passwordEncoder.matches(passActual, usuario.getPassword())) {
-            return ResponseEntity.badRequest().body("La contraseña actual es incorrecta.");
-        }
+		return "supervisor/supervisor";
+	}
 
-        // 2. Encriptar y guardar la nueva contraseña
-        usuario.setPassword(passwordEncoder.encode(passNueva));
-        usuarioRepo.save(usuario);
+	// Cambiar contraseña del perfil logueado
+	@PostMapping("/supervisor/perfil/password")
+	@ResponseBody
+	public ResponseEntity<?> cambiarPassword(@RequestBody Map<String, String> payload, Principal principal) {
+		String username = principal.getName();
+		Usuario usuario = usuarioRepo.findByUsername(username).orElse(null);
 
-        return ResponseEntity.ok().build();
-    }
-    
-    // Subir foto
-    @PostMapping(value = "/supervisor/perfil/foto", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @ResponseBody
-    public ResponseEntity<?> subirFotoPerfil(@RequestParam("file") MultipartFile file, Principal principal) {
+		if (usuario == null) {
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuario no encontrado.");
+		}
 
-        String username = principal.getName();
-        Usuario u = usuarioRepo.findByUsername(username).orElse(null);
-        if (u == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuario no encontrado.");
-        }
+		String passActual = payload.get("passActual");
+		String passNueva = payload.get("passNueva");
 
-        try {
-            // borrar foto anterior si existe
-            storageService.deleteIfExists(u.getFoto());
+		// 1. Verificar que la contraseña actual ingresada coincida con la de la BD
+		if (!passwordEncoder.matches(passActual, usuario.getPassword())) {
+			return ResponseEntity.badRequest().body("La contraseña actual es incorrecta.");
+		}
 
-            String key = storageService.saveProfilePhoto(u.getIdUsuario(), u.getUsername(), file);
-            u.setFoto(key);
-            usuarioRepo.save(u);
+		// 2. Encriptar y guardar la nueva contraseña
+		usuario.setPassword(passwordEncoder.encode(passNueva));
+		usuarioRepo.save(usuario);
 
-            String url = storageService.publicUrl(key);
-            return ResponseEntity.ok(Map.of("url", url));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("No se pudo subir la foto.");
-        }
-    }
+		return ResponseEntity.ok().build();
+	}
 
-    @GetMapping("/supervisor/perfil/foto")
-    @ResponseBody
-    public ResponseEntity<?> obtenerFotoPerfil(Principal principal) {
-        String username = principal.getName();
-        Usuario u = usuarioRepo.findByUsername(username).orElse(null);
+	// Subir foto
+	@PostMapping(value = "/supervisor/perfil/foto", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	@ResponseBody
+	public ResponseEntity<?> subirFotoPerfil(@RequestParam("file") MultipartFile file, Principal principal) {
 
-        if (u == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuario no encontrado.");
-        }
+		String username = principal.getName();
+		Usuario u = usuarioRepo.findByUsername(username).orElse(null);
+		if (u == null) {
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuario no encontrado.");
+		}
 
-        String url = storageService.publicUrl(u.getFoto());
-        if (url == null || url.isBlank()) {
-            url = "/assets/iconos/sinFotoPerfil.png";
-        }
+		try {
+			// borrar foto anterior si existe
+			storageService.deleteIfExists(u.getFoto());
 
-        return ResponseEntity.ok(Map.of("url", url));
-    }
-    
-    @DeleteMapping("/supervisor/perfil/foto")
-    @ResponseBody
-    public ResponseEntity<?> eliminarFotoPerfil(Principal principal) {
-        String username = principal.getName();
-        Usuario u = usuarioRepo.findByUsername(username).orElse(null);
-        
-        if (u != null && u.getFoto() != null) {
-            storageService.deleteIfExists(u.getFoto());
-            u.setFoto(null);
-            usuarioRepo.save(u);
-        }
+			String key = storageService.saveProfilePhoto(u.getIdUsuario(), u.getUsername(), file);
+			u.setFoto(key);
+			usuarioRepo.save(u);
 
-        return ResponseEntity.ok(Map.of(
-            "message", "Foto eliminada correctamente", 
-            "url", "/assets/iconos/sinFotoPerfil.png"
-        ));
-    }
+			String url = storageService.publicUrl(key);
+			return ResponseEntity.ok(Map.of("url", url));
+		}
+		catch (IllegalArgumentException e) {
+			return ResponseEntity.badRequest().body(e.getMessage());
+		}
+		catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("No se pudo subir la foto.");
+		}
+	}
+
+	@GetMapping("/supervisor/perfil/foto")
+	@ResponseBody
+	public ResponseEntity<?> obtenerFotoPerfil(Principal principal) {
+		String username = principal.getName();
+		Usuario u = usuarioRepo.findByUsername(username).orElse(null);
+
+		if (u == null) {
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuario no encontrado.");
+		}
+
+		String url = storageService.publicUrl(u.getFoto());
+		if (url == null || url.isBlank()) {
+			url = "/assets/iconos/sinFotoPerfil.png";
+		}
+
+		return ResponseEntity.ok(Map.of("url", url));
+	}
+
+	@DeleteMapping("/supervisor/perfil/foto")
+	@ResponseBody
+	public ResponseEntity<?> eliminarFotoPerfil(Principal principal) {
+		String username = principal.getName();
+		Usuario u = usuarioRepo.findByUsername(username).orElse(null);
+
+		if (u != null && u.getFoto() != null) {
+			storageService.deleteIfExists(u.getFoto());
+			u.setFoto(null);
+			usuarioRepo.save(u);
+		}
+
+		return ResponseEntity
+			.ok(Map.of("message", "Foto eliminada correctamente", "url", "/assets/iconos/sinFotoPerfil.png"));
+	}
+
 }

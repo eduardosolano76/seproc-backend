@@ -2,35 +2,37 @@ package com.example.demo.dto;
 
 public class OptionDto {
 
-    private Long id;
-    private String nombre;
+	private Long id;
 
-    public OptionDto() {
-    }
+	private String nombre;
 
-    public OptionDto(Long id, String nombre) {
-        this.id = id;
-        this.nombre = nombre;
-    }
+	public OptionDto() {
+	}
 
-    public OptionDto(Integer id, String nombre) {
-        this.id = id != null ? id.longValue() : null;
-        this.nombre = nombre;
-    }
+	public OptionDto(Long id, String nombre) {
+		this.id = id;
+		this.nombre = nombre;
+	}
 
-    public Long getId() {
-        return id;
-    }
+	public OptionDto(Integer id, String nombre) {
+		this.id = id != null ? id.longValue() : null;
+		this.nombre = nombre;
+	}
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+	public Long getId() {
+		return id;
+	}
 
-    public String getNombre() {
-        return nombre;
-    }
+	public void setId(Long id) {
+		this.id = id;
+	}
 
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
-    }
+	public String getNombre() {
+		return nombre;
+	}
+
+	public void setNombre(String nombre) {
+		this.nombre = nombre;
+	}
+
 }

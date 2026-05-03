@@ -20,79 +20,79 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/constructor")
 public class ConstructorSolicitudController {
 
-    private final SolicitudProyectoRepository solRepo;
-    private final CatEstadoRepository estadoRepo;
-    private final CatMunicipioRepository municipioRepo;
-    private final CatLocalidadRepository localidadRepo;
-    private final TipoEdificacionRepository tipoEdificacionRepo;
-    private final UsuarioRepository usuarioRepo;
+	private final SolicitudProyectoRepository solRepo;
 
-    public ConstructorSolicitudController(
-            SolicitudProyectoRepository solRepo,
-            CatEstadoRepository estadoRepo,
-            CatMunicipioRepository municipioRepo,
-            CatLocalidadRepository localidadRepo,
-            TipoEdificacionRepository tipoEdificacionRepo,
-            UsuarioRepository usuarioRepo
-    ) {
-        this.solRepo = solRepo;
-        this.estadoRepo = estadoRepo;
-        this.municipioRepo = municipioRepo;
-        this.localidadRepo = localidadRepo;
-        this.tipoEdificacionRepo = tipoEdificacionRepo;
-        this.usuarioRepo = usuarioRepo;
-    }
+	private final CatEstadoRepository estadoRepo;
 
-    @PostMapping("/solicitudes")
-    public ResponseEntity<?> crearSolicitud(@RequestBody SolicitudProyectoRequest req, Authentication auth) {
+	private final CatMunicipioRepository municipioRepo;
 
-        String username = auth.getName();
-        var usuario = usuarioRepo.findByUsername(username);
-        if (usuario.isEmpty()) {
-            return ResponseEntity.badRequest().body("Usuario no encontrado");
-        }
+	private final CatLocalidadRepository localidadRepo;
 
-        CatEstado estado = estadoRepo.findById(req.idEstado).orElse(null);
-        CatMunicipio municipio = municipioRepo.findById(req.idMunicipio).orElse(null);
-        CatLocalidad localidad = localidadRepo.findById(req.idLocalidad).orElse(null);
-        TipoEdificacion tipoEdificacion = req.idTipoEdificacion != null
-                ? tipoEdificacionRepo.findById(req.idTipoEdificacion).orElse(null)
-                : null;
+	private final TipoEdificacionRepository tipoEdificacionRepo;
 
-        if (estado == null || municipio == null || localidad == null) {
-            return ResponseEntity.badRequest().body("Ubicación inválida");
-        }
+	private final UsuarioRepository usuarioRepo;
 
-        if (tipoEdificacion == null) {
-            return ResponseEntity.badRequest().body("Tipo de edificación inválido");
-        }
+	public ConstructorSolicitudController(SolicitudProyectoRepository solRepo, CatEstadoRepository estadoRepo,
+			CatMunicipioRepository municipioRepo, CatLocalidadRepository localidadRepo,
+			TipoEdificacionRepository tipoEdificacionRepo, UsuarioRepository usuarioRepo) {
+		this.solRepo = solRepo;
+		this.estadoRepo = estadoRepo;
+		this.municipioRepo = municipioRepo;
+		this.localidadRepo = localidadRepo;
+		this.tipoEdificacionRepo = tipoEdificacionRepo;
+		this.usuarioRepo = usuarioRepo;
+	}
 
-        SolicitudProyecto s = new SolicitudProyecto();
-        s.setIdUsuarioContratista(usuario.get().getIdUsuario());
-        s.setEstadoSolicitud("PENDIENTE");
+	@PostMapping("/solicitudes")
+	public ResponseEntity<?> crearSolicitud(@RequestBody SolicitudProyectoRequest req, Authentication auth) {
 
-        s.setNombreEscuela(req.nombreEscuela);
-        s.setCct1(req.cct1);
-        s.setCct2((req.cct2 == null || req.cct2.isBlank()) ? null : req.cct2);
+		String username = auth.getName();
+		var usuario = usuarioRepo.findByUsername(username);
+		if (usuario.isEmpty()) {
+			return ResponseEntity.badRequest().body("Usuario no encontrado");
+		}
 
-        s.setEstado(estado);
-        s.setMunicipio(municipio);
-        s.setLocalidad(localidad);
-        s.setTipoEdificacion(tipoEdificacion);
+		CatEstado estado = estadoRepo.findById(req.idEstado).orElse(null);
+		CatMunicipio municipio = municipioRepo.findById(req.idMunicipio).orElse(null);
+		CatLocalidad localidad = localidadRepo.findById(req.idLocalidad).orElse(null);
+		TipoEdificacion tipoEdificacion = req.idTipoEdificacion != null
+				? tipoEdificacionRepo.findById(req.idTipoEdificacion).orElse(null) : null;
 
-        s.setCalleNumero(req.calleNumero);
-        s.setCp(req.cp);
+		if (estado == null || municipio == null || localidad == null) {
+			return ResponseEntity.badRequest().body("Ubicación inválida");
+		}
 
-        s.setResponsableInmueble(req.responsable);
-        s.setContacto(req.contacto);
+		if (tipoEdificacion == null) {
+			return ResponseEntity.badRequest().body("Tipo de edificación inválido");
+		}
 
-        s.setNumInmueblesEvaluar(req.numInmuebles);
-        s.setNumEntreEjes(req.numEntreEjes);
+		SolicitudProyecto s = new SolicitudProyecto();
+		s.setIdUsuarioContratista(usuario.get().getIdUsuario());
+		s.setEstadoSolicitud("PENDIENTE");
 
-        s.setTipoObra(req.tipoObra);
+		s.setNombreEscuela(req.nombreEscuela);
+		s.setCct1(req.cct1);
+		s.setCct2((req.cct2 == null || req.cct2.isBlank()) ? null : req.cct2);
 
-        solRepo.save(s);
+		s.setEstado(estado);
+		s.setMunicipio(municipio);
+		s.setLocalidad(localidad);
+		s.setTipoEdificacion(tipoEdificacion);
 
-        return ResponseEntity.ok().body("OK");
-    }
+		s.setCalleNumero(req.calleNumero);
+		s.setCp(req.cp);
+
+		s.setResponsableInmueble(req.responsable);
+		s.setContacto(req.contacto);
+
+		s.setNumInmueblesEvaluar(req.numInmuebles);
+		s.setNumEntreEjes(req.numEntreEjes);
+
+		s.setTipoObra(req.tipoObra);
+
+		solRepo.save(s);
+
+		return ResponseEntity.ok().body("OK");
+	}
+
 }

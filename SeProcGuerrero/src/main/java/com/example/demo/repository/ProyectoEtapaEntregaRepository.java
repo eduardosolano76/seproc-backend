@@ -8,9 +8,10 @@ import java.util.Optional;
 
 public interface ProyectoEtapaEntregaRepository extends JpaRepository<ProyectoEtapaEntrega, Long> {
 
-    long countByProyectoEtapa_IdProyectoEtapa(Long idProyectoEtapa);
+	long countByProyectoEtapa_IdProyectoEtapa(Long idProyectoEtapa);
 
-    Optional<ProyectoEtapaEntrega> findFirstByProyectoEtapa_IdProyectoEtapaOrderByVersionDesc(Long idProyectoEtapa);
+	Optional<ProyectoEtapaEntrega> findFirstByProyectoEtapa_IdProyectoEtapaOrderByVersionDesc(Long idProyectoEtapa);
 
-    List<ProyectoEtapaEntrega> findByProyectoEtapa_IdProyectoEtapaOrderByVersionDesc(Long idProyectoEtapa);
+	List<ProyectoEtapaEntrega> findByProyectoEtapa_IdProyectoEtapaOrderByVersionDesc(Long idProyectoEtapa);
+
 }

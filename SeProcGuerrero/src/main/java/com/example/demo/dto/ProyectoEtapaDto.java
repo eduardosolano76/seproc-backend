@@ -13,21 +13,35 @@ import lombok.Setter;
 @Getter
 @Setter
 public class ProyectoEtapaDto {
-	
-    private Long idProyectoEtapa;
-    private Proyecto proyecto;
-    private ProyectoEtapa proyectoEtapaPadre;
-    private EtapaPlantilla etapaPlantilla;
-    private String nombreMostrado;
-    private Integer numeroNivel;
-    private Integer ordenVisual;
-    private Integer nivelArbol;
-    private String estado; 
-    private BigDecimal avancePorcentaje;
-    private LocalDateTime fechaHabilitada;
-    private LocalDateTime fechaInicio;
-    private LocalDateTime fechaCierre;
-    private LocalDateTime fechaActualizacion;
-    private String claveInterna;
+
+	private Long idProyectoEtapa;
+
+	private Proyecto proyecto;
+
+	private ProyectoEtapa proyectoEtapaPadre;
+
+	private EtapaPlantilla etapaPlantilla;
+
+	private String nombreMostrado;
+
+	private Integer numeroNivel;
+
+	private Integer ordenVisual;
+
+	private Integer nivelArbol;
+
+	private String estado;
+
+	private BigDecimal avancePorcentaje;
+
+	private LocalDateTime fechaHabilitada;
+
+	private LocalDateTime fechaInicio;
+
+	private LocalDateTime fechaCierre;
+
+	private LocalDateTime fechaActualizacion;
+
+	private String claveInterna;
 
 }

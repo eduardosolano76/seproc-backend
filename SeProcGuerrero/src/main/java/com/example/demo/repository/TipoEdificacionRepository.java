@@ -7,5 +7,6 @@ import java.util.List;
 
 public interface TipoEdificacionRepository extends JpaRepository<TipoEdificacion, Integer> {
 
-    List<TipoEdificacion> findByActivoTrueOrderByNombreAsc();
+	List<TipoEdificacion> findByActivoTrueOrderByNombreAsc();
+
 }

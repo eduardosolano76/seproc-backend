@@ -14,133 +14,128 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/central/usuarios")
 public class CentralUsuariosApiController {
 
-    private final UsuarioRepository usuarioRepo;
-    private final RolRepository rolRepo;
-    private final PasswordEncoder passwordEncoder;
+	private final UsuarioRepository usuarioRepo;
 
-    public CentralUsuariosApiController(UsuarioRepository usuarioRepo,
-                                        RolRepository rolRepo,
-                                        PasswordEncoder passwordEncoder) {
-        this.usuarioRepo = usuarioRepo;
-        this.rolRepo = rolRepo;
-        this.passwordEncoder = passwordEncoder;
-    }
+	private final RolRepository rolRepo;
 
-    @GetMapping("/{id}")
-    public ResponseEntity<?> detalle(@PathVariable Long id) {
-        Usuario u = usuarioRepo.findById(id).orElse(null);
-        if (u == null) return ResponseEntity.notFound().build();
-        return ResponseEntity.ok(u);
-    }
+	private final PasswordEncoder passwordEncoder;
 
-    @PostMapping("/crear")
-    public ResponseEntity<?> crear(@RequestBody UsuarioUpsertDto dto) {
+	public CentralUsuariosApiController(UsuarioRepository usuarioRepo, RolRepository rolRepo,
+			PasswordEncoder passwordEncoder) {
+		this.usuarioRepo = usuarioRepo;
+		this.rolRepo = rolRepo;
+		this.passwordEncoder = passwordEncoder;
+	}
 
-        if (dto.getNombre() == null || dto.getNombre().isBlank()) {
-            return ResponseEntity.badRequest().body("Nombre obligatorio.");
-        }
-        if (dto.getApellido() == null || dto.getApellido().isBlank()) {
-            return ResponseEntity.badRequest().body("Apellido obligatorio.");
-        }
-        if (dto.getUsername() == null || dto.getUsername().isBlank()) {
-            return ResponseEntity.badRequest().body("Username obligatorio.");
-        }
-        if (dto.getEmail() == null || dto.getEmail().isBlank()) {
-            return ResponseEntity.badRequest().body("Email obligatorio.");
-        }
-        if (dto.getPassword() == null || dto.getPassword().isBlank()) {
-            return ResponseEntity.badRequest().body("Password obligatorio.");
-        }
+	@GetMapping("/{id}")
+	public ResponseEntity<?> detalle(@PathVariable Long id) {
+		Usuario u = usuarioRepo.findById(id).orElse(null);
+		if (u == null)
+			return ResponseEntity.notFound().build();
+		return ResponseEntity.ok(u);
+	}
 
-        if (usuarioRepo.existsByUsername(dto.getUsername())) {
-            return ResponseEntity.badRequest().body("Username ya existe.");
-        }
-        if (usuarioRepo.existsByEmail(dto.getEmail())) {
-            return ResponseEntity.badRequest().body("Email ya existe.");
-        }
+	@PostMapping("/crear")
+	public ResponseEntity<?> crear(@RequestBody UsuarioUpsertDto dto) {
 
-        String rolNombre = dto.getRolNombre() == null ? "" : dto.getRolNombre().trim().toLowerCase();
+		if (dto.getNombre() == null || dto.getNombre().isBlank()) {
+			return ResponseEntity.badRequest().body("Nombre obligatorio.");
+		}
+		if (dto.getApellido() == null || dto.getApellido().isBlank()) {
+			return ResponseEntity.badRequest().body("Apellido obligatorio.");
+		}
+		if (dto.getUsername() == null || dto.getUsername().isBlank()) {
+			return ResponseEntity.badRequest().body("Username obligatorio.");
+		}
+		if (dto.getEmail() == null || dto.getEmail().isBlank()) {
+			return ResponseEntity.badRequest().body("Email obligatorio.");
+		}
+		if (dto.getPassword() == null || dto.getPassword().isBlank()) {
+			return ResponseEntity.badRequest().body("Password obligatorio.");
+		}
 
-        if (!rolNombre.equals("supervisor") &&
-            !rolNombre.equals("contratista") &&
-            !rolNombre.equals("direccion")) {
-            return ResponseEntity.badRequest().body("Central solo puede crear supervisor, contratista o direccion.");
-        }
+		if (usuarioRepo.existsByUsername(dto.getUsername())) {
+			return ResponseEntity.badRequest().body("Username ya existe.");
+		}
+		if (usuarioRepo.existsByEmail(dto.getEmail())) {
+			return ResponseEntity.badRequest().body("Email ya existe.");
+		}
 
-        Rol rol = rolRepo.findByNombre(rolNombre).orElse(null);
-        if (rol == null) {
-            return ResponseEntity.badRequest().body("Rol no válido.");
-        }
+		String rolNombre = dto.getRolNombre() == null ? "" : dto.getRolNombre().trim().toLowerCase();
 
-        Usuario u = new Usuario();
-        u.setNombre(dto.getNombre().trim());
-        u.setApellido(dto.getApellido().trim());
-        u.setUsername(dto.getUsername().trim());
-        u.setEmail(dto.getEmail().trim());
-        u.setPassword(passwordEncoder.encode(dto.getPassword()));
-        u.setActivo(true);
-        u.setRol(rol);
+		if (!rolNombre.equals("supervisor") && !rolNombre.equals("contratista") && !rolNombre.equals("direccion")) {
+			return ResponseEntity.badRequest().body("Central solo puede crear supervisor, contratista o direccion.");
+		}
 
-        usuarioRepo.save(u);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
-    }
+		Rol rol = rolRepo.findByNombre(rolNombre).orElse(null);
+		if (rol == null) {
+			return ResponseEntity.badRequest().body("Rol no válido.");
+		}
 
-    @PostMapping("/{id}/actualizar")
-    public ResponseEntity<?> actualizar(@PathVariable Long id, @RequestBody UsuarioUpsertDto dto) {
-        Usuario u = usuarioRepo.findById(id).orElse(null);
-        if (u == null) return ResponseEntity.notFound().build();
+		Usuario u = new Usuario();
+		u.setNombre(dto.getNombre().trim());
+		u.setApellido(dto.getApellido().trim());
+		u.setUsername(dto.getUsername().trim());
+		u.setEmail(dto.getEmail().trim());
+		u.setPassword(passwordEncoder.encode(dto.getPassword()));
+		u.setActivo(true);
+		u.setRol(rol);
 
-        String rolActual = (u.getRol() != null && u.getRol().getNombre() != null)
-                ? u.getRol().getNombre().toLowerCase()
-                : "";
+		usuarioRepo.save(u);
+		return ResponseEntity.status(HttpStatus.CREATED).build();
+	}
 
-        if (!rolActual.equals("supervisor") &&
-            !rolActual.equals("contratista") &&
-            !rolActual.equals("direccion")) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body("Central no puede editar este tipo de usuario.");
-        }
+	@PostMapping("/{id}/actualizar")
+	public ResponseEntity<?> actualizar(@PathVariable Long id, @RequestBody UsuarioUpsertDto dto) {
+		Usuario u = usuarioRepo.findById(id).orElse(null);
+		if (u == null)
+			return ResponseEntity.notFound().build();
 
-        if (dto.getUsername() != null && !dto.getUsername().equalsIgnoreCase(u.getUsername())
-                && usuarioRepo.existsByUsername(dto.getUsername())) {
-            return ResponseEntity.badRequest().body("Username ya existe.");
-        }
+		String rolActual = (u.getRol() != null && u.getRol().getNombre() != null) ? u.getRol().getNombre().toLowerCase()
+				: "";
 
-        if (dto.getEmail() != null && !dto.getEmail().equalsIgnoreCase(u.getEmail())
-                && usuarioRepo.existsByEmail(dto.getEmail())) {
-            return ResponseEntity.badRequest().body("Email ya existe.");
-        }
+		if (!rolActual.equals("supervisor") && !rolActual.equals("contratista") && !rolActual.equals("direccion")) {
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Central no puede editar este tipo de usuario.");
+		}
 
-        u.setNombre(dto.getNombre());
-        u.setApellido(dto.getApellido());
-        u.setUsername(dto.getUsername());
-        u.setEmail(dto.getEmail());
+		if (dto.getUsername() != null && !dto.getUsername().equalsIgnoreCase(u.getUsername())
+				&& usuarioRepo.existsByUsername(dto.getUsername())) {
+			return ResponseEntity.badRequest().body("Username ya existe.");
+		}
 
-        if (dto.getPassword() != null && !dto.getPassword().isBlank()) {
-            u.setPassword(passwordEncoder.encode(dto.getPassword()));
-        }
+		if (dto.getEmail() != null && !dto.getEmail().equalsIgnoreCase(u.getEmail())
+				&& usuarioRepo.existsByEmail(dto.getEmail())) {
+			return ResponseEntity.badRequest().body("Email ya existe.");
+		}
 
-        usuarioRepo.save(u);
-        return ResponseEntity.ok().build();
-    }
+		u.setNombre(dto.getNombre());
+		u.setApellido(dto.getApellido());
+		u.setUsername(dto.getUsername());
+		u.setEmail(dto.getEmail());
 
-    @PostMapping("/{id}/eliminar")
-    public ResponseEntity<?> eliminar(@PathVariable Long id) {
-        Usuario u = usuarioRepo.findById(id).orElse(null);
-        if (u == null) return ResponseEntity.notFound().build();
+		if (dto.getPassword() != null && !dto.getPassword().isBlank()) {
+			u.setPassword(passwordEncoder.encode(dto.getPassword()));
+		}
 
-        String rolActual = (u.getRol() != null && u.getRol().getNombre() != null)
-                ? u.getRol().getNombre().toLowerCase()
-                : "";
+		usuarioRepo.save(u);
+		return ResponseEntity.ok().build();
+	}
 
-        if (!rolActual.equals("supervisor") &&
-            !rolActual.equals("contratista") &&
-            !rolActual.equals("direccion")) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body("Central no puede eliminar este tipo de usuario.");
-        }
+	@PostMapping("/{id}/eliminar")
+	public ResponseEntity<?> eliminar(@PathVariable Long id) {
+		Usuario u = usuarioRepo.findById(id).orElse(null);
+		if (u == null)
+			return ResponseEntity.notFound().build();
 
-        usuarioRepo.deleteById(id);
-        return ResponseEntity.ok().build();
-    }
+		String rolActual = (u.getRol() != null && u.getRol().getNombre() != null) ? u.getRol().getNombre().toLowerCase()
+				: "";
+
+		if (!rolActual.equals("supervisor") && !rolActual.equals("contratista") && !rolActual.equals("direccion")) {
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Central no puede eliminar este tipo de usuario.");
+		}
+
+		usuarioRepo.deleteById(id);
+		return ResponseEntity.ok().build();
+	}
+
 }

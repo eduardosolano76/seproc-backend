@@ -8,9 +8,10 @@ import java.util.List;
 
 public interface CatLocalidadRepository extends JpaRepository<CatLocalidad, Long> {
 
-    boolean existsByMunicipioAndCveLocalidad(CatMunicipio municipio, String cveLocalidad);
+	boolean existsByMunicipioAndCveLocalidad(CatMunicipio municipio, String cveLocalidad);
 
-    List<CatLocalidad> findByMunicipioOrderByNombreAsc(CatMunicipio municipio);
+	List<CatLocalidad> findByMunicipioOrderByNombreAsc(CatMunicipio municipio);
 
-    List<CatLocalidad> findByMunicipio_IdMunicipioOrderByNombreAsc(Integer idMunicipio);
+	List<CatLocalidad> findByMunicipio_IdMunicipioOrderByNombreAsc(Integer idMunicipio);
+
 }

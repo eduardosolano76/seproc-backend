@@ -23,27 +23,34 @@ public class LoginController {
 			var auths = auth.getAuthorities();
 
 			// 4. Redirigimos al módulo que le corresponde para sacarlo del login
-			if (auths.stream().anyMatch(
-					a -> a.getAuthority().equals("ROLE_ADMINISTRADOR") || a.getAuthority().equals("ADMINISTRADOR"))) {
+			if (auths.stream()
+				.anyMatch(a -> a.getAuthority().equals("ROLE_ADMINISTRADOR")
+						|| a.getAuthority().equals("ADMINISTRADOR"))) {
 				return "redirect:/admin";
 			}
-			if (auths.stream().anyMatch(a -> a.getAuthority().equals("ROLE_CONTRATISTA") || a.getAuthority().equals("CONTRATISTA"))) {
-                return "redirect:/constructor";
-            }
-			if (auths.stream().anyMatch(a -> a.getAuthority().equals("ROLE_SUPERVISOR") || a.getAuthority().equals("SUPERVISOR"))) {
-                return "redirect:/supervisor";
-            }
-			if (auths.stream().anyMatch(a -> a.getAuthority().equals("ROLE_CENTRAL") || a.getAuthority().equals("CENTRAL"))) {
-                return "redirect:/central";
-            }
-			if (auths.stream().anyMatch(a -> a.getAuthority().equals("ROLE_DIRECCION") || a.getAuthority().equals("DIRECCION"))) {
-                return "redirect:/direccion";
-            }
-			
+			if (auths.stream()
+				.anyMatch(a -> a.getAuthority().equals("ROLE_CONTRATISTA") || a.getAuthority().equals("CONTRATISTA"))) {
+				return "redirect:/constructor";
+			}
+			if (auths.stream()
+				.anyMatch(a -> a.getAuthority().equals("ROLE_SUPERVISOR") || a.getAuthority().equals("SUPERVISOR"))) {
+				return "redirect:/supervisor";
+			}
+			if (auths.stream()
+				.anyMatch(a -> a.getAuthority().equals("ROLE_CENTRAL") || a.getAuthority().equals("CENTRAL"))) {
+				return "redirect:/central";
+			}
+			if (auths.stream()
+				.anyMatch(a -> a.getAuthority().equals("ROLE_DIRECCION") || a.getAuthority().equals("DIRECCION"))) {
+				return "redirect:/direccion";
+			}
+
 			// Por defecto, si el rol no coincide con ninguno, lo mandamos a la raíz.
-            return "redirect:/";
+			return "redirect:/";
 		}
-		// Si llega aquí, es porque NO tiene sesión activa, así que le mostramos el formulario
+		// Si llega aquí, es porque NO tiene sesión activa, así que le mostramos el
+		// formulario
 		return "login/login"; // templates/login/login.html
 	}
+
 }

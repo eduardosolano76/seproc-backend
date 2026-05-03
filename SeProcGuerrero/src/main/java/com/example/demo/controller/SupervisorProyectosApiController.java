@@ -29,8 +29,11 @@ import com.example.demo.service.SeguridadService;
 public class SupervisorProyectosApiController {
 
 	private final ProyectoRepository proyectoRepo;
+
 	private final UsuarioRepository usuarioRepo;
+
 	private final ProyectoEtapaService proyectoEtapaService;
+
 	private final SeguridadService seguridadService;
 
 	public SupervisorProyectosApiController(ProyectoRepository proyectoRepo, UsuarioRepository usuarioRepo,
@@ -53,27 +56,27 @@ public class SupervisorProyectosApiController {
 		Institucion miInstitucion = seguridadService.getInstitucionActual();
 
 		var items = proyectoRepo
-				.findByInstitucionAndIdUsuarioSupervisorAndEstadoProyectoOrderByFechaAprobacionDesc(miInstitucion,
-						supervisorId, estado.toUpperCase())
-				.stream().map(p -> {
-					SolicitudProyecto s = p.getSolicitud();
-					var constructor = usuarioRepo.findById(s.getIdUsuarioContratista()).orElse(null);
+			.findByInstitucionAndIdUsuarioSupervisorAndEstadoProyectoOrderByFechaAprobacionDesc(miInstitucion,
+					supervisorId, estado.toUpperCase())
+			.stream()
+			.map(p -> {
+				SolicitudProyecto s = p.getSolicitud();
+				var constructor = usuarioRepo.findById(s.getIdUsuarioContratista()).orElse(null);
 
-					return new HashMap<String, Object>() {
-						{
-							put("idProyecto", p.getIdProyecto());
-							put("idSolicitud", s.getIdSolicitud());
-							put("nombreEscuela", s.getNombreEscuela());
-							put("constructor",
-									constructor != null ? (constructor.getNombre() + " " + constructor.getApellido())
-											: "—");
-							put("fechaAprobacion", p.getFechaAprobacion() != null
-									? p.getFechaAprobacion().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))
-									: "");
-							put("estadoProyecto", p.getEstadoProyecto());
-						}
-					};
-				}).toList();
+				return new HashMap<String, Object>() {
+					{
+						put("idProyecto", p.getIdProyecto());
+						put("idSolicitud", s.getIdSolicitud());
+						put("nombreEscuela", s.getNombreEscuela());
+						put("constructor", constructor != null
+								? (constructor.getNombre() + " " + constructor.getApellido()) : "—");
+						put("fechaAprobacion", p.getFechaAprobacion() != null
+								? p.getFechaAprobacion().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")) : "");
+						put("estadoProyecto", p.getEstadoProyecto());
+					}
+				};
+			})
+			.toList();
 
 		return ResponseEntity.ok(items);
 	}
@@ -113,10 +116,8 @@ public class SupervisorProyectosApiController {
 		dto.put("idProyecto", p.getIdProyecto());
 		dto.put("idSolicitud", s.getIdSolicitud());
 		dto.put("estadoProyecto", p.getEstadoProyecto());
-		dto.put("fechaAprobacion",
-				p.getFechaAprobacion() != null
-						? p.getFechaAprobacion().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))
-						: null);
+		dto.put("fechaAprobacion", p.getFechaAprobacion() != null
+				? p.getFechaAprobacion().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")) : null);
 
 		dto.put("quienEnvia", constructor != null ? (constructor.getNombre() + " " + constructor.getApellido()) : "—");
 
@@ -266,4 +267,5 @@ public class SupervisorProyectosApiController {
 
 		return ResponseEntity.ok(historial);
 	}
+
 }

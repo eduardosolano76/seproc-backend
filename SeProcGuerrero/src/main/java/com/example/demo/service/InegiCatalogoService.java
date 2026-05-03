@@ -13,47 +13,50 @@ import java.util.List;
 @Service
 public class InegiCatalogoService {
 
-    private final RestTemplate restTemplate;
-    private final ObjectMapper objectMapper;
+	private final RestTemplate restTemplate;
 
-    public InegiCatalogoService() {
-        this.restTemplate = new RestTemplate();
-        this.objectMapper = new ObjectMapper();
-    }
+	private final ObjectMapper objectMapper;
 
-    public List<InegiMunicipioDto> obtenerMunicipiosDeGuerrero() {
-        String url = "https://gaia.inegi.org.mx/wscatgeo/v2/mgem/12";
-        return extraerLista(url, InegiMunicipioDto.class);
-    }
+	public InegiCatalogoService() {
+		this.restTemplate = new RestTemplate();
+		this.objectMapper = new ObjectMapper();
+	}
 
-    public List<InegiLocalidadDto> obtenerLocalidadesDeMunicipio(String cveMunicipio) {
-        String url = "https://gaia.inegi.org.mx/wscatgeo/v2/localidades/12/" + cveMunicipio;
-        return extraerLista(url, InegiLocalidadDto.class);
-    }
+	public List<InegiMunicipioDto> obtenerMunicipiosDeGuerrero() {
+		String url = "https://gaia.inegi.org.mx/wscatgeo/v2/mgem/12";
+		return extraerLista(url, InegiMunicipioDto.class);
+	}
 
-    private <T> List<T> extraerLista(String url, Class<T> clazz) {
-        try {
-            String json = restTemplate.getForObject(url, String.class);
+	public List<InegiLocalidadDto> obtenerLocalidadesDeMunicipio(String cveMunicipio) {
+		String url = "https://gaia.inegi.org.mx/wscatgeo/v2/localidades/12/" + cveMunicipio;
+		return extraerLista(url, InegiLocalidadDto.class);
+	}
 
-            if (json == null || json.isBlank()) {
-                return List.of();
-            }
+	private <T> List<T> extraerLista(String url, Class<T> clazz) {
+		try {
+			String json = restTemplate.getForObject(url, String.class);
 
-            JsonNode root = objectMapper.readTree(json);
-            JsonNode datos = root.get("datos");
+			if (json == null || json.isBlank()) {
+				return List.of();
+			}
 
-            if (datos == null || !datos.isArray()) {
-                return List.of();
-            }
+			JsonNode root = objectMapper.readTree(json);
+			JsonNode datos = root.get("datos");
 
-            List<T> resultado = new ArrayList<>();
-            for (JsonNode item : datos) {
-                resultado.add(objectMapper.treeToValue(item, clazz));
-            }
-            return resultado;
+			if (datos == null || !datos.isArray()) {
+				return List.of();
+			}
 
-        } catch (Exception e) {
-            throw new RuntimeException("Error al consumir INEGI: " + url, e);
-        }
-    }
+			List<T> resultado = new ArrayList<>();
+			for (JsonNode item : datos) {
+				resultado.add(objectMapper.treeToValue(item, clazz));
+			}
+			return resultado;
+
+		}
+		catch (Exception e) {
+			throw new RuntimeException("Error al consumir INEGI: " + url, e);
+		}
+	}
+
 }

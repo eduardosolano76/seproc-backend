@@ -27,9 +27,13 @@ import com.example.demo.service.SeguridadService;
 public class CentralSolicitudesApiController {
 
 	private final SolicitudProyectoRepository solRepo;
+
 	private final UsuarioRepository usuarioRepo;
+
 	private final ProyectoRepository proyectoRepo;
+
 	private final ProyectoEtapaService proyectoEtapaService;
+
 	private final SeguridadService seguridadService;
 
 	public CentralSolicitudesApiController(SolicitudProyectoRepository solRepo, UsuarioRepository usuarioRepo,
@@ -50,20 +54,19 @@ public class CentralSolicitudesApiController {
 		}
 
 		var s = solOpt.get();
-		
+
 		Institucion miInstitucion = seguridadService.getInstitucionActual();
-        if (miInstitucion != null && !s.getInstitucion().getIdInstitucion().equals(miInstitucion.getIdInstitucion())) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Acceso denegado a esta solicitud.");
-        }
-		
+		if (miInstitucion != null && !s.getInstitucion().getIdInstitucion().equals(miInstitucion.getIdInstitucion())) {
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Acceso denegado a esta solicitud.");
+		}
+
 		SolicitudDetalleDto dto = new SolicitudDetalleDto();
 		dto.idSolicitud = s.getIdSolicitud();
 		dto.estadoSolicitud = s.getEstadoSolicitud();
 		dto.motivoRechazo = s.getMotivoRechazo();
 
 		dto.fechaSolicitud = s.getFechaSolicitud() != null
-				? s.getFechaSolicitud().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))
-				: null;
+				? s.getFechaSolicitud().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")) : null;
 
 		var uEnv = usuarioRepo.findById(s.getIdUsuarioContratista()).orElse(null);
 		dto.quienEnvia = (uEnv != null) ? (uEnv.getNombre() + " " + uEnv.getApellido()) : "—";
@@ -87,12 +90,13 @@ public class CentralSolicitudesApiController {
 		dto.tipoObra = s.getTipoObra();
 		dto.tipoEdificacion = s.getTipoEdificacion() != null ? s.getTipoEdificacion().getNombre() : "";
 
-		var p = proyectoRepo.findByInstitucionAndSolicitud_IdSolicitud(miInstitucion,id).orElse(null);
+		var p = proyectoRepo.findByInstitucionAndSolicitud_IdSolicitud(miInstitucion, id).orElse(null);
 
 		if (p != null && p.getIdUsuarioSupervisor() != null) {
 			var sup = usuarioRepo.findById(p.getIdUsuarioSupervisor()).orElse(null);
 			dto.supervisorAsignado = sup != null ? (sup.getNombre() + " " + sup.getApellido()) : "—";
-		} else {
+		}
+		else {
 			dto.supervisorAsignado = null;
 		}
 
@@ -102,23 +106,25 @@ public class CentralSolicitudesApiController {
 	@GetMapping
 	public ResponseEntity<?> listar(@RequestParam("estado") String estado) {
 		Institucion miInstitucion = seguridadService.getInstitucionActual();
-		
-		var items = solRepo.findByInstitucionAndEstadoSolicitudOrderByFechaSolicitudDesc(miInstitucion,estado.toUpperCase()).stream().map(s -> {
-			var u = usuarioRepo.findById(s.getIdUsuarioContratista()).orElse(null);
 
-			return new java.util.HashMap<String, Object>() {
-				{
-					put("idSolicitud", s.getIdSolicitud());
-					put("nombreEscuela", s.getNombreEscuela());
-					put("constructor", u != null ? (u.getNombre() + " " + u.getApellido()) : "—");
-					put("fechaSolicitud",
-							s.getFechaSolicitud() != null
-									? s.getFechaSolicitud().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))
-									: "");
-					put("estadoSolicitud", s.getEstadoSolicitud());
-				}
-			};
-		}).toList();
+		var items = solRepo
+			.findByInstitucionAndEstadoSolicitudOrderByFechaSolicitudDesc(miInstitucion, estado.toUpperCase())
+			.stream()
+			.map(s -> {
+				var u = usuarioRepo.findById(s.getIdUsuarioContratista()).orElse(null);
+
+				return new java.util.HashMap<String, Object>() {
+					{
+						put("idSolicitud", s.getIdSolicitud());
+						put("nombreEscuela", s.getNombreEscuela());
+						put("constructor", u != null ? (u.getNombre() + " " + u.getApellido()) : "—");
+						put("fechaSolicitud", s.getFechaSolicitud() != null
+								? s.getFechaSolicitud().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")) : "");
+						put("estadoSolicitud", s.getEstadoSolicitud());
+					}
+				};
+			})
+			.toList();
 
 		return ResponseEntity.ok(items);
 	}
@@ -126,14 +132,16 @@ public class CentralSolicitudesApiController {
 	@GetMapping("/supervisores")
 	public ResponseEntity<?> supervisores() {
 		Institucion miInstitucion = seguridadService.getInstitucionActual();
-		
-		var list = usuarioRepo.findByInstitucionAndRol_NombreIgnoreCase(miInstitucion,"supervisor").stream()
-				.map(u -> new java.util.HashMap<String, Object>() {
-					{
-						put("id", u.getIdUsuario());
-						put("nombre", u.getNombre() + " " + u.getApellido());
-					}
-				}).toList();
+
+		var list = usuarioRepo.findByInstitucionAndRol_NombreIgnoreCase(miInstitucion, "supervisor")
+			.stream()
+			.map(u -> new java.util.HashMap<String, Object>() {
+				{
+					put("id", u.getIdUsuario());
+					put("nombre", u.getNombre() + " " + u.getApellido());
+				}
+			})
+			.toList();
 
 		return ResponseEntity.ok(list);
 	}
@@ -148,10 +156,10 @@ public class CentralSolicitudesApiController {
 
 		var s = solOpt.get();
 		Institucion miInstitucion = seguridadService.getInstitucionActual();
-		
+
 		if (miInstitucion != null && !s.getInstitucion().getIdInstitucion().equals(miInstitucion.getIdInstitucion())) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Acceso denegado.");
-        }
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Acceso denegado.");
+		}
 		if (!"PENDIENTE".equalsIgnoreCase(s.getEstadoSolicitud())) {
 			return ResponseEntity.badRequest().body("Solo se puede aprobar si está PENDIENTE");
 		}
@@ -159,10 +167,10 @@ public class CentralSolicitudesApiController {
 		if (proyectoRepo.existsByInstitucionAndSolicitud_IdSolicitud(miInstitucion, id)) {
 			return ResponseEntity.badRequest().body("Ya existe un proyecto para esta solicitud");
 		}
-		
+
 		if (proyectoRepo.existsByInstitucionAndSolicitud_IdSolicitud(miInstitucion, id)) {
-            return ResponseEntity.badRequest().body("Ya existe un proyecto para esta solicitud");
-        }
+			return ResponseEntity.badRequest().body("Ya existe un proyecto para esta solicitud");
+		}
 
 		var central = usuarioRepo.findByUsername(auth.getName()).orElse(null);
 		if (central == null) {
@@ -179,7 +187,7 @@ public class CentralSolicitudesApiController {
 		p.setSolicitud(s);
 		p.setIdUsuarioSupervisor(supervisorId);
 		p.setEstadoProyecto("ACTIVO");
-		
+
 		p.setInstitucion(miInstitucion);
 
 		Proyecto proyectoGuardado = proyectoRepo.save(p);
@@ -202,10 +210,10 @@ public class CentralSolicitudesApiController {
 
 		var s = solOpt.get();
 		Institucion miInstitucion = seguridadService.getInstitucionActual();
-		
+
 		if (miInstitucion != null && !s.getInstitucion().getIdInstitucion().equals(miInstitucion.getIdInstitucion())) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Acceso denegado.");
-        }
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Acceso denegado.");
+		}
 
 		if (!"PENDIENTE".equalsIgnoreCase(s.getEstadoSolicitud())) {
 			return ResponseEntity.badRequest().body("Solo se puede rechazar si está PENDIENTE");
@@ -224,4 +232,5 @@ public class CentralSolicitudesApiController {
 
 		return ResponseEntity.ok("OK");
 	}
+
 }

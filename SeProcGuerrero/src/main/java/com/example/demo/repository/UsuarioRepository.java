@@ -16,22 +16,23 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
 	@Query("SELECT u FROM Usuario u WHERE u.username = :username")
 	Optional<Usuario> findByUsername(@Param("username") String username);
 
-    // Validaciones de registro (evita duplicados globales)
+	// Validaciones de registro (evita duplicados globales)
 	boolean existsByUsername(String username);
+
 	boolean existsByEmail(String email);
 
 	// -- Metodos multitenant (Con institucion obligatoria) --
-	
-	// Busca usuarios de una institución específica y con un rol específico 
+
+	// Busca usuarios de una institución específica y con un rol específico
 	List<Usuario> findByInstitucionAndRol_NombreIgnoreCase(Institucion institucion, String nombreRol);
-    
-    // Busca las solicitudes de registro pendientes DE ESA INSTITUCIÓN
-    List<Usuario> findByInstitucionAndActivoFalse(Institucion institucion);
-    
-    // Busca usuarios aprobados por rol DE ESA INSTITUCIÓN
-    List<Usuario> findByInstitucionAndActivoTrueAndRol_NombreIgnoreCase(Institucion institucion, String nombreRol);
-    
-    // Para listar a todos los usuarios de la empresa
-    List<Usuario> findByInstitucion(Institucion institucion);
+
+	// Busca las solicitudes de registro pendientes DE ESA INSTITUCIÓN
+	List<Usuario> findByInstitucionAndActivoFalse(Institucion institucion);
+
+	// Busca usuarios aprobados por rol DE ESA INSTITUCIÓN
+	List<Usuario> findByInstitucionAndActivoTrueAndRol_NombreIgnoreCase(Institucion institucion, String nombreRol);
+
+	// Para listar a todos los usuarios de la empresa
+	List<Usuario> findByInstitucion(Institucion institucion);
 
 }

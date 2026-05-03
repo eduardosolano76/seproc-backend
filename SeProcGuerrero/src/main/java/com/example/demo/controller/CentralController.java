@@ -29,8 +29,11 @@ import com.example.demo.storage.StorageService;
 public class CentralController {
 
 	private final UsuarioRepository usuarioRepo;
+
 	private final StorageService storageService;
+
 	private final PasswordEncoder passwordEncoder;
+
 	private final SeguridadService seguridadService;
 
 	public CentralController(UsuarioRepository usuarioRepo, StorageService storageService,
@@ -42,70 +45,75 @@ public class CentralController {
 	}
 
 	@GetMapping("/central")
-    public String central(
-            Model model,
-            Principal principal,
-            @RequestParam(value = "view", required = false, defaultValue = "solicitudes") String view,
-            @RequestHeader(value = "X-Requested-With", required = false) String requestedWith
-    ) {
+	public String central(Model model, Principal principal,
+			@RequestParam(value = "view", required = false, defaultValue = "solicitudes") String view,
+			@RequestHeader(value = "X-Requested-With", required = false) String requestedWith) {
 
-        String username = principal.getName();
-        var usuario = usuarioRepo.findByUsername(username).orElse(null);
+		String username = principal.getName();
+		var usuario = usuarioRepo.findByUsername(username).orElse(null);
 
-        if (usuario != null) {
-            model.addAttribute("nombreUsuario", usuario.getNombre());
-            String rol = (usuario.getRol() != null) ? usuario.getRol().getNombre() : "sin rol";
-            model.addAttribute("rolUsuario", rol);
-            model.addAttribute("fotoUrl", storageService.publicUrl(usuario.getFoto()));
-            
-            // Pasamos los datos de la institución a la vista para que el menú lateral cargue su logo
-            Institucion miInstitucion = usuario.getInstitucion();
-            if (miInstitucion != null) {
-                model.addAttribute("logoEmpresa", miInstitucion.getLogoUrl());
-                model.addAttribute("nombreEmpresa", miInstitucion.getAbreviacion());
-            } else {
-                model.addAttribute("logoEmpresa", "/assets/iconos/logoIgife.jpg"); // Fallback de seguridad
-                model.addAttribute("nombreEmpresa", "SEPROC");
-            }
-            
-        } else {
-            model.addAttribute("nombreUsuario", username);
-            model.addAttribute("rolUsuario", "sin rol");
-            model.addAttribute("fotoUrl", null);
-            model.addAttribute("logoEmpresa", "/assets/iconos/logoIgife.jpg");
-            model.addAttribute("nombreEmpresa", "SEPROC");
-        }
+		if (usuario != null) {
+			model.addAttribute("nombreUsuario", usuario.getNombre());
+			String rol = (usuario.getRol() != null) ? usuario.getRol().getNombre() : "sin rol";
+			model.addAttribute("rolUsuario", rol);
+			model.addAttribute("fotoUrl", storageService.publicUrl(usuario.getFoto()));
 
-        model.addAttribute("view", view);
-        
-        List<Usuario> usuarios = List.of();
-        Institucion institucionActual = seguridadService.getInstitucionActual();
+			// Pasamos los datos de la institución a la vista para que el menú lateral
+			// cargue su logo
+			Institucion miInstitucion = usuario.getInstitucion();
+			if (miInstitucion != null) {
+				model.addAttribute("logoEmpresa", miInstitucion.getLogoUrl());
+				model.addAttribute("nombreEmpresa", miInstitucion.getAbreviacion());
+			}
+			else {
+				model.addAttribute("logoEmpresa", "/assets/iconos/logoIgife.jpg"); // Fallback
+																					// de
+																					// seguridad
+				model.addAttribute("nombreEmpresa", "SEPROC");
+			}
 
-        if (institucionActual != null) {
-            switch (view) {
-                case "usuarios-supervisores":
-                    usuarios = usuarioRepo.findByInstitucionAndActivoTrueAndRol_NombreIgnoreCase(institucionActual, "supervisor");
-                    break;
-                case "usuarios-constructores":
-                    usuarios = usuarioRepo.findByInstitucionAndActivoTrueAndRol_NombreIgnoreCase(institucionActual, "contratista");
-                    break;
-                case "usuarios-directores":
-                    usuarios = usuarioRepo.findByInstitucionAndActivoTrueAndRol_NombreIgnoreCase(institucionActual, "direccion");
-                    break;
-                default:
-                    break;
-            }
-        }
+		}
+		else {
+			model.addAttribute("nombreUsuario", username);
+			model.addAttribute("rolUsuario", "sin rol");
+			model.addAttribute("fotoUrl", null);
+			model.addAttribute("logoEmpresa", "/assets/iconos/logoIgife.jpg");
+			model.addAttribute("nombreEmpresa", "SEPROC");
+		}
 
-        model.addAttribute("usuarios", usuarios);
+		model.addAttribute("view", view);
 
-        boolean isAjax = "XMLHttpRequest".equalsIgnoreCase(requestedWith);
-        if (isAjax && view != null && view.startsWith("usuarios-")) {
-            return "central/_usuarios :: usuariosContent";
-        }
+		List<Usuario> usuarios = List.of();
+		Institucion institucionActual = seguridadService.getInstitucionActual();
 
-        return "central/central";
-    }
+		if (institucionActual != null) {
+			switch (view) {
+				case "usuarios-supervisores":
+					usuarios = usuarioRepo.findByInstitucionAndActivoTrueAndRol_NombreIgnoreCase(institucionActual,
+							"supervisor");
+					break;
+				case "usuarios-constructores":
+					usuarios = usuarioRepo.findByInstitucionAndActivoTrueAndRol_NombreIgnoreCase(institucionActual,
+							"contratista");
+					break;
+				case "usuarios-directores":
+					usuarios = usuarioRepo.findByInstitucionAndActivoTrueAndRol_NombreIgnoreCase(institucionActual,
+							"direccion");
+					break;
+				default:
+					break;
+			}
+		}
+
+		model.addAttribute("usuarios", usuarios);
+
+		boolean isAjax = "XMLHttpRequest".equalsIgnoreCase(requestedWith);
+		if (isAjax && view != null && view.startsWith("usuarios-")) {
+			return "central/_usuarios :: usuariosContent";
+		}
+
+		return "central/central";
+	}
 
 	@PostMapping("/central/perfil/password")
 	@ResponseBody
@@ -158,9 +166,11 @@ public class CentralController {
 
 			String url = storageService.publicUrl(key);
 			return ResponseEntity.ok(Map.of("url", url));
-		} catch (IllegalArgumentException e) {
+		}
+		catch (IllegalArgumentException e) {
 			return ResponseEntity.badRequest().body(e.getMessage());
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("No se pudo subir la foto.");
 		}
 	}
@@ -197,6 +207,7 @@ public class CentralController {
 		}
 
 		return ResponseEntity
-				.ok(Map.of("message", "Foto eliminada correctamente", "url", "/assets/iconos/sinFotoPerfil.png"));
+			.ok(Map.of("message", "Foto eliminada correctamente", "url", "/assets/iconos/sinFotoPerfil.png"));
 	}
+
 }

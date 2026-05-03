@@ -9,16 +9,15 @@ import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
-public class WebConfig implements WebMvcConfigurer{
-	
-    @Value("${app.storage.base-path:uploads}")
-    private String basePath;
+public class WebConfig implements WebMvcConfigurer {
 
-    @Override
-    public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        Path uploadDir = Paths.get(basePath).toAbsolutePath().normalize();
-        registry.addResourceHandler("/uploads/**")
-                .addResourceLocations("file:" + uploadDir.toString() + "/");
-    }
+	@Value("${app.storage.base-path:uploads}")
+	private String basePath;
+
+	@Override
+	public void addResourceHandlers(ResourceHandlerRegistry registry) {
+		Path uploadDir = Paths.get(basePath).toAbsolutePath().normalize();
+		registry.addResourceHandler("/uploads/**").addResourceLocations("file:" + uploadDir.toString() + "/");
+	}
 
 }

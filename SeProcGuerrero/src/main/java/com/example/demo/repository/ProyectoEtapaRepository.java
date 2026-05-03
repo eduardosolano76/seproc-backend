@@ -13,26 +13,21 @@ import com.example.demo.modelo.ProyectoEtapa;
 @Repository
 public interface ProyectoEtapaRepository extends JpaRepository<ProyectoEtapa, Long> {
 
-    List<ProyectoEtapa> findByProyecto_IdProyectoOrderByOrdenVisualAsc(Integer idProyecto);
+	List<ProyectoEtapa> findByProyecto_IdProyectoOrderByOrdenVisualAsc(Integer idProyecto);
 
-    Optional<ProyectoEtapa> findByProyecto_IdProyectoAndEtapaPlantilla_ClaveInternaAndNumeroNivel(Integer idProyecto,
-                                                                                                  String claveInterna,
-                                                                                                  Integer numeroNivel);
+	Optional<ProyectoEtapa> findByProyecto_IdProyectoAndEtapaPlantilla_ClaveInternaAndNumeroNivel(Integer idProyecto,
+			String claveInterna, Integer numeroNivel);
 
-    Optional<ProyectoEtapa> findByProyecto_IdProyectoAndEtapaPlantilla_ClaveInternaAndNumeroNivelIsNull(Integer idProyecto,
-                                                                                                          String claveInterna);
+	Optional<ProyectoEtapa> findByProyecto_IdProyectoAndEtapaPlantilla_ClaveInternaAndNumeroNivelIsNull(
+			Integer idProyecto, String claveInterna);
 
-    Optional<ProyectoEtapa> findFirstByProyecto_IdProyectoAndOrdenVisualGreaterThanAndEstadoOrderByOrdenVisualAsc(Integer idProyecto,
-                                                                                                                   Integer ordenVisual,
-                                                                                                                   String estado);
-    
-    @Query("SELECT pe FROM ProyectoEtapa pe " +
-    	       "JOIN pe.etapaPlantilla ep " +
-    	       "WHERE pe.proyecto.idProyecto = :idProyecto " +
-    	       "AND ep.claveInterna = :claveInterna " +
-    	       "AND (pe.numeroNivel = :numeroNivel OR (pe.numeroNivel IS NULL AND :numeroNivel IS NULL))")
-    	Optional<ProyectoEtapa> findByClaveInternaAndNivel(
-    	        @Param("idProyecto") Integer idProyecto, 
-    	        @Param("claveInterna") String claveInterna, 
-    	        @Param("numeroNivel") Integer numeroNivel);
+	Optional<ProyectoEtapa> findFirstByProyecto_IdProyectoAndOrdenVisualGreaterThanAndEstadoOrderByOrdenVisualAsc(
+			Integer idProyecto, Integer ordenVisual, String estado);
+
+	@Query("SELECT pe FROM ProyectoEtapa pe " + "JOIN pe.etapaPlantilla ep "
+			+ "WHERE pe.proyecto.idProyecto = :idProyecto " + "AND ep.claveInterna = :claveInterna "
+			+ "AND (pe.numeroNivel = :numeroNivel OR (pe.numeroNivel IS NULL AND :numeroNivel IS NULL))")
+	Optional<ProyectoEtapa> findByClaveInternaAndNivel(@Param("idProyecto") Integer idProyecto,
+			@Param("claveInterna") String claveInterna, @Param("numeroNivel") Integer numeroNivel);
+
 }

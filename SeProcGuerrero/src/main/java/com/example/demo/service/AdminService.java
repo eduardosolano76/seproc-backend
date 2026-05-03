@@ -17,7 +17,9 @@ public class AdminService {
 
 	// Inyección de dependencias a través del constructor
 	private final UsuarioRepository usuarioRepo;
+
 	private final RolRepository rolRepo;
+
 	private final SeguridadService seguridadService;
 
 	// Constructor para inyectar las dependencias
@@ -37,7 +39,7 @@ public class AdminService {
 	// Método para aprobar un usuario, asignándole un rol y activándolo
 	public void aprobarUsuario(Long id, String rolNombre) {
 		Usuario usuario = usuarioRepo.findById(id)
-				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado."));
+			.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado."));
 
 		Institucion miInstitucion = seguridadService.getInstitucionActual();
 		if (miInstitucion != null
@@ -47,7 +49,7 @@ public class AdminService {
 		}
 
 		Rol rol = rolRepo.findByNombre(rolNombre)
-				.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Rol no válido."));
+			.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Rol no válido."));
 
 		usuario.setRol(rol);
 		usuario.setActivo(true);
@@ -59,7 +61,7 @@ public class AdminService {
 	// validación para no eliminar al admin
 	public void rechazarUsuario(Long id) {
 		Usuario usuario = usuarioRepo.findById(id)
-				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado."));
+			.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado."));
 
 		Institucion miInstitucion = seguridadService.getInstitucionActual();
 		if (miInstitucion != null
@@ -74,4 +76,5 @@ public class AdminService {
 
 		usuarioRepo.deleteById(id);
 	}
+
 }

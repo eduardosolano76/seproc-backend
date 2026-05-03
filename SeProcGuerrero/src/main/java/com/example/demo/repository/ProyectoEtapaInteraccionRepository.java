@@ -7,7 +7,8 @@ import java.util.List;
 
 public interface ProyectoEtapaInteraccionRepository extends JpaRepository<ProyectoEtapaInteraccion, Integer> {
 
-    List<ProyectoEtapaInteraccion> findByProyectoEtapa_IdProyectoEtapaOrderByFechaInteraccionDesc(Long idProyectoEtapa);
+	List<ProyectoEtapaInteraccion> findByProyectoEtapa_IdProyectoEtapaOrderByFechaInteraccionDesc(Long idProyectoEtapa);
 
-    List<ProyectoEtapaInteraccion> findByProyectoEtapa_IdProyectoEtapaOrderByFechaInteraccionAsc(Long idProyectoEtapa);
+	List<ProyectoEtapaInteraccion> findByProyectoEtapa_IdProyectoEtapaOrderByFechaInteraccionAsc(Long idProyectoEtapa);
+
 }

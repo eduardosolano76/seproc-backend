@@ -21,57 +21,57 @@ import jakarta.validation.Valid;
 @RequestMapping("/registro")
 public class RegistroController {
 
-    private final UsuarioRepository usuarioRepo;
-    private final PasswordEncoder encoder;
+	private final UsuarioRepository usuarioRepo;
 
-    public RegistroController(UsuarioRepository usuarioRepo, PasswordEncoder encoder) {
-        this.usuarioRepo = usuarioRepo;
-        this.encoder = encoder;
-    }
+	private final PasswordEncoder encoder;
 
-    // Formulario
-    @GetMapping
-    public String form(Model model) {
-        model.addAttribute("registro", new RegistroDto());
-        return "registro/registro";
-    }
+	public RegistroController(UsuarioRepository usuarioRepo, PasswordEncoder encoder) {
+		this.usuarioRepo = usuarioRepo;
+		this.encoder = encoder;
+	}
 
-    // Guardar registro como PENDIENTE (activo=false, sin rol)
-    @PostMapping
-    public String registrar(@Valid @ModelAttribute("registro") RegistroDto dto,
-                            BindingResult br,
-                            Model model) {
+	// Formulario
+	@GetMapping
+	public String form(Model model) {
+		model.addAttribute("registro", new RegistroDto());
+		return "registro/registro";
+	}
 
-        if (usuarioRepo.existsByUsername(dto.getUsername())) {
-            br.rejectValue("username", "username.duplicado", "Ese username ya está registrado.");
-        }
-        if (usuarioRepo.existsByEmail(dto.getEmail())) {
-            br.rejectValue("email", "email.duplicado", "Ese correo ya está registrado.");
-        }
+	// Guardar registro como PENDIENTE (activo=false, sin rol)
+	@PostMapping
+	public String registrar(@Valid @ModelAttribute("registro") RegistroDto dto, BindingResult br, Model model) {
 
-        if (br.hasErrors()) {
-            return "registro/registro";
-        }
+		if (usuarioRepo.existsByUsername(dto.getUsername())) {
+			br.rejectValue("username", "username.duplicado", "Ese username ya está registrado.");
+		}
+		if (usuarioRepo.existsByEmail(dto.getEmail())) {
+			br.rejectValue("email", "email.duplicado", "Ese correo ya está registrado.");
+		}
 
-        Usuario u = new Usuario();
-        u.setUsername(dto.getUsername());
-        u.setPassword(encoder.encode(dto.getPassword()));
-        u.setNombre(dto.getNombre());
-        u.setApellido(dto.getApellido());
-        u.setEmail(dto.getEmail());
-        u.setFechaRegistro(LocalDate.now());
+		if (br.hasErrors()) {
+			return "registro/registro";
+		}
 
-        // IMPORTANTE: queda pendiente
-        u.setActivo(false);
-        u.setRol(null); // el admin lo asigna al aprobar
+		Usuario u = new Usuario();
+		u.setUsername(dto.getUsername());
+		u.setPassword(encoder.encode(dto.getPassword()));
+		u.setNombre(dto.getNombre());
+		u.setApellido(dto.getApellido());
+		u.setEmail(dto.getEmail());
+		u.setFechaRegistro(LocalDate.now());
 
-        usuarioRepo.save(u);
+		// IMPORTANTE: queda pendiente
+		u.setActivo(false);
+		u.setRol(null); // el admin lo asigna al aprobar
 
-        return "redirect:/registro/exito";
-    }
+		usuarioRepo.save(u);
 
-    @GetMapping("/exito")
-    public String exito() {
-        return "registro/registro-exito";
-    }
+		return "redirect:/registro/exito";
+	}
+
+	@GetMapping("/exito")
+	public String exito() {
+		return "registro/registro-exito";
+	}
+
 }

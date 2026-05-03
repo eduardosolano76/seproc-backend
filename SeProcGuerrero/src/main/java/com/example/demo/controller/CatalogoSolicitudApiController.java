@@ -12,17 +12,18 @@ import java.util.List;
 @RequestMapping("/api/catalogos")
 public class CatalogoSolicitudApiController {
 
-    private final TipoEdificacionRepository tipoEdificacionRepository;
+	private final TipoEdificacionRepository tipoEdificacionRepository;
 
-    public CatalogoSolicitudApiController(TipoEdificacionRepository tipoEdificacionRepository) {
-        this.tipoEdificacionRepository = tipoEdificacionRepository;
-    }
+	public CatalogoSolicitudApiController(TipoEdificacionRepository tipoEdificacionRepository) {
+		this.tipoEdificacionRepository = tipoEdificacionRepository;
+	}
 
-    @GetMapping("/tipos-edificacion")
-    public List<OptionDto> tiposEdificacion() {
-        return tipoEdificacionRepository.findByActivoTrueOrderByNombreAsc()
-                .stream()
-                .map(t -> new OptionDto(t.getIdTipoEdificacion(), t.getNombre()))
-                .toList();
-    }
+	@GetMapping("/tipos-edificacion")
+	public List<OptionDto> tiposEdificacion() {
+		return tipoEdificacionRepository.findByActivoTrueOrderByNombreAsc()
+			.stream()
+			.map(t -> new OptionDto(t.getIdTipoEdificacion(), t.getNombre()))
+			.toList();
+	}
+
 }

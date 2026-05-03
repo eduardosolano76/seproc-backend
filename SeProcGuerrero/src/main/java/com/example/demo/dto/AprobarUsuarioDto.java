@@ -4,9 +4,9 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Getter
-@Setter	
+@Setter
 public class AprobarUsuarioDto {
-	
+
 	private String rolNombre;
 
 }

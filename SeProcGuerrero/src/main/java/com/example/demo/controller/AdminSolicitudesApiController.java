@@ -28,9 +28,13 @@ import com.example.demo.service.SeguridadService;
 public class AdminSolicitudesApiController {
 
 	private final SolicitudProyectoRepository solRepo;
+
 	private final UsuarioRepository usuarioRepo;
+
 	private final ProyectoRepository proyectoRepo;
+
 	private final ProyectoEtapaService proyectoEtapaService;
+
 	private final SeguridadService seguridadService;
 
 	public AdminSolicitudesApiController(SolicitudProyectoRepository solRepo, UsuarioRepository usuarioRepo,
@@ -48,24 +52,23 @@ public class AdminSolicitudesApiController {
 		Institucion miInstitucion = seguridadService.getInstitucionActual();
 
 		var items = solRepo
-				.findByInstitucionAndEstadoSolicitudOrderByFechaSolicitudDesc(miInstitucion, estado.toUpperCase())
-				.stream().map(s -> {
-					var u = usuarioRepo.findById(s.getIdUsuarioContratista()).orElse(null);
+			.findByInstitucionAndEstadoSolicitudOrderByFechaSolicitudDesc(miInstitucion, estado.toUpperCase())
+			.stream()
+			.map(s -> {
+				var u = usuarioRepo.findById(s.getIdUsuarioContratista()).orElse(null);
 
-					return new HashMap<String, Object>() {
-						{
-							put("idSolicitud", s.getIdSolicitud());
-							put("nombreEscuela", s.getNombreEscuela());
-							put("constructor", u != null ? (u.getNombre() + " " + u.getApellido()) : "—");
-							put("fechaSolicitud",
-									s.getFechaSolicitud() != null
-											? s.getFechaSolicitud()
-													.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))
-											: "");
-							put("estadoSolicitud", s.getEstadoSolicitud());
-						}
-					};
-				}).toList();
+				return new HashMap<String, Object>() {
+					{
+						put("idSolicitud", s.getIdSolicitud());
+						put("nombreEscuela", s.getNombreEscuela());
+						put("constructor", u != null ? (u.getNombre() + " " + u.getApellido()) : "—");
+						put("fechaSolicitud", s.getFechaSolicitud() != null
+								? s.getFechaSolicitud().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")) : "");
+						put("estadoSolicitud", s.getEstadoSolicitud());
+					}
+				};
+			})
+			.toList();
 
 		return ResponseEntity.ok(items);
 	}
@@ -88,8 +91,7 @@ public class AdminSolicitudesApiController {
 		dto.estadoSolicitud = s.getEstadoSolicitud();
 		dto.motivoRechazo = s.getMotivoRechazo();
 		dto.fechaSolicitud = s.getFechaSolicitud() != null
-				? s.getFechaSolicitud().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))
-				: null;
+				? s.getFechaSolicitud().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")) : null;
 
 		var uEnv = usuarioRepo.findById(s.getIdUsuarioContratista()).orElse(null);
 		dto.quienEnvia = (uEnv != null) ? (uEnv.getNombre() + " " + uEnv.getApellido()) : "—";
@@ -113,7 +115,8 @@ public class AdminSolicitudesApiController {
 		if (p != null && p.getIdUsuarioSupervisor() != null) {
 			var sup = usuarioRepo.findById(p.getIdUsuarioSupervisor()).orElse(null);
 			dto.supervisorAsignado = sup != null ? (sup.getNombre() + " " + sup.getApellido()) : "—";
-		} else {
+		}
+		else {
 			dto.supervisorAsignado = null;
 		}
 
@@ -124,13 +127,15 @@ public class AdminSolicitudesApiController {
 	public ResponseEntity<?> supervisores() {
 		Institucion miInstitucion = seguridadService.getInstitucionActual();
 
-		var list = usuarioRepo.findByInstitucionAndRol_NombreIgnoreCase(miInstitucion, "supervisor").stream()
-				.map(u -> new HashMap<String, Object>() {
-					{
-						put("id", u.getIdUsuario());
-						put("nombre", u.getNombre() + " " + u.getApellido());
-					}
-				}).toList();
+		var list = usuarioRepo.findByInstitucionAndRol_NombreIgnoreCase(miInstitucion, "supervisor")
+			.stream()
+			.map(u -> new HashMap<String, Object>() {
+				{
+					put("id", u.getIdUsuario());
+					put("nombre", u.getNombre() + " " + u.getApellido());
+				}
+			})
+			.toList();
 
 		return ResponseEntity.ok(list);
 	}
@@ -214,4 +219,5 @@ public class AdminSolicitudesApiController {
 
 		return ResponseEntity.ok("OK");
 	}
+
 }

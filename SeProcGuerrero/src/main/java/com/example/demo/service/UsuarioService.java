@@ -19,8 +19,11 @@ public class UsuarioService {
 
 	// Inyección de dependencias a través del constructor
 	private final UsuarioRepository usuarioRepo;
+
 	private final RolRepository rolRepo;
+
 	private final PasswordEncoder passwordEncoder;
+
 	private final SeguridadService seguridadService;
 
 	// Constructor para inyectar las dependencias
@@ -36,7 +39,7 @@ public class UsuarioService {
 	// encuentra
 	public Usuario obtenerPorId(Long id) {
 		Usuario u = usuarioRepo.findById(id)
-				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado."));
+			.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado."));
 
 		// Verificamos que el usuario que intentan consultar pertenezca a la institución
 		// del administrador logueado
@@ -51,20 +54,22 @@ public class UsuarioService {
 	// Método para listar usuarios activos según la vista solicitada, utilizando un
 	// switch para determinar el rol
 	public List<Usuario> listarUsuariosPorView(String view) {
-		Institucion miInstitucion = seguridadService.getInstitucionActual(); // Obtenemos la institución
+		Institucion miInstitucion = seguridadService.getInstitucionActual(); // Obtenemos
+																				// la
+																				// institución
 
 		return switch (view) {
-		case "usuarios-supervisores" ->
-			usuarioRepo.findByInstitucionAndActivoTrueAndRol_NombreIgnoreCase(miInstitucion, "supervisor");
-		case "usuarios-constructores" ->
-			usuarioRepo.findByInstitucionAndActivoTrueAndRol_NombreIgnoreCase(miInstitucion, "contratista");
-		case "usuarios-directores" ->
-			usuarioRepo.findByInstitucionAndActivoTrueAndRol_NombreIgnoreCase(miInstitucion, "direccion");
-		case "usuarios-central" ->
-			usuarioRepo.findByInstitucionAndActivoTrueAndRol_NombreIgnoreCase(miInstitucion, "central");
-		case "usuarios-administrador" ->
-			usuarioRepo.findByInstitucionAndActivoTrueAndRol_NombreIgnoreCase(miInstitucion, "administrador");
-		default -> List.of();
+			case "usuarios-supervisores" ->
+				usuarioRepo.findByInstitucionAndActivoTrueAndRol_NombreIgnoreCase(miInstitucion, "supervisor");
+			case "usuarios-constructores" ->
+				usuarioRepo.findByInstitucionAndActivoTrueAndRol_NombreIgnoreCase(miInstitucion, "contratista");
+			case "usuarios-directores" ->
+				usuarioRepo.findByInstitucionAndActivoTrueAndRol_NombreIgnoreCase(miInstitucion, "direccion");
+			case "usuarios-central" ->
+				usuarioRepo.findByInstitucionAndActivoTrueAndRol_NombreIgnoreCase(miInstitucion, "central");
+			case "usuarios-administrador" ->
+				usuarioRepo.findByInstitucionAndActivoTrueAndRol_NombreIgnoreCase(miInstitucion, "administrador");
+			default -> List.of();
 		};
 	}
 
@@ -112,7 +117,7 @@ public class UsuarioService {
 
 		if (dto.getRolNombre() != null && !dto.getRolNombre().isBlank()) {
 			Rol rol = rolRepo.findByNombre(dto.getRolNombre())
-					.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Rol no válido."));
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Rol no válido."));
 			u.setRol(rol);
 		}
 
@@ -165,7 +170,7 @@ public class UsuarioService {
 
 		if (dto.getRolNombre() != null && !dto.getRolNombre().isBlank()) {
 			Rol rol = rolRepo.findByNombre(dto.getRolNombre())
-					.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Rol no válido."));
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Rol no válido."));
 			u.setRol(rol);
 		}
 
@@ -184,4 +189,5 @@ public class UsuarioService {
 
 		usuarioRepo.deleteById(id);
 	}
+
 }

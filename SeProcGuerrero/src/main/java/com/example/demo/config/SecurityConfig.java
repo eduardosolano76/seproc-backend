@@ -14,63 +14,70 @@ import com.example.demo.security.RoleRedirectSuccessHandler;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    @Bean
-    SecurityFilterChain securityFilterChain(
-            HttpSecurity http,
-            RoleRedirectSuccessHandler successHandler
-    ) throws Exception {
+	@Bean
+	SecurityFilterChain securityFilterChain(HttpSecurity http, RoleRedirectSuccessHandler successHandler)
+			throws Exception {
 
-        http
-            .authorizeHttpRequests(auth -> auth
-                // ESTÁTICOS
-                .requestMatchers("/assets/**","/css/**","/js/**","/images/**","/static/**","/uploads/**").permitAll()
+		http.authorizeHttpRequests(auth -> auth
+			// ESTÁTICOS
+			.requestMatchers("/assets/**", "/css/**", "/js/**", "/images/**", "/static/**", "/uploads/**")
+			.permitAll()
 
-                // PÚBLICOS
-                .requestMatchers("/login","/auth/**","/public/**","/registro/**").permitAll()
+			// PÚBLICOS
+			.requestMatchers("/login", "/auth/**", "/public/**", "/registro/**", "/seproc/**")
+			.permitAll()
 
-             // MÓDULOS POR ROL
-                .requestMatchers("/admin", "/admin/**").hasRole("ADMINISTRADOR")
-                .requestMatchers("/api/admin/**").hasRole("ADMINISTRADOR")
-                
-                .requestMatchers("/constructor", "/constructor/**").hasRole("CONTRATISTA")
-                .requestMatchers("/api/constructor/**").hasRole("CONTRATISTA")
-                
-                .requestMatchers("/supervisor", "/supervisor/**").hasRole("SUPERVISOR")
-                .requestMatchers("/api/supervisor/**").hasRole("SUPERVISOR")
-                
-                .requestMatchers("/central", "/central/**").hasRole("CENTRAL")
-                .requestMatchers("/api/central/**").hasRole("CENTRAL")
-                
-                .requestMatchers("/direccion", "/direccion/**").hasRole("DIRECCION")
-                .requestMatchers("/api/direccion/**").hasRole("DIRECCION")
+			// MÓDULOS POR ROL
+			.requestMatchers("/admin", "/admin/**")
+			.hasRole("ADMINISTRADOR")
+			.requestMatchers("/api/admin/**")
+			.hasRole("ADMINISTRADOR")
 
+			.requestMatchers("/constructor", "/constructor/**")
+			.hasRole("CONTRATISTA")
+			.requestMatchers("/api/constructor/**")
+			.hasRole("CONTRATISTA")
 
-                .anyRequest().authenticated()
-            )
-            .formLogin(form -> form
-                .loginPage("/login")
-                .loginProcessingUrl("/login")
-                .successHandler(successHandler) // <-- REDIRECCIÓN POR ROL
-                .failureHandler((request, response, exception) -> {
-                    if (exception instanceof org.springframework.security.authentication.DisabledException) {
-                        response.sendRedirect("/login?pending=true");
-                    } else {
-                        response.sendRedirect("/login?error=true");
-                    }
-                })
-                .permitAll()
-            )
-            .logout(logout -> logout
-                .logoutUrl("/logout")
-                .logoutSuccessUrl("/login?logout=true")
-                .permitAll()
-            );
+			.requestMatchers("/supervisor", "/supervisor/**")
+			.hasRole("SUPERVISOR")
+			.requestMatchers("/api/supervisor/**")
+			.hasRole("SUPERVISOR")
 
-        return http.build();
-    }
+			.requestMatchers("/central", "/central/**")
+			.hasRole("CENTRAL")
+			.requestMatchers("/api/central/**")
+			.hasRole("CENTRAL")
 
-    @Bean
-    PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+			.requestMatchers("/direccion", "/direccion/**")
+			.hasRole("DIRECCION")
+			.requestMatchers("/api/direccion/**")
+			.hasRole("DIRECCION")
+
+			.anyRequest()
+			.authenticated())
+			.formLogin(form -> form.loginPage("/login")
+				.loginProcessingUrl("/login")
+				.successHandler(successHandler) // <--
+												// REDIRECCIÓN
+												// POR
+												// ROL
+				.failureHandler((request, response, exception) -> {
+					if (exception instanceof org.springframework.security.authentication.DisabledException) {
+						response.sendRedirect("/login?pending=true");
+					}
+					else {
+						response.sendRedirect("/login?error=true");
+					}
+				})
+				.permitAll())
+			.logout(logout -> logout.logoutUrl("/logout").logoutSuccessUrl("/login?logout=true").permitAll());
+
+		return http.build();
+	}
+
+	@Bean
+	PasswordEncoder passwordEncoder() {
+		return new BCryptPasswordEncoder();
+	}
+
 }

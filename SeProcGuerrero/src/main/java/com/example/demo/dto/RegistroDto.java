@@ -9,26 +9,26 @@ import lombok.Setter;
 @Getter
 @Setter
 public class RegistroDto {
-	
-    @NotBlank
-    @Size(min = 3, max = 50)
-    private String username;
 
-    @NotBlank
-    @Size(min = 4, max = 100)
-    private String password;
+	@NotBlank
+	@Size(min = 3, max = 50)
+	private String username;
 
-    @NotBlank
-    @Size(max = 250)
-    private String nombre;
+	@NotBlank
+	@Size(min = 4, max = 100)
+	private String password;
 
-    @NotBlank
-    @Size(max = 250)
-    private String apellido;
+	@NotBlank
+	@Size(max = 250)
+	private String nombre;
 
-    @NotBlank
-    @Email
-    @Size(max = 100)
-    private String email;
+	@NotBlank
+	@Size(max = 250)
+	private String apellido;
+
+	@NotBlank
+	@Email
+	@Size(max = 100)
+	private String email;
 
 }

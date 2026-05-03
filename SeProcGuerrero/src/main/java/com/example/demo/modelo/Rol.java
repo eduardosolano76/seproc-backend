@@ -14,13 +14,13 @@ import lombok.Setter;
 @Entity
 @Table(name = "roles")
 public class Rol {
-	
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_roles")
-    private Integer idRoles;
 
-    @Column(name = "nombre", length = 50)
-    private String nombre;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "id_roles")
+	private Integer idRoles;
+
+	@Column(name = "nombre", length = 50)
+	private String nombre;
 
 }

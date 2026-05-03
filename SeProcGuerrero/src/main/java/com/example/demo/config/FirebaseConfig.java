@@ -15,21 +15,22 @@ import jakarta.annotation.PostConstruct;
 @Configuration
 public class FirebaseConfig {
 
-    @Value("${FIREBASE_SERVICE_ACCOUNT}")
-    private Resource serviceAccount;
+	@Value("${FIREBASE_SERVICE_ACCOUNT}")
+	private Resource serviceAccount;
 
-    @Value("${FIREBASE_STORAGE_BUCKET}")
-    private String storageBucket;
+	@Value("${FIREBASE_STORAGE_BUCKET}")
+	private String storageBucket;
 
-    @PostConstruct
-    public void init() throws IOException {
-        if (FirebaseApp.getApps().isEmpty()) {
-            FirebaseOptions options = FirebaseOptions.builder()
-                    .setCredentials(GoogleCredentials.fromStream(serviceAccount.getInputStream()))
-                    .setStorageBucket(storageBucket)
-                    .build();
+	@PostConstruct
+	public void init() throws IOException {
+		if (FirebaseApp.getApps().isEmpty()) {
+			FirebaseOptions options = FirebaseOptions.builder()
+				.setCredentials(GoogleCredentials.fromStream(serviceAccount.getInputStream()))
+				.setStorageBucket(storageBucket)
+				.build();
 
-            FirebaseApp.initializeApp(options);
-        }
-    }
+			FirebaseApp.initializeApp(options);
+		}
+	}
+
 }

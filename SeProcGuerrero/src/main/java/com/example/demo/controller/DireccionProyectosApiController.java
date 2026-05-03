@@ -25,8 +25,11 @@ import com.example.demo.service.SeguridadService;
 public class DireccionProyectosApiController {
 
 	private final ProyectoRepository proyectoRepo;
+
 	private final UsuarioRepository usuarioRepo;
+
 	private final ProyectoEtapaService proyectoEtapaService;
+
 	private final SeguridadService seguridadService;
 
 	public DireccionProyectosApiController(ProyectoRepository proyectoRepo, UsuarioRepository usuarioRepo,
@@ -42,30 +45,29 @@ public class DireccionProyectosApiController {
 		Institucion miInstitucion = seguridadService.getInstitucionActual();
 
 		var items = proyectoRepo
-				.findByInstitucionAndEstadoProyectoOrderByFechaAprobacionDesc(miInstitucion, estado.toUpperCase())
-				.stream().map(p -> {
-					SolicitudProyecto s = p.getSolicitud();
-					var contratista = usuarioRepo.findById(s.getIdUsuarioContratista()).orElse(null);
-					var supervisor = usuarioRepo.findById(p.getIdUsuarioSupervisor()).orElse(null);
+			.findByInstitucionAndEstadoProyectoOrderByFechaAprobacionDesc(miInstitucion, estado.toUpperCase())
+			.stream()
+			.map(p -> {
+				SolicitudProyecto s = p.getSolicitud();
+				var contratista = usuarioRepo.findById(s.getIdUsuarioContratista()).orElse(null);
+				var supervisor = usuarioRepo.findById(p.getIdUsuarioSupervisor()).orElse(null);
 
-					return new HashMap<String, Object>() {
-						{
-							put("idProyecto", p.getIdProyecto());
-							put("idSolicitud", s.getIdSolicitud());
-							put("nombreEscuela", s.getNombreEscuela());
-							put("constructor",
-									contratista != null ? (contratista.getNombre() + " " + contratista.getApellido())
-											: "—");
-							put("supervisor",
-									supervisor != null ? (supervisor.getNombre() + " " + supervisor.getApellido())
-											: "—");
-							put("fechaAprobacion", p.getFechaAprobacion() != null
-									? p.getFechaAprobacion().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))
-									: "");
-							put("estadoProyecto", p.getEstadoProyecto());
-						}
-					};
-				}).toList();
+				return new HashMap<String, Object>() {
+					{
+						put("idProyecto", p.getIdProyecto());
+						put("idSolicitud", s.getIdSolicitud());
+						put("nombreEscuela", s.getNombreEscuela());
+						put("constructor", contratista != null
+								? (contratista.getNombre() + " " + contratista.getApellido()) : "—");
+						put("supervisor",
+								supervisor != null ? (supervisor.getNombre() + " " + supervisor.getApellido()) : "—");
+						put("fechaAprobacion", p.getFechaAprobacion() != null
+								? p.getFechaAprobacion().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")) : "");
+						put("estadoProyecto", p.getEstadoProyecto());
+					}
+				};
+			})
+			.toList();
 
 		return ResponseEntity.ok(items);
 	}
@@ -92,10 +94,8 @@ public class DireccionProyectosApiController {
 		dto.put("idProyecto", p.getIdProyecto());
 		dto.put("idSolicitud", s.getIdSolicitud());
 		dto.put("estadoProyecto", p.getEstadoProyecto());
-		dto.put("fechaAprobacion",
-				p.getFechaAprobacion() != null
-						? p.getFechaAprobacion().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))
-						: null);
+		dto.put("fechaAprobacion", p.getFechaAprobacion() != null
+				? p.getFechaAprobacion().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")) : null);
 
 		dto.put("quienEnvia", contratista != null ? (contratista.getNombre() + " " + contratista.getApellido()) : "—");
 		dto.put("supervisorAsignado",
@@ -126,7 +126,8 @@ public class DireccionProyectosApiController {
 		try {
 			ProyectoEtapa etapaActual = proyectoEtapaService.obtenerEtapaPorClaveVisual(id, etapa);
 			return ResponseEntity.ok(proyectoEtapaService.obtenerDetalleActualEtapa(etapaActual));
-		} catch (IllegalArgumentException e) {
+		}
+		catch (IllegalArgumentException e) {
 			return ResponseEntity.badRequest().body(e.getMessage());
 		}
 	}
@@ -145,8 +146,10 @@ public class DireccionProyectosApiController {
 		try {
 			ProyectoEtapa etapaActual = proyectoEtapaService.obtenerEtapaPorClaveVisual(id, etapa);
 			return ResponseEntity.ok(proyectoEtapaService.obtenerHistorialEtapa(etapaActual));
-		} catch (IllegalArgumentException e) {
+		}
+		catch (IllegalArgumentException e) {
 			return ResponseEntity.badRequest().body(e.getMessage());
 		}
 	}
+
 }

@@ -9,9 +9,10 @@ import java.util.Optional;
 
 public interface CatMunicipioRepository extends JpaRepository<CatMunicipio, Integer> {
 
-    Optional<CatMunicipio> findByEstadoAndCveMunicipio(CatEstado estado, String cveMunicipio);
+	Optional<CatMunicipio> findByEstadoAndCveMunicipio(CatEstado estado, String cveMunicipio);
 
-    List<CatMunicipio> findByEstadoOrderByNombreAsc(CatEstado estado);
+	List<CatMunicipio> findByEstadoOrderByNombreAsc(CatEstado estado);
 
-    List<CatMunicipio> findByEstado_IdEstadoOrderByNombreAsc(Integer idEstado);
+	List<CatMunicipio> findByEstado_IdEstadoOrderByNombreAsc(Integer idEstado);
+
 }

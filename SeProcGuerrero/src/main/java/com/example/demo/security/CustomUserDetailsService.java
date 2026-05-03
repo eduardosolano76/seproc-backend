@@ -14,33 +14,36 @@ import com.example.demo.repository.UsuarioRepository;
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
 
-    private final UsuarioRepository repo;
+	private final UsuarioRepository repo;
 
-    public CustomUserDetailsService(UsuarioRepository repo) {
-        this.repo = repo;
-    }
+	public CustomUserDetailsService(UsuarioRepository repo) {
+		this.repo = repo;
+	}
 
-    @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        var u = repo.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado: " + username));
-        
-        // Bloqueo si no esta aprobado
-        if (u.getActivo() == null || !u.getActivo()) {
-            throw new DisabledException("Tu cuenta está pendiente de aprobación.");
-        }
+	@Override
+	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+		var u = repo.findByUsername(username)
+			.orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado: " + username));
 
-        // roles.nombre -> "administrador", "central", etc.
-        String roleName = (u.getRol() != null && u.getRol().getNombre() != null)
-                ? u.getRol().getNombre()
-                : "PENDIENTE"; // fallback por si un usuario quedó sin rol
+		// Bloqueo si no esta aprobado
+		if (u.getActivo() == null || !u.getActivo()) {
+			throw new DisabledException("Tu cuenta está pendiente de aprobación.");
+		}
 
-        String role = "ROLE_" + roleName.toUpperCase();
+		// roles.nombre -> "administrador", "central", etc.
+		String roleName = (u.getRol() != null && u.getRol().getNombre() != null) ? u.getRol().getNombre() : "PENDIENTE"; // fallback
+																															// por
+																															// si
+																															// un
+																															// usuario
+																															// quedó
+																															// sin
+																															// rol
 
-        return new org.springframework.security.core.userdetails.User(
-                u.getUsername(),
-                u.getPassword(),
-                List.of(new SimpleGrantedAuthority(role))
-        );
-    }
+		String role = "ROLE_" + roleName.toUpperCase();
+
+		return new org.springframework.security.core.userdetails.User(u.getUsername(), u.getPassword(),
+				List.of(new SimpleGrantedAuthority(role)));
+	}
+
 }

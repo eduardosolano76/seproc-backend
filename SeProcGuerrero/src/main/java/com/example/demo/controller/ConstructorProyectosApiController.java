@@ -36,9 +36,13 @@ import com.example.demo.storage.StorageService;
 public class ConstructorProyectosApiController {
 
 	private final ProyectoRepository proyectoRepo;
+
 	private final UsuarioRepository usuarioRepo;
+
 	private final StorageService storageService;
+
 	private final ProyectoEtapaService proyectoEtapaService;
+
 	private final SeguridadService seguridadService;
 
 	public ConstructorProyectosApiController(ProyectoRepository proyectoRepo, UsuarioRepository usuarioRepo,
@@ -64,27 +68,27 @@ public class ConstructorProyectosApiController {
 		Institucion miInstitucion = seguridadService.getInstitucionActual();
 
 		var items = proyectoRepo
-				.findByInstitucionAndSolicitud_IdUsuarioContratistaAndEstadoProyectoOrderByFechaAprobacionDesc(
-						miInstitucion, constructorId, estado.toUpperCase())
-				.stream().map(p -> {
-					SolicitudProyecto s = p.getSolicitud();
-					var supervisor = usuarioRepo.findById(p.getIdUsuarioSupervisor()).orElse(null);
+			.findByInstitucionAndSolicitud_IdUsuarioContratistaAndEstadoProyectoOrderByFechaAprobacionDesc(
+					miInstitucion, constructorId, estado.toUpperCase())
+			.stream()
+			.map(p -> {
+				SolicitudProyecto s = p.getSolicitud();
+				var supervisor = usuarioRepo.findById(p.getIdUsuarioSupervisor()).orElse(null);
 
-					return new HashMap<String, Object>() {
-						{
-							put("idProyecto", p.getIdProyecto());
-							put("idSolicitud", s.getIdSolicitud());
-							put("nombreEscuela", s.getNombreEscuela());
-							put("supervisor",
-									supervisor != null ? (supervisor.getNombre() + " " + supervisor.getApellido())
-											: "—");
-							put("fechaAprobacion", p.getFechaAprobacion() != null
-									? p.getFechaAprobacion().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))
-									: "");
-							put("estadoProyecto", p.getEstadoProyecto());
-						}
-					};
-				}).toList();
+				return new HashMap<String, Object>() {
+					{
+						put("idProyecto", p.getIdProyecto());
+						put("idSolicitud", s.getIdSolicitud());
+						put("nombreEscuela", s.getNombreEscuela());
+						put("supervisor",
+								supervisor != null ? (supervisor.getNombre() + " " + supervisor.getApellido()) : "—");
+						put("fechaAprobacion", p.getFechaAprobacion() != null
+								? p.getFechaAprobacion().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")) : "");
+						put("estadoProyecto", p.getEstadoProyecto());
+					}
+				};
+			})
+			.toList();
 
 		return ResponseEntity.ok(items);
 	}
@@ -123,10 +127,8 @@ public class ConstructorProyectosApiController {
 		dto.put("idProyecto", p.getIdProyecto());
 		dto.put("idSolicitud", s.getIdSolicitud());
 		dto.put("estadoProyecto", p.getEstadoProyecto());
-		dto.put("fechaAprobacion",
-				p.getFechaAprobacion() != null
-						? p.getFechaAprobacion().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))
-						: null);
+		dto.put("fechaAprobacion", p.getFechaAprobacion() != null
+				? p.getFechaAprobacion().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")) : null);
 
 		dto.put("quienEnvia", constructor != null ? (constructor.getNombre() + " " + constructor.getApellido()) : "—");
 
@@ -188,9 +190,11 @@ public class ConstructorProyectosApiController {
 			return ResponseEntity.ok(Map.of("mensaje",
 					"Archivo subido como borrador correctamente. Recuerda presionar 'Entregar' para enviarlo al supervisor.",
 					"url", publicUrl));
-		} catch (IllegalArgumentException e) {
+		}
+		catch (IllegalArgumentException e) {
 			return ResponseEntity.badRequest().body(e.getMessage());
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error interno al subir el reporte.");
 		}
 	}
@@ -224,9 +228,11 @@ public class ConstructorProyectosApiController {
 			proyectoEtapaService.confirmarEntregaAlSupervisor(etapaActual, usuario);
 
 			return ResponseEntity.ok(Map.of("mensaje", "El reporte ha sido enviado al supervisor exitosamente."));
-		} catch (IllegalArgumentException e) {
+		}
+		catch (IllegalArgumentException e) {
 			return ResponseEntity.badRequest().body(e.getMessage());
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error interno al enviar el reporte.");
 		}
 	}
@@ -306,7 +312,8 @@ public class ConstructorProyectosApiController {
 			storageService.deleteIfExists(storagePath);
 
 			return ResponseEntity.ok(Map.of("mensaje", "Imagen eliminada correctamente."));
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			return ResponseEntity.badRequest().body(e.getMessage());
 		}
 	}
@@ -328,7 +335,8 @@ public class ConstructorProyectosApiController {
 			headers.setContentDispositionFormData("attachment", "Reporte_Aprobado_" + etapa + ".pdf");
 
 			return new ResponseEntity<>(pdfBytes, headers, HttpStatus.OK);
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			return ResponseEntity.badRequest().build();
 		}
 	}
@@ -356,8 +364,10 @@ public class ConstructorProyectosApiController {
 			ProyectoEtapa etapaActual = proyectoEtapaService.obtenerEtapaPorClaveVisual(id, etapa);
 			proyectoEtapaService.actualizarNotaDeBorrador(etapaActual, storagePath, nota);
 			return ResponseEntity.ok(Map.of("mensaje", "Nota actualizada correctamente."));
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			return ResponseEntity.badRequest().body(e.getMessage());
 		}
 	}
+
 }
