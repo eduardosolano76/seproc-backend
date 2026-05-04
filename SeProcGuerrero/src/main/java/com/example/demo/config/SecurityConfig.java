@@ -24,7 +24,7 @@ public class SecurityConfig {
 			.permitAll()
 
 			// PÚBLICOS
-			.requestMatchers("/login", "/auth/**", "/public/**", "/registro/**", "/seproc/**")
+			.requestMatchers("/login", "/auth/**", "/public/**", "/registro/**", "/seproc/**", "/solicitar-acceso/**")
 			.permitAll()
 
 			// MÓDULOS POR ROL

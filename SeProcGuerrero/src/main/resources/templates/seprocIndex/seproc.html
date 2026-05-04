@@ -1,5 +1,4 @@
 <!-- seproc.html -->
-
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="es">
     <head>
@@ -7,6 +6,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>SeProc</title>
         <link rel="stylesheet" th:href="@{/css/seprocIndex/seproc.css}" />
+        <link rel="stylesheet" th:href="@{/css/seprocIndex/solicitar-acceso.css}" />
     </head>
     <body>
         <!-- NAVBAR -->
@@ -76,8 +76,8 @@
                         tanto a contratistas independientes como a grandes supervisiones estatales.
                     </p>
 
-                    <a th:href="@{/registro}" class="btn-primary">
-                        ¡Comenzar ahora!
+                    <a onclick="switchView('solicitar')" class="btn-primary cursor-pointer">
+                        Solicitar acceso
                         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path
                                 stroke-linecap="round"
@@ -234,6 +234,9 @@
                     </a>
                 </div>
             </div>
+
+            <!-- SOLICITAR ACCESO (TRAÍDO DESDE EL OTRO ARCHIVO HTML) -->
+            <div th:replace="~{seprocIndex/solicitar-acceso :: vistaSolicitar}"></div>
         </main>
 
         <!-- FOOTER -->
@@ -293,5 +296,33 @@
 
         <!-- Script -->
         <script type="module" th:src="@{/js/seprocIndex/app.js}"></script>
+
+        <!-- MODAL DE ÉXITO (Aparece flotando sobre todo) -->
+        <div th:if="${mensajeExito}" id="successModal" class="modal-overlay">
+            <div class="modal-card">
+                <!-- Icono de Check Verde -->
+                <div class="modal-icon">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M5 13l4 4L19 7"
+                        ></path>
+                    </svg>
+                </div>
+                <h3>¡Solicitud enviada!</h3>
+                <p th:text="${mensajeExito}"></p>
+
+                <!-- Botón para cerrar el modal usando JavaScript básico -->
+                <button
+                    onclick="document.getElementById('successModal').style.display='none'"
+                    class="btn-primary cursor-pointer"
+                    style="margin-top: 1.5rem; width: 100%; justify-content: center; border: none"
+                >
+                    Entendido
+                </button>
+            </div>
+        </div>
     </body>
 </html>

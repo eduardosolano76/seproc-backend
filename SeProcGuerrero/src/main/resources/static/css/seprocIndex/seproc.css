@@ -169,7 +169,6 @@ html {
 /* === HERO SECTION === */
 .main-content {
 	flex-grow: 1;
-	display: flex;
 	align-items: flex-start;
 	padding: 4rem 1.5rem 2rem 1.5rem;
 }
@@ -745,3 +744,80 @@ html {
 .dependencia-card:nth-child(1) { animation-delay: 0.1s; }
 .dependencia-card:nth-child(2) { animation-delay: 0.2s; }
 .dependencia-card:nth-child(3) { animation-delay: 0.3s; }
+
+/* === ESTILOS DEL MODAL === */
+
+/* La capa oscura que cubre toda la pantalla */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(4px); /* Desenfoque del fondo */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999; /* Asegura que esté por encima de todo */
+    animation: fadeIn 0.3s ease forwards;
+}
+
+/* La tarjeta blanca en el centro */
+.modal-card {
+    background-color: var(--bg);
+    border-radius: var(--radius-xl);
+    padding: 2.5rem 2rem;
+    max-width: 400px;
+    width: 90%;
+    text-align: center;
+    box-shadow: var(--shadow-main);
+    /* Animación de rebote */
+    animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.modal-icon {
+    width: 60px;
+    height: 60px;
+    background-color: #d1fae5;
+    color: #059669;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem auto;
+}
+
+.modal-icon svg {
+    width: 30px;
+    height: 30px;
+}
+
+.modal-card h3 {
+    color: var(--primary-dark);
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.modal-card p {
+    color: var(--muted);
+    font-size: 1rem;
+    line-height: 1.5;
+}
+
+/* Animaciones específicas del modal */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes popIn {
+    from {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
