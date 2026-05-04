@@ -59,6 +59,36 @@ a {
 	padding: 0 1.5rem;
 }
 
+/* === PERSONALIZACIÓN DEL SCROLLBAR === */
+
+/* 1. Para navegadores basados en WebKit (Chrome, Edge, Safari, Opera) */
+::-webkit-scrollbar {
+	width: 8px; 
+	height: 8px; 
+}
+
+/* El fondo (track) por donde se mueve la barra */
+::-webkit-scrollbar-track {
+	background: transparent; /* Transparente para que se vea limpio */
+}
+
+/* La barrita (thumb) que arrastras con el mouse */
+::-webkit-scrollbar-thumb {
+	background-color: #cbd5e1; 
+	border-radius: 10px;       
+}
+
+/* Efecto al pasar el mouse por encima de la barrita */
+::-webkit-scrollbar-thumb:hover {
+	background-color: #94a3b8; /* Se oscurece un poco para indicar que puedes hacer clic */
+}
+
+/* 2. Para Firefox (usa un estándar diferente) */
+html {
+	scrollbar-width: thin; /* Hace la barra delgada */
+	scrollbar-color: #cbd5e1 transparent; /* Color del thumb y color del track */
+}
+
 /* === NAVBAR === */
 .navbar {
 	display: flex;
@@ -140,10 +170,10 @@ a {
 .main-content {
 	flex-grow: 1;
 	display: flex;
-	align-items: center;
-	padding: 0 1.5rem;
+	align-items: flex-start;
+	padding: 4rem 1.5rem 2rem 1.5rem;
 }
- 
+
 .hero-grid {
 	display: grid;
 	grid-template-columns: 1fr;
@@ -220,206 +250,112 @@ a {
 	margin-left: 0.5rem;
 }
 
-/* === BENTO GRID === */
-.bento-container {
+/* === SAAS FEATURE GRID (NUEVO DISEÑO) === */
+.features-container {
 	height: 100%;
+	display: flex;
+	align-items: center;
 }
 
-.bento-grid {
+.features-grid {
 	display: grid;
-	grid-template-columns: repeat(12, 1fr);
-	gap: 1rem;
-	height: 100%;
+	grid-template-columns: repeat(2, 1fr); /* 2 Columnas */
+	gap: 1.5rem;
+	width: 100%;
 }
 
-/* Si es móvil, apilamos las tarjetas */
+/* En móviles se apilan en 1 columna */
 @media ( max-width : 1023px) {
-	.bento-grid {
-		display: flex;
-		flex-direction: column;
+	.features-grid {
+		grid-template-columns: 1fr;
 	}
 }
 
-.card {
-	position: relative;
-	overflow: hidden;
+/* Estilo base de cada tarjeta */
+.feat-card {
+	background-color: var(--bg);
+	border: 1px solid var(--line);
 	border-radius: var(--radius-xl);
-	box-sizing: border-box;
-	min-height: 160px; /* Para móviles */
-}
-
-.card img {
-	width: 100%;
-	height: 100%;
-	object-fit: cover;
-	display: block;
-}
-
-/* Tarjeta 1: Supervisa y reporta */
-.card-1 {
-	grid-column: span 8;
-	background-color: var(--primary-soft);
-	border: 1px solid var(--primary-border);
+	padding: 2rem 1.5rem;
+	box-shadow: var(--shadow-panel);
+	transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s
+		ease;
 	display: flex;
 	flex-direction: column;
-	justify-content: center;
-	align-items: center;
-	text-align: center;
-	padding: 1.5rem;
-	border-radius: var(--radius-lg);
+	align-items: flex-start;
 }
 
-.card-1 h3 {
-	color: var(--primary);
-	font-size: 1.25rem;
-	margin-bottom: 0.25rem;
-}
-
-.card-1 p {
-	color: var(--primary-dark);
-	font-size: 0.875rem;
-	opacity: 0.8;
-}
-
-/* Tarjeta 2: Imagen Construcción */
-.card-2 {
-	grid-column: span 4;
-	background-color: var(--panel);
-	border: 1px solid var(--line);
-	box-shadow: var(--shadow-panel);
-	border-radius: var(--radius-lg);
-}
-
-.card-2 img {
-	opacity: 0.9;
-}
-
-/* Tarjeta 3: Gestión completa (Imagen + Degradado) */
-.card-3 {
-	grid-column: span 6;
-	background-color: var(--panel);
-	border: 1px solid var(--line);
-	box-shadow: var(--shadow-panel);
-}
-
-.card-3 img {
-	position: absolute;
-	inset: 0;
-}
-
-.card-3-overlay {
-	position: absolute;
-	inset: 0;
-	background: linear-gradient(to top, rgba(13, 43, 121, 0.9), transparent);
-	display: flex;
-	align-items: flex-end;
-	padding: 1.25rem;
-}
-
-.card-3-overlay span {
-	color: white;
-	font-size: 0.875rem;
-	font-weight: 500;
-	z-index: 10;
-}
-
-/* Tarjeta 4: SeProc para todos (Azul Oscuro, Vertical) */
-.card-4 {
-	grid-column: span 6;
-	grid-row: span 2;
-	background-color: var(--blue-dark);
+/* Efecto hover elegante */
+.feat-card:hover {
+	transform: translateY(-5px);
 	box-shadow: var(--shadow-main);
+	border-color: var(--primary-border);
+}
+
+/* Contenedor del Icono */
+.feat-icon {
+	width: 50px;
+	height: 50px;
+	border-radius: 14px;
 	display: flex;
-	flex-direction: column;
-	justify-content: flex-start;
-	align-items: flex-end;
-	padding: 1.5rem;
-	text-align: right;
-	min-height: 250px;
-}
-
-.card-4 img {
-	position: absolute;
-	inset: 0;
-	opacity: 0.4;
-	mix-blend-mode: overlay;
-}
-
-.card-4-content {
-	position: relative;
-	z-index: 10;
-}
-
-.card-4-content span {
-	color: var(--blue-light);
-	font-size: 0.875rem;
-	font-weight: 500;
-}
-
-.card-4-content h3 {
-	color: var(--yellow);
-	font-size: 1.25rem;
-	font-weight: 700;
-	margin-top: 0.5rem;
-	line-height: 1.2;
-}
-
-/* Tarjeta 5: Reportes Inteligentes */
-.card-5 {
-	grid-column: span 6;
-	background-color: var(--panel);
-	border: 1px solid var(--line);
-	box-shadow: var(--shadow-soft);
-	padding: 1.5rem;
-	display: flex;
-	flex-direction: column;
+	align-items: center;
 	justify-content: center;
+	margin-bottom: 1.5rem;
 }
 
-.card-5 h3 {
+.feat-icon svg {
+	width: 24px;
+	height: 24px;
+}
+
+/* Textos de las tarjetas */
+.feat-card h4 {
 	color: var(--primary-dark);
 	font-size: 1.125rem;
-	line-height: 1.2;
-	position: relative;
-	z-index: 10;
-}
-
-.blob-green {
-	position: absolute;
-	right: -1rem;
-	bottom: -1rem;
-	width: 5rem;
-	height: 5rem;
-	background-color: var(--green);
-	opacity: 0.2;
-	border-radius: 50%;
-	filter: blur(20px);
-}
-
-/* Tarjeta 6: Footer Bento (Degradado completo) */
-.card-6 {
-	grid-column: span 12;
-	background: linear-gradient(to right, var(--blue-dark), var(--primary));
-	border: 1px solid var(--blue-mid);
-	box-shadow: var(--shadow-main);
-	padding: 1.5rem;
-	text-align: center;
-	border-radius: var(--radius); /* Usa el radio más grande aquí */
-	display: flex;
-	flex-direction: column;
-	justify-content: center;
-}
-
-.card-6 span {
-	color: var(--blue-light);
-	font-size: 0.875rem;
-}
-
-.card-6 h2 {
-	color: white;
-	font-size: 1.5rem;
 	font-weight: 700;
-	margin-top: 0.25rem;
+	margin-bottom: 0.5rem;
+}
+
+.feat-card p {
+	color: var(--muted);
+	font-size: 0.875rem;
+	line-height: 1.6;
+}
+
+/* Colores dinámicos para los iconos usando tus variables */
+.icon-blue {
+	background-color: var(--primary-soft);
+	color: var(--primary);
+}
+
+.icon-green {
+	background-color: rgba(47, 191, 113, 0.15);
+	color: var(--green);
+}
+
+.icon-yellow {
+	background-color: rgba(246, 198, 74, 0.15);
+	color: #d4a017;
+} /* Un amarillo ligeramente más oscuro para contraste */
+
+/* Estilo especial para la 4ta tarjeta (Azul oscura para anclar el diseño) */
+.feat-card-dark {
+	background: linear-gradient(135deg, var(--blue-dark), var(--primary));
+	border: none;
+	grid-column: 1 / -1;
+}
+
+.feat-card-dark h4 {
+	color: var(--bg);
+}
+
+.feat-card-dark p {
+	color: var(--blue-light);
+}
+
+.feat-card-dark .icon-dark {
+	background-color: rgba(255, 255, 255, 0.15);
+	color: var(--bg);
 }
 
 .logo-mask {
@@ -556,7 +492,7 @@ a {
 .dropdown:hover .dropdown-menu {
 	opacity: 1;
 	visibility: visible;
-	transform: translateX(-50%) translateY(10px); 
+	transform: translateX(-50%) translateY(10px);
 }
 
 /* Estilos para los enlaces dentro del dropdown (Sobrescribe los globales del nav) */
@@ -589,7 +525,6 @@ a {
 /* === VIEW: DEPENDENCIAS (SELECCIÓN DE ESCUELA) === */
 .dependencias-section {
 	width: 100%;
-	padding-top: 2rem;
 }
 
 .dependencias-header {
@@ -599,7 +534,7 @@ a {
 
 .dependencias-header h2 {
 	font-size: 3rem;
-	color: var(--text); /* Texto oscuro como en tu diseño */
+	color: var(--text);
 	margin-bottom: 1rem;
 	font-weight: 600;
 }
@@ -618,14 +553,13 @@ a {
 }
 
 /* Tablet: 2 columnas */
-@media (min-width: 768px) {
+@media ( min-width : 768px) {
 	.dependencias-grid {
 		grid-template-columns: repeat(2, 1fr);
 	}
 }
 
-/* Escritorio: 3 columnas idéntico a la imagen */
-@media (min-width: 1024px) {
+@media ( min-width : 1024px) {
 	.dependencias-grid {
 		grid-template-columns: repeat(3, 1fr);
 	}
@@ -641,7 +575,7 @@ a {
 	transition: background-color 0.2s ease, transform 0.2s ease;
 	text-decoration: none;
 }
-  
+
 /* Efecto hover sutil */
 .dependencia-card:hover {
 	background-color: var(--panel);
@@ -665,5 +599,149 @@ a {
 
 .dependencia-card:hover .dependencia-name {
 	color: var(--primary);
-	font-weight: 500;
+	text-shadow: 0 0 0.5px var(--primary);
 }
+
+/* === FOOTER === */
+.footer {
+	background-color: var(--bg);
+	border-top: 1px solid var(--line);
+	padding: 4rem 0 2rem 0;
+	margin-top: auto; /* Empuja el footer siempre al fondo de la pantalla */
+}
+
+.footer-content {
+	display: grid;
+	grid-template-columns: 1fr;
+	gap: 2.5rem;
+	margin-bottom: 3rem;
+}
+
+/* En tablets y escritorio dividimos en 3 columnas */
+@media (min-width: 768px) {
+	.footer-content {
+		grid-template-columns: 2fr 1fr 1fr;
+		gap: 4rem;
+	}
+}
+
+.footer-brand p {
+	color: var(--muted);
+	font-size: 0.875rem;
+	line-height: 1.6;
+	margin-top: 1rem;
+	max-width: 400px;
+}
+
+.footer h4 {
+	color: var(--primary-dark);
+	font-size: 1rem;
+	font-weight: 600;
+	margin-bottom: 1.25rem;
+}
+
+.footer ul {
+	list-style: none;
+	padding: 0;
+}
+
+.footer ul li {
+	margin-bottom: 0.75rem;
+}
+
+.footer ul a {
+	color: var(--muted);
+	font-size: 0.875rem;
+	transition: color 0.2s ease;
+	cursor: pointer;
+}
+
+.footer ul a:hover {
+	color: var(--primary);
+	text-decoration: underline;
+}
+
+/* === FOOTER BOTTOM (Copyright) === */
+.footer-bottom {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 1rem;
+	padding-top: 2rem;
+	border-top: 1px solid var(--line);
+	text-align: center;
+}
+
+.footer-bottom p {
+	color: var(--muted);
+	font-size: 0.875rem;
+}
+
+.legal-links {
+	display: flex;
+	gap: 1.5rem;
+}
+
+.legal-links a {
+	color: var(--muted);
+	font-size: 0.875rem;
+	transition: color 0.2s ease;
+}
+
+.legal-links a:hover {
+	color: var(--primary);
+}
+
+.cursor-pointer {
+	cursor: pointer;
+}
+
+/* === ANIMACIONES DE CARGA (EFECTOS) ====== */
+
+/* Creamos la animación base (Aparecer y subir) */
+@keyframes fadeSlideUp {
+	0% {
+		opacity: 0;
+		transform: translateY(40px); /* Empieza 40px más abajo */
+	}
+	100% {
+		opacity: 1;
+		transform: translateY(0); /* Sube a su posición original */
+	}
+}
+
+/* Animamos el texto principal de inicio */
+.hero-text {
+	opacity: 0; /* Inicia invisible */
+	/* Usamos cubic-bezier para que el movimiento sea mantequilla pura (estilo Apple/Stripe) */
+	animation: fadeSlideUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; 
+}
+
+/* Animamos las tarjetas de características */
+.feat-card {
+	opacity: 0;
+	animation: fadeSlideUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+/* EFECTO CASCADA: Le damos un pequeño retraso a cada tarjeta para que entren una tras otra */
+.feat-card:nth-child(1) { animation-delay: 0.1s; }
+.feat-card:nth-child(2) { animation-delay: 0.2s; }
+.feat-card:nth-child(3) { animation-delay: 0.3s; }
+.feat-card:nth-child(4) { animation-delay: 0.4s; }
+.feat-card:nth-child(5) { animation-delay: 0.5s; }
+
+/* Animamos la vista de Portal de Acceso (Dependencias) */
+.dependencias-header {
+	opacity: 0;
+	animation: fadeSlideUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+.dependencia-card {
+	opacity: 0;
+	animation: fadeSlideUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+/* Efecto cascada para las dependencias */
+.dependencia-card:nth-child(1) { animation-delay: 0.1s; }
+.dependencia-card:nth-child(2) { animation-delay: 0.2s; }
+.dependencia-card:nth-child(3) { animation-delay: 0.3s; }

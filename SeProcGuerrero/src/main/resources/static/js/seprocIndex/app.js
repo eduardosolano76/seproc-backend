@@ -1,4 +1,4 @@
-// js/seproc/app.js
+// js/seprocIndex/app.js
 
 import * as nav from './navigation.js';
 
