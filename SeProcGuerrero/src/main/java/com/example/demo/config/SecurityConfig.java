@@ -2,23 +2,72 @@ package com.example.demo.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
+import com.example.demo.security.AdminSistemaDetailsService;
+import com.example.demo.security.CustomUserDetailsService;
 import com.example.demo.security.RoleRedirectSuccessHandler;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+	
+    // ZONA SÚPER ADMIN (Prioridad 1 - Totalmente Aislada)
+	@Bean
+    @Order(1)
+    SecurityFilterChain superAdminFilterChain(HttpSecurity http, 
+            AdminSistemaDetailsService adminSistemaDetailsService, 
+            PasswordEncoder passwordEncoder) throws Exception {
+        
+	    DaoAuthenticationProvider superAdminProvider =
+	            new DaoAuthenticationProvider(adminSistemaDetailsService);
+
+	    superAdminProvider.setPasswordEncoder(passwordEncoder);
+
+
+        http.securityMatcher("/admin-seproc/**")
+            .authenticationProvider(superAdminProvider)
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/admin-seproc/login-seproc").permitAll()
+                .requestMatchers("/assets/**", "/css/**", "/js/**", "/images/**").permitAll() 
+                .anyRequest().hasRole("SUPERADMIN")
+            )
+            .formLogin(form -> form
+                .loginPage("/admin-seproc/login-seproc")
+                .loginProcessingUrl("/admin-seproc/login-seproc")
+                .defaultSuccessUrl("/admin-seproc/dashboard-seproc", true)
+                .failureUrl("/admin-seproc/login-seproc?error=true")
+                .permitAll()
+            )
+            .logout(logout -> logout
+                .logoutUrl("/admin-seproc/logout")
+                .logoutSuccessUrl("/admin-seproc/login-seproc?logout=true")
+                .permitAll()
+            );
+
+        return http.build();
+    }
 
 	@Bean
-	SecurityFilterChain securityFilterChain(HttpSecurity http, RoleRedirectSuccessHandler successHandler)
-			throws Exception {
+	@Order(2)
+	SecurityFilterChain securityFilterChain(HttpSecurity http, 
+            RoleRedirectSuccessHandler successHandler,
+            CustomUserDetailsService customUserDetailsService, 
+            PasswordEncoder passwordEncoder) throws Exception {
+		
+		// EXPLÍCITAMENTE para los clientes
+        DaoAuthenticationProvider clientProvider = new DaoAuthenticationProvider(customUserDetailsService);
+        clientProvider.setPasswordEncoder(passwordEncoder);
 
-		http.authorizeHttpRequests(auth -> auth
+		http
+		.authenticationProvider(clientProvider)
+		.authorizeHttpRequests(auth -> auth
 			// ESTÁTICOS
 			.requestMatchers("/assets/**", "/css/**", "/js/**", "/images/**", "/static/**", "/uploads/**")
 			.permitAll()
