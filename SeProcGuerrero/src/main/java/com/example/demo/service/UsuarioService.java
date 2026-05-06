@@ -19,20 +19,19 @@ public class UsuarioService {
 
 	// Inyección de dependencias a través del constructor
 	private final UsuarioRepository usuarioRepo;
-
 	private final RolRepository rolRepo;
-
 	private final PasswordEncoder passwordEncoder;
-
 	private final SeguridadService seguridadService;
 
+
+
 	// Constructor para inyectar las dependencias
-	public UsuarioService(UsuarioRepository usuarioRepo, RolRepository rolRepo, PasswordEncoder passwordEncoder,
-			SeguridadService seguridadService) {
+	public UsuarioService(UsuarioRepository usuarioRepo, RolRepository rolRepo, PasswordEncoder passwordEncoder, SeguridadService seguridadService) {	
 		this.usuarioRepo = usuarioRepo;
 		this.rolRepo = rolRepo;
 		this.passwordEncoder = passwordEncoder;
 		this.seguridadService = seguridadService;
+		
 	}
 
 	// Método para obtener un usuario por su ID, lanzando una excepción si no se
@@ -40,35 +39,25 @@ public class UsuarioService {
 	public Usuario obtenerPorId(Long id) {
 		Usuario u = usuarioRepo.findById(id)
 			.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado."));
-
-		// Verificamos que el usuario que intentan consultar pertenezca a la institución
-		// del administrador logueado
-		Institucion miInstitucion = seguridadService.getInstitucionActual();
-		if (miInstitucion != null && !u.getInstitucion().getIdInstitucion().equals(miInstitucion.getIdInstitucion())) {
-			throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-					"Acceso denegado. Este usuario pertenece a otra institución.");
-		}
 		return u;
 	}
 
 	// Método para listar usuarios activos según la vista solicitada, utilizando un
 	// switch para determinar el rol
 	public List<Usuario> listarUsuariosPorView(String view) {
-		Institucion miInstitucion = seguridadService.getInstitucionActual(); // Obtenemos
-																				// la
-																				// institución
+		Institucion miInst = seguridadService.getInstitucionActual();
 
 		return switch (view) {
 			case "usuarios-supervisores" ->
-				usuarioRepo.findByInstitucionAndActivoTrueAndRol_NombreIgnoreCase(miInstitucion, "supervisor");
+				usuarioRepo.findByInstitucionAndActivoTrueAndRol_NombreIgnoreCase(miInst,"supervisor");
 			case "usuarios-constructores" ->
-				usuarioRepo.findByInstitucionAndActivoTrueAndRol_NombreIgnoreCase(miInstitucion, "contratista");
+				usuarioRepo.findByInstitucionAndActivoTrueAndRol_NombreIgnoreCase(miInst, "contratista");
 			case "usuarios-directores" ->
-				usuarioRepo.findByInstitucionAndActivoTrueAndRol_NombreIgnoreCase(miInstitucion, "direccion");
+				usuarioRepo.findByInstitucionAndActivoTrueAndRol_NombreIgnoreCase(miInst, "direccion");
 			case "usuarios-central" ->
-				usuarioRepo.findByInstitucionAndActivoTrueAndRol_NombreIgnoreCase(miInstitucion, "central");
+				usuarioRepo.findByInstitucionAndActivoTrueAndRol_NombreIgnoreCase(miInst, "central");
 			case "usuarios-administrador" ->
-				usuarioRepo.findByInstitucionAndActivoTrueAndRol_NombreIgnoreCase(miInstitucion, "administrador");
+				usuarioRepo.findByInstitucionAndActivoTrueAndRol_NombreIgnoreCase(miInst, "administrador");
 			default -> List.of();
 		};
 	}
@@ -111,9 +100,9 @@ public class UsuarioService {
 		u.setEmail(dto.getEmail());
 		u.setPassword(passwordEncoder.encode(dto.getPassword()));
 		u.setActivo(true);
-
-		// Atamos al nuevo usuario a la empresa de quien lo está creando
+		
 		u.setInstitucion(seguridadService.getInstitucionActual());
+
 
 		if (dto.getRolNombre() != null && !dto.getRolNombre().isBlank()) {
 			Rol rol = rolRepo.findByNombre(dto.getRolNombre())

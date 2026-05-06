@@ -51,9 +51,9 @@ public class Usuario {
 
 	@Column(name = "foto", length = 255, nullable = true)
 	private String foto; // guarda la "key" tipo: usuarios/15/profile_xxx.jpg
-
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "id_institucion", nullable = false)
-	private Institucion institucion;
+	
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_institucion", insertable = false, updatable = false)
+    private Institucion institucion;
 
 }

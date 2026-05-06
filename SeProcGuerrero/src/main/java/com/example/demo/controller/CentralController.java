@@ -29,11 +29,8 @@ import com.example.demo.storage.StorageService;
 public class CentralController {
 
 	private final UsuarioRepository usuarioRepo;
-
 	private final StorageService storageService;
-
 	private final PasswordEncoder passwordEncoder;
-
 	private final SeguridadService seguridadService;
 
 	public CentralController(UsuarioRepository usuarioRepo, StorageService storageService,
@@ -84,21 +81,21 @@ public class CentralController {
 		model.addAttribute("view", view);
 
 		List<Usuario> usuarios = List.of();
-		Institucion institucionActual = seguridadService.getInstitucionActual();
+		Institucion miInstitucion = seguridadService.getInstitucionActual();
 
-		if (institucionActual != null) {
+		if (miInstitucion != null) {
 			switch (view) {
 				case "usuarios-supervisores":
-					usuarios = usuarioRepo.findByInstitucionAndActivoTrueAndRol_NombreIgnoreCase(institucionActual,
-							"supervisor");
+					usuarios = usuarioRepo.findByInstitucionAndActivoTrueAndRol_NombreIgnoreCase(
+							miInstitucion, "supervisor");
 					break;
 				case "usuarios-constructores":
-					usuarios = usuarioRepo.findByInstitucionAndActivoTrueAndRol_NombreIgnoreCase(institucionActual,
-							"contratista");
+					usuarios = usuarioRepo.findByInstitucionAndActivoTrueAndRol_NombreIgnoreCase(
+							miInstitucion, "contratista");
 					break;
 				case "usuarios-directores":
-					usuarios = usuarioRepo.findByInstitucionAndActivoTrueAndRol_NombreIgnoreCase(institucionActual,
-							"direccion");
+					usuarios = usuarioRepo.findByInstitucionAndActivoTrueAndRol_NombreIgnoreCase(
+							miInstitucion, "direccion");
 					break;
 				default:
 					break;

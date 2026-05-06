@@ -3,7 +3,6 @@ package com.example.demo.controller;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -55,11 +54,6 @@ public class CentralSolicitudesApiController {
 
 		var s = solOpt.get();
 
-		Institucion miInstitucion = seguridadService.getInstitucionActual();
-		if (miInstitucion != null && !s.getInstitucion().getIdInstitucion().equals(miInstitucion.getIdInstitucion())) {
-			return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Acceso denegado a esta solicitud.");
-		}
-
 		SolicitudDetalleDto dto = new SolicitudDetalleDto();
 		dto.idSolicitud = s.getIdSolicitud();
 		dto.estadoSolicitud = s.getEstadoSolicitud();
@@ -90,7 +84,7 @@ public class CentralSolicitudesApiController {
 		dto.tipoObra = s.getTipoObra();
 		dto.tipoEdificacion = s.getTipoEdificacion() != null ? s.getTipoEdificacion().getNombre() : "";
 
-		var p = proyectoRepo.findByInstitucionAndSolicitud_IdSolicitud(miInstitucion, id).orElse(null);
+		var p = proyectoRepo.findBySolicitud_IdSolicitud(id).orElse(null);
 
 		if (p != null && p.getIdUsuarioSupervisor() != null) {
 			var sup = usuarioRepo.findById(p.getIdUsuarioSupervisor()).orElse(null);
@@ -105,10 +99,8 @@ public class CentralSolicitudesApiController {
 
 	@GetMapping
 	public ResponseEntity<?> listar(@RequestParam("estado") String estado) {
-		Institucion miInstitucion = seguridadService.getInstitucionActual();
-
 		var items = solRepo
-			.findByInstitucionAndEstadoSolicitudOrderByFechaSolicitudDesc(miInstitucion, estado.toUpperCase())
+			.findByEstadoSolicitudOrderByFechaSolicitudDesc(estado.toUpperCase())
 			.stream()
 			.map(s -> {
 				var u = usuarioRepo.findById(s.getIdUsuarioContratista()).orElse(null);
@@ -132,7 +124,6 @@ public class CentralSolicitudesApiController {
 	@GetMapping("/supervisores")
 	public ResponseEntity<?> supervisores() {
 		Institucion miInstitucion = seguridadService.getInstitucionActual();
-
 		var list = usuarioRepo.findByInstitucionAndRol_NombreIgnoreCase(miInstitucion, "supervisor")
 			.stream()
 			.map(u -> new java.util.HashMap<String, Object>() {
@@ -155,20 +146,16 @@ public class CentralSolicitudesApiController {
 		}
 
 		var s = solOpt.get();
-		Institucion miInstitucion = seguridadService.getInstitucionActual();
 
-		if (miInstitucion != null && !s.getInstitucion().getIdInstitucion().equals(miInstitucion.getIdInstitucion())) {
-			return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Acceso denegado.");
-		}
 		if (!"PENDIENTE".equalsIgnoreCase(s.getEstadoSolicitud())) {
 			return ResponseEntity.badRequest().body("Solo se puede aprobar si está PENDIENTE");
 		}
 
-		if (proyectoRepo.existsByInstitucionAndSolicitud_IdSolicitud(miInstitucion, id)) {
+		if (proyectoRepo.existsBySolicitud_IdSolicitud(id)) {
 			return ResponseEntity.badRequest().body("Ya existe un proyecto para esta solicitud");
 		}
 
-		if (proyectoRepo.existsByInstitucionAndSolicitud_IdSolicitud(miInstitucion, id)) {
+		if (proyectoRepo.existsBySolicitud_IdSolicitud(id)) {
 			return ResponseEntity.badRequest().body("Ya existe un proyecto para esta solicitud");
 		}
 
@@ -188,7 +175,6 @@ public class CentralSolicitudesApiController {
 		p.setIdUsuarioSupervisor(supervisorId);
 		p.setEstadoProyecto("ACTIVO");
 
-		p.setInstitucion(miInstitucion);
 
 		Proyecto proyectoGuardado = proyectoRepo.save(p);
 		proyectoEtapaService.inicializarEtapasProyecto(proyectoGuardado);
@@ -209,11 +195,6 @@ public class CentralSolicitudesApiController {
 		}
 
 		var s = solOpt.get();
-		Institucion miInstitucion = seguridadService.getInstitucionActual();
-
-		if (miInstitucion != null && !s.getInstitucion().getIdInstitucion().equals(miInstitucion.getIdInstitucion())) {
-			return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Acceso denegado.");
-		}
 
 		if (!"PENDIENTE".equalsIgnoreCase(s.getEstadoSolicitud())) {
 			return ResponseEntity.badRequest().body("Solo se puede rechazar si está PENDIENTE");

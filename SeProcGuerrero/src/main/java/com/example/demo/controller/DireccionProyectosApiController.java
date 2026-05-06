@@ -3,7 +3,6 @@ package com.example.demo.controller;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -11,14 +10,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.demo.modelo.Institucion;
 import com.example.demo.modelo.Proyecto;
 import com.example.demo.modelo.ProyectoEtapa;
 import com.example.demo.modelo.SolicitudProyecto;
 import com.example.demo.repository.ProyectoRepository;
 import com.example.demo.repository.UsuarioRepository;
 import com.example.demo.service.ProyectoEtapaService;
-import com.example.demo.service.SeguridadService;
 
 @RestController
 @RequestMapping("/api/direccion/proyectos")
@@ -30,22 +27,19 @@ public class DireccionProyectosApiController {
 
 	private final ProyectoEtapaService proyectoEtapaService;
 
-	private final SeguridadService seguridadService;
 
 	public DireccionProyectosApiController(ProyectoRepository proyectoRepo, UsuarioRepository usuarioRepo,
-			ProyectoEtapaService proyectoEtapaService, SeguridadService seguridadService) {
+			ProyectoEtapaService proyectoEtapaService) {
 		this.proyectoRepo = proyectoRepo;
 		this.usuarioRepo = usuarioRepo;
 		this.proyectoEtapaService = proyectoEtapaService;
-		this.seguridadService = seguridadService;
 	}
 
 	@GetMapping
 	public ResponseEntity<?> listar(@RequestParam("estado") String estado) {
-		Institucion miInstitucion = seguridadService.getInstitucionActual();
 
 		var items = proyectoRepo
-			.findByInstitucionAndEstadoProyectoOrderByFechaAprobacionDesc(miInstitucion, estado.toUpperCase())
+			.findByEstadoProyectoOrderByFechaAprobacionDesc(estado.toUpperCase())
 			.stream()
 			.map(p -> {
 				SolicitudProyecto s = p.getSolicitud();
@@ -80,10 +74,6 @@ public class DireccionProyectosApiController {
 
 		Proyecto p = pOpt.get();
 
-		Institucion miInstitucion = seguridadService.getInstitucionActual();
-		if (miInstitucion != null && !p.getInstitucion().getIdInstitucion().equals(miInstitucion.getIdInstitucion())) {
-			return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Acceso denegado al proyecto.");
-		}
 
 		SolicitudProyecto s = p.getSolicitud();
 
@@ -117,11 +107,6 @@ public class DireccionProyectosApiController {
 		if (pOpt.isEmpty())
 			return ResponseEntity.notFound().build();
 
-		Institucion miInstitucion = seguridadService.getInstitucionActual();
-		if (miInstitucion != null
-				&& !pOpt.get().getInstitucion().getIdInstitucion().equals(miInstitucion.getIdInstitucion())) {
-			return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Acceso denegado.");
-		}
 
 		try {
 			ProyectoEtapa etapaActual = proyectoEtapaService.obtenerEtapaPorClaveVisual(id, etapa);
@@ -138,11 +123,6 @@ public class DireccionProyectosApiController {
 		if (pOpt.isEmpty())
 			return ResponseEntity.notFound().build();
 
-		Institucion miInstitucion = seguridadService.getInstitucionActual();
-		if (miInstitucion != null
-				&& !pOpt.get().getInstitucion().getIdInstitucion().equals(miInstitucion.getIdInstitucion())) {
-			return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Acceso denegado.");
-		}
 		try {
 			ProyectoEtapa etapaActual = proyectoEtapaService.obtenerEtapaPorClaveVisual(id, etapa);
 			return ResponseEntity.ok(proyectoEtapaService.obtenerHistorialEtapa(etapaActual));

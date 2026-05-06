@@ -12,13 +12,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 import com.example.demo.modelo.EtapaPlantilla;
-import com.example.demo.modelo.Institucion;
 import com.example.demo.modelo.Proyecto;
 import com.example.demo.modelo.ProyectoEtapa;
 import com.example.demo.modelo.ProyectoEtapaEntrega;
@@ -53,16 +50,13 @@ public class ProyectoEtapaService {
 
 	private final ProyectoEtapaInteraccionRepository interaccionRepo;
 
-	private final SeguridadService seguridadService;
 
 	public ProyectoEtapaService(ProyectoEtapaRepository proyectoEtapaRepo, ProyectoEtapaEntregaRepository entregaRepo,
-			EtapaPlantillaRepository etapaPlantillaRepo, ProyectoEtapaInteraccionRepository interaccionRepo,
-			SeguridadService seguridadService) {
+			EtapaPlantillaRepository etapaPlantillaRepo, ProyectoEtapaInteraccionRepository interaccionRepo) {
 		this.proyectoEtapaRepo = proyectoEtapaRepo;
 		this.entregaRepo = entregaRepo;
 		this.etapaPlantillaRepo = etapaPlantillaRepo;
 		this.interaccionRepo = interaccionRepo;
-		this.seguridadService = seguridadService;
 	}
 
 	public void inicializarEtapasProyecto(Proyecto proyecto) {
@@ -81,9 +75,7 @@ public class ProyectoEtapaService {
 		String tipoObra = proyecto.getSolicitud() != null && proyecto.getSolicitud().getTipoObra() != null
 				? proyecto.getSolicitud().getTipoObra() : "Edificación";
 
-		// Pasamos la institución del proyecto para buscar sus plantillas específicas
-		Institucion institucion = proyecto.getInstitucion();
-		List<EtapaPlantilla> plantillas = obtenerTerminalesEnSecuencia(tipoObra, nivelesProyecto, institucion);
+		List<EtapaPlantilla> plantillas = obtenerTerminalesEnSecuencia(tipoObra, nivelesProyecto);
 		List<EtapaProgramada> secuencia = construirSecuenciaProgramada(plantillas, nivelesProyecto);
 
 		int orden = 1;
@@ -133,11 +125,6 @@ public class ProyectoEtapaService {
 		ProyectoEtapa etapa = proyectoEtapaRepo.findByClaveInternaAndNivel(idProyecto, claveInterna, numeroNivel)
 			.orElseThrow(() -> new RuntimeException("No se encontro la etapa para la clave: " + claveVisual));
 
-		Institucion miInstitucion = seguridadService.getInstitucionActual();
-		if (miInstitucion != null
-				&& !etapa.getProyecto().getInstitucion().getIdInstitucion().equals(miInstitucion.getIdInstitucion())) {
-			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Acceso denegado a las etapas de este proyecto.");
-		}
 
 		return etapa;
 	}
@@ -416,17 +403,6 @@ public class ProyectoEtapaService {
 	public Map<String, String> obtenerEstadosVisuales(Integer idProyecto) {
 		List<ProyectoEtapa> etapas = proyectoEtapaRepo.findByProyecto_IdProyectoOrderByOrdenVisualAsc(idProyecto);
 
-		if (!etapas.isEmpty()) {
-			Institucion miInstitucion = seguridadService.getInstitucionActual();
-			if (miInstitucion != null && !etapas.get(0)
-				.getProyecto()
-				.getInstitucion()
-				.getIdInstitucion()
-				.equals(miInstitucion.getIdInstitucion())) {
-				throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Acceso denegado a este proyecto.");
-			}
-		}
-
 		Map<String, String> mapa = new LinkedHashMap<>();
 
 		for (ProyectoEtapa pe : etapas) {
@@ -677,26 +653,24 @@ public class ProyectoEtapaService {
 		return true;
 	}
 
-	private List<EtapaPlantilla> obtenerTerminalesEnSecuencia(String tipoObra, int nivelesProyecto,
-			Institucion institucion) {
+	private List<EtapaPlantilla> obtenerTerminalesEnSecuencia(String tipoObra, int nivelesProyecto) {
 		List<EtapaPlantilla> roots = etapaPlantillaRepo
-			.findByInstitucionAndEtapaPadreIsNullAndTipoObraAndActivoTrueOrderByOrdenVisualAsc(institucion, tipoObra);
+			.findByEtapaPadreIsNullAndTipoObraAndActivoTrueOrderByOrdenVisualAsc(tipoObra);
 
 		List<EtapaPlantilla> terminales = new ArrayList<>();
 		for (EtapaPlantilla root : roots) {
-			appendTerminales(root, nivelesProyecto, terminales, institucion);
+			appendTerminales(root, nivelesProyecto, terminales);
 		}
 		return terminales;
 	}
 
-	private void appendTerminales(EtapaPlantilla plantilla, int nivelesProyecto, List<EtapaPlantilla> destino,
-			Institucion institucion) {
+	private void appendTerminales(EtapaPlantilla plantilla, int nivelesProyecto, List<EtapaPlantilla> destino) {
 		if (!aplicaANiveles(plantilla, nivelesProyecto)) {
 			return;
 		}
 
 		List<EtapaPlantilla> hijos = etapaPlantillaRepo
-			.findByInstitucionAndEtapaPadre_IdEtapaPlantillaOrderByOrdenVisualAsc(institucion,
+			.findByEtapaPadre_IdEtapaPlantillaOrderByOrdenVisualAsc(
 					plantilla.getIdEtapaPlantilla());
 
 		if (hijos == null || hijos.isEmpty()) {
@@ -707,7 +681,7 @@ public class ProyectoEtapaService {
 		}
 
 		for (EtapaPlantilla hijo : hijos) {
-			appendTerminales(hijo, nivelesProyecto, destino, institucion);
+			appendTerminales(hijo, nivelesProyecto, destino);
 		}
 	}
 

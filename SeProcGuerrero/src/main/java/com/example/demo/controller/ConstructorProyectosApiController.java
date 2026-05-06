@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.example.demo.modelo.Institucion;
 import com.example.demo.modelo.Proyecto;
 import com.example.demo.modelo.ProyectoEtapa;
 import com.example.demo.modelo.ProyectoEtapaEntrega;
@@ -28,7 +27,6 @@ import com.example.demo.repository.ProyectoEtapaRepository;
 import com.example.demo.repository.ProyectoRepository;
 import com.example.demo.repository.UsuarioRepository;
 import com.example.demo.service.ProyectoEtapaService;
-import com.example.demo.service.SeguridadService;
 import com.example.demo.storage.StorageService;
 
 @RestController
@@ -43,17 +41,16 @@ public class ConstructorProyectosApiController {
 
 	private final ProyectoEtapaService proyectoEtapaService;
 
-	private final SeguridadService seguridadService;
 
+	
 	public ConstructorProyectosApiController(ProyectoRepository proyectoRepo, UsuarioRepository usuarioRepo,
 			StorageService storageService, ProyectoEtapaRepository proyectoEtapaRepo,
-			ProyectoEtapaEntregaRepository entregaRepo, ProyectoEtapaService proyectoEtapaService,
-			SeguridadService seguridadService) {
+			ProyectoEtapaEntregaRepository entregaRepo, ProyectoEtapaService proyectoEtapaService) {
 		this.proyectoRepo = proyectoRepo;
 		this.usuarioRepo = usuarioRepo;
 		this.storageService = storageService;
 		this.proyectoEtapaService = proyectoEtapaService;
-		this.seguridadService = seguridadService;
+		
 	}
 
 	@GetMapping
@@ -65,30 +62,29 @@ public class ConstructorProyectosApiController {
 		}
 
 		Long constructorId = usuarioOpt.get().getIdUsuario();
-		Institucion miInstitucion = seguridadService.getInstitucionActual();
 
 		var items = proyectoRepo
-			.findByInstitucionAndSolicitud_IdUsuarioContratistaAndEstadoProyectoOrderByFechaAprobacionDesc(
-					miInstitucion, constructorId, estado.toUpperCase())
-			.stream()
-			.map(p -> {
-				SolicitudProyecto s = p.getSolicitud();
-				var supervisor = usuarioRepo.findById(p.getIdUsuarioSupervisor()).orElse(null);
+				.findBySolicitud_IdUsuarioContratistaAndEstadoProyectoOrderByFechaAprobacionDesc(constructorId,
+						estado.toUpperCase())
+				.stream().map(p -> {
+					SolicitudProyecto s = p.getSolicitud();
+					var supervisor = usuarioRepo.findById(p.getIdUsuarioSupervisor()).orElse(null);
 
-				return new HashMap<String, Object>() {
-					{
-						put("idProyecto", p.getIdProyecto());
-						put("idSolicitud", s.getIdSolicitud());
-						put("nombreEscuela", s.getNombreEscuela());
-						put("supervisor",
-								supervisor != null ? (supervisor.getNombre() + " " + supervisor.getApellido()) : "—");
-						put("fechaAprobacion", p.getFechaAprobacion() != null
-								? p.getFechaAprobacion().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")) : "");
-						put("estadoProyecto", p.getEstadoProyecto());
-					}
-				};
-			})
-			.toList();
+					return new HashMap<String, Object>() {
+						{
+							put("idProyecto", p.getIdProyecto());
+							put("idSolicitud", s.getIdSolicitud());
+							put("nombreEscuela", s.getNombreEscuela());
+							put("supervisor",
+									supervisor != null ? (supervisor.getNombre() + " " + supervisor.getApellido())
+											: "—");
+							put("fechaAprobacion", p.getFechaAprobacion() != null
+									? p.getFechaAprobacion().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))
+									: "");
+							put("estadoProyecto", p.getEstadoProyecto());
+						}
+					};
+				}).toList();
 
 		return ResponseEntity.ok(items);
 	}
@@ -102,17 +98,12 @@ public class ConstructorProyectosApiController {
 		}
 
 		Long constructorId = usuarioOpt.get().getIdUsuario();
-		Institucion miInstitucion = seguridadService.getInstitucionActual();
 
 		var pOpt = proyectoRepo.findById(id);
 		if (pOpt.isEmpty())
 			return ResponseEntity.notFound().build();
 
 		Proyecto p = pOpt.get();
-
-		if (!p.getInstitucion().getIdInstitucion().equals(miInstitucion.getIdInstitucion())) {
-			return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Acceso denegado a este proyecto");
-		}
 
 		SolicitudProyecto s = p.getSolicitud();
 
@@ -127,8 +118,10 @@ public class ConstructorProyectosApiController {
 		dto.put("idProyecto", p.getIdProyecto());
 		dto.put("idSolicitud", s.getIdSolicitud());
 		dto.put("estadoProyecto", p.getEstadoProyecto());
-		dto.put("fechaAprobacion", p.getFechaAprobacion() != null
-				? p.getFechaAprobacion().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")) : null);
+		dto.put("fechaAprobacion",
+				p.getFechaAprobacion() != null
+						? p.getFechaAprobacion().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))
+						: null);
 
 		dto.put("quienEnvia", constructor != null ? (constructor.getNombre() + " " + constructor.getApellido()) : "—");
 
@@ -162,7 +155,6 @@ public class ConstructorProyectosApiController {
 		}
 
 		var usuario = usuarioOpt.get();
-		Institucion miInstitucion = seguridadService.getInstitucionActual();
 
 		// Validar que el proyecto le pertenece al constructor
 		var pOpt = proyectoRepo.findById(id);
@@ -170,8 +162,8 @@ public class ConstructorProyectosApiController {
 			return ResponseEntity.notFound().build();
 
 		Proyecto p = pOpt.get();
-		if (!p.getInstitucion().getIdInstitucion().equals(miInstitucion.getIdInstitucion())
-				|| !usuario.getIdUsuario().equals(p.getSolicitud().getIdUsuarioContratista())) {
+
+		if (!usuario.getIdUsuario().equals(p.getSolicitud().getIdUsuarioContratista())) {
 			return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No tienes acceso a este proyecto.");
 		}
 
@@ -190,11 +182,9 @@ public class ConstructorProyectosApiController {
 			return ResponseEntity.ok(Map.of("mensaje",
 					"Archivo subido como borrador correctamente. Recuerda presionar 'Entregar' para enviarlo al supervisor.",
 					"url", publicUrl));
-		}
-		catch (IllegalArgumentException e) {
+		} catch (IllegalArgumentException e) {
 			return ResponseEntity.badRequest().body(e.getMessage());
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error interno al subir el reporte.");
 		}
 	}
@@ -209,7 +199,6 @@ public class ConstructorProyectosApiController {
 		}
 
 		var usuario = usuarioOpt.get();
-		Institucion miInstitucion = seguridadService.getInstitucionActual();
 
 		// Validar accesos
 		var pOpt = proyectoRepo.findById(id);
@@ -217,8 +206,9 @@ public class ConstructorProyectosApiController {
 			return ResponseEntity.notFound().build();
 
 		Proyecto p = pOpt.get();
-		if (!p.getInstitucion().getIdInstitucion().equals(miInstitucion.getIdInstitucion())
-				|| !usuario.getIdUsuario().equals(p.getSolicitud().getIdUsuarioContratista())) {
+
+		// Validar que el proyecto le pertenece al constructor logueado
+		if (!usuario.getIdUsuario().equals(p.getSolicitud().getIdUsuarioContratista())) {
 			return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No tienes acceso a este proyecto.");
 		}
 
@@ -228,11 +218,9 @@ public class ConstructorProyectosApiController {
 			proyectoEtapaService.confirmarEntregaAlSupervisor(etapaActual, usuario);
 
 			return ResponseEntity.ok(Map.of("mensaje", "El reporte ha sido enviado al supervisor exitosamente."));
-		}
-		catch (IllegalArgumentException e) {
+		} catch (IllegalArgumentException e) {
 			return ResponseEntity.badRequest().body(e.getMessage());
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error interno al enviar el reporte.");
 		}
 	}
@@ -246,16 +234,15 @@ public class ConstructorProyectosApiController {
 		}
 
 		Long constructorId = usuarioOpt.get().getIdUsuario();
-		Institucion miInstitucion = seguridadService.getInstitucionActual();
 
 		var pOpt = proyectoRepo.findById(id);
 		if (pOpt.isEmpty())
 			return ResponseEntity.notFound().build();
 
 		Proyecto p = pOpt.get();
-		if (!p.getInstitucion().getIdInstitucion().equals(miInstitucion.getIdInstitucion())
-				|| !constructorId.equals(p.getSolicitud().getIdUsuarioContratista())) {
-			return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No tienes acceso a este proyecto");
+
+		if (!constructorId.equals(p.getSolicitud().getIdUsuarioContratista())) {
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No tienes acceso a este proyecto.");
 		}
 
 		ProyectoEtapa etapaActual = proyectoEtapaService.obtenerEtapaPorClaveVisual(id, etapa);
@@ -271,16 +258,15 @@ public class ConstructorProyectosApiController {
 		}
 
 		Long constructorId = usuarioOpt.get().getIdUsuario();
-		Institucion miInstitucion = seguridadService.getInstitucionActual();
 
 		var pOpt = proyectoRepo.findById(id);
 		if (pOpt.isEmpty())
 			return ResponseEntity.notFound().build();
 
 		Proyecto p = pOpt.get();
-		if (!p.getInstitucion().getIdInstitucion().equals(miInstitucion.getIdInstitucion())
-				|| !constructorId.equals(p.getSolicitud().getIdUsuarioContratista())) {
-			return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No tienes acceso a este proyecto");
+
+		if (!constructorId.equals(p.getSolicitud().getIdUsuarioContratista())) {
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No tienes acceso a este proyecto.");
 		}
 
 		ProyectoEtapa etapaActual = proyectoEtapaService.obtenerEtapaPorClaveVisual(id, etapa);
@@ -295,25 +281,23 @@ public class ConstructorProyectosApiController {
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuario no encontrado.");
 		}
 
-		Institucion miInstitucion = seguridadService.getInstitucionActual();
 		var pOpt = proyectoRepo.findById(id);
 		if (pOpt.isEmpty())
 			return ResponseEntity.notFound().build();
 
 		Proyecto p = pOpt.get();
-		if (!p.getInstitucion().getIdInstitucion().equals(miInstitucion.getIdInstitucion())
-				|| !usuarioOpt.get().getIdUsuario().equals(p.getSolicitud().getIdUsuarioContratista())) {
+		
+		if (!usuarioOpt.get().getIdUsuario().equals(p.getSolicitud().getIdUsuarioContratista())) {
 			return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No tienes acceso a este proyecto.");
 		}
-
+		
 		try {
 			ProyectoEtapa etapaActual = proyectoEtapaService.obtenerEtapaPorClaveVisual(id, etapa);
 			proyectoEtapaService.eliminarArchivoDeBorrador(etapaActual, storagePath);
 			storageService.deleteIfExists(storagePath);
 
 			return ResponseEntity.ok(Map.of("mensaje", "Imagen eliminada correctamente."));
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			return ResponseEntity.badRequest().body(e.getMessage());
 		}
 	}
@@ -325,6 +309,11 @@ public class ConstructorProyectosApiController {
 		if (usuarioOpt.isEmpty()) {
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 		}
+		
+		var pOpt = proyectoRepo.findById(id);
+		if (pOpt.isEmpty() || !usuarioOpt.get().getIdUsuario().equals(pOpt.get().getSolicitud().getIdUsuarioContratista())) {
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+		}
 
 		try {
 			byte[] pdfBytes = proyectoEtapaService.generarPdfDeImagenesAprobadas(id, etapa);
@@ -335,8 +324,7 @@ public class ConstructorProyectosApiController {
 			headers.setContentDispositionFormData("attachment", "Reporte_Aprobado_" + etapa + ".pdf");
 
 			return new ResponseEntity<>(pdfBytes, headers, HttpStatus.OK);
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			return ResponseEntity.badRequest().build();
 		}
 	}
@@ -349,23 +337,21 @@ public class ConstructorProyectosApiController {
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuario no encontrado.");
 		}
 
-		Institucion miInstitucion = seguridadService.getInstitucionActual();
 		var pOpt = proyectoRepo.findById(id);
 		if (pOpt.isEmpty())
 			return ResponseEntity.notFound().build();
 
 		Proyecto p = pOpt.get();
-		if (!p.getInstitucion().getIdInstitucion().equals(miInstitucion.getIdInstitucion())
-				|| !usuarioOpt.get().getIdUsuario().equals(p.getSolicitud().getIdUsuarioContratista())) {
+		
+		if (!usuarioOpt.get().getIdUsuario().equals(p.getSolicitud().getIdUsuarioContratista())) {
 			return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No tienes acceso a este proyecto.");
 		}
-
+		
 		try {
 			ProyectoEtapa etapaActual = proyectoEtapaService.obtenerEtapaPorClaveVisual(id, etapa);
 			proyectoEtapaService.actualizarNotaDeBorrador(etapaActual, storagePath, nota);
 			return ResponseEntity.ok(Map.of("mensaje", "Nota actualizada correctamente."));
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			return ResponseEntity.badRequest().body(e.getMessage());
 		}
 	}

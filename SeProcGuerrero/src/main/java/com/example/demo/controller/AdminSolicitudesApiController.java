@@ -4,7 +4,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,18 +27,15 @@ import com.example.demo.service.SeguridadService;
 public class AdminSolicitudesApiController {
 
 	private final SolicitudProyectoRepository solRepo;
-
 	private final UsuarioRepository usuarioRepo;
-
 	private final ProyectoRepository proyectoRepo;
-
 	private final ProyectoEtapaService proyectoEtapaService;
-
 	private final SeguridadService seguridadService;
 
+
 	public AdminSolicitudesApiController(SolicitudProyectoRepository solRepo, UsuarioRepository usuarioRepo,
-			ProyectoRepository proyectoRepo, ProyectoEtapaService proyectoEtapaService,
-			SeguridadService seguridadService) {
+			ProyectoRepository proyectoRepo, ProyectoEtapaService proyectoEtapaService, SeguridadService seguridadService) {
+				
 		this.solRepo = solRepo;
 		this.usuarioRepo = usuarioRepo;
 		this.proyectoRepo = proyectoRepo;
@@ -49,10 +45,9 @@ public class AdminSolicitudesApiController {
 
 	@GetMapping
 	public ResponseEntity<?> listar(@RequestParam("estado") String estado) {
-		Institucion miInstitucion = seguridadService.getInstitucionActual();
-
+        // Solo pasamos el estado. Hibernate inyecta el Tenant por detrás.
 		var items = solRepo
-			.findByInstitucionAndEstadoSolicitudOrderByFechaSolicitudDesc(miInstitucion, estado.toUpperCase())
+			.findByEstadoSolicitudOrderByFechaSolicitudDesc(estado.toUpperCase())
 			.stream()
 			.map(s -> {
 				var u = usuarioRepo.findById(s.getIdUsuarioContratista()).orElse(null);
@@ -81,11 +76,6 @@ public class AdminSolicitudesApiController {
 
 		var s = solOpt.get();
 
-		Institucion miInstitucion = seguridadService.getInstitucionActual();
-		if (miInstitucion != null && !s.getInstitucion().getIdInstitucion().equals(miInstitucion.getIdInstitucion())) {
-			return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Acceso denegado a esta solicitud.");
-		}
-
 		SolicitudDetalleDto dto = new SolicitudDetalleDto();
 		dto.idSolicitud = s.getIdSolicitud();
 		dto.estadoSolicitud = s.getEstadoSolicitud();
@@ -110,8 +100,8 @@ public class AdminSolicitudesApiController {
 		dto.numEntreEjes = s.getNumEntreEjes();
 		dto.tipoObra = s.getTipoObra();
 		dto.tipoEdificacion = s.getTipoEdificacion() != null ? s.getTipoEdificacion().getNombre() : "";
-
-		var p = proyectoRepo.findByInstitucionAndSolicitud_IdSolicitud(miInstitucion, id).orElse(null);
+		
+		var p = proyectoRepo.findBySolicitud_IdSolicitud(id).orElse(null);
 		if (p != null && p.getIdUsuarioSupervisor() != null) {
 			var sup = usuarioRepo.findById(p.getIdUsuarioSupervisor()).orElse(null);
 			dto.supervisorAsignado = sup != null ? (sup.getNombre() + " " + sup.getApellido()) : "—";
@@ -125,8 +115,8 @@ public class AdminSolicitudesApiController {
 
 	@GetMapping("/supervisores")
 	public ResponseEntity<?> supervisores() {
+		
 		Institucion miInstitucion = seguridadService.getInstitucionActual();
-
 		var list = usuarioRepo.findByInstitucionAndRol_NombreIgnoreCase(miInstitucion, "supervisor")
 			.stream()
 			.map(u -> new HashMap<String, Object>() {
@@ -148,17 +138,12 @@ public class AdminSolicitudesApiController {
 
 		var s = solOpt.get();
 
-		Institucion miInstitucion = seguridadService.getInstitucionActual();
-
-		if (miInstitucion != null && !s.getInstitucion().getIdInstitucion().equals(miInstitucion.getIdInstitucion())) {
-			return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Acceso denegado.");
-		}
 
 		if (!"PENDIENTE".equalsIgnoreCase(s.getEstadoSolicitud())) {
 			return ResponseEntity.badRequest().body("Solo se puede aprobar si está PENDIENTE");
 		}
 
-		if (proyectoRepo.existsByInstitucionAndSolicitud_IdSolicitud(miInstitucion, id)) {
+		if (proyectoRepo.existsBySolicitud_IdSolicitud(id)) {
 			return ResponseEntity.badRequest().body("Ya existe un proyecto para esta solicitud");
 		}
 
@@ -176,8 +161,6 @@ public class AdminSolicitudesApiController {
 		p.setSolicitud(s);
 		p.setIdUsuarioSupervisor(supervisorId);
 		p.setEstadoProyecto("ACTIVO");
-
-		p.setInstitucion(miInstitucion);
 
 		Proyecto proyectoGuardado = proyectoRepo.save(p);
 		proyectoEtapaService.inicializarEtapasProyecto(proyectoGuardado);
@@ -197,11 +180,6 @@ public class AdminSolicitudesApiController {
 
 		var s = solOpt.get();
 
-		Institucion miInstitucion = seguridadService.getInstitucionActual();
-
-		if (miInstitucion != null && !s.getInstitucion().getIdInstitucion().equals(miInstitucion.getIdInstitucion())) {
-			return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Acceso denegado.");
-		}
 
 		if (!"PENDIENTE".equalsIgnoreCase(s.getEstadoSolicitud())) {
 			return ResponseEntity.badRequest().body("Solo se puede rechazar si está PENDIENTE");

@@ -3,7 +3,6 @@ package com.example.demo.controller;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -43,11 +42,8 @@ public class AdminProyectosApiController {
 
 	@GetMapping
 	public ResponseEntity<?> listar(@RequestParam("estado") String estado) {
-		// Obtenemos la institución del administrador logueado
-		Institucion miInstitucion = seguridadService.getInstitucionActual();
-
 		var items = proyectoRepo
-			.findByInstitucionAndEstadoProyectoOrderByFechaAprobacionDesc(miInstitucion, estado.toUpperCase())
+			.findByEstadoProyectoOrderByFechaAprobacionDesc(estado.toUpperCase())
 			.stream()
 			.map(p -> {
 				SolicitudProyecto s = p.getSolicitud();
@@ -82,11 +78,6 @@ public class AdminProyectosApiController {
 			return ResponseEntity.notFound().build();
 
 		Proyecto p = pOpt.get();
-
-		Institucion miInstitucion = seguridadService.getInstitucionActual();
-		if (miInstitucion != null && !p.getInstitucion().getIdInstitucion().equals(miInstitucion.getIdInstitucion())) {
-			return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Acceso denegado al proyecto.");
-		}
 
 		SolicitudProyecto s = p.getSolicitud();
 
@@ -135,11 +126,6 @@ public class AdminProyectosApiController {
 		if (pOpt.isEmpty())
 			return ResponseEntity.notFound().build();
 
-		Institucion miInstitucion = seguridadService.getInstitucionActual();
-		if (miInstitucion != null
-				&& !pOpt.get().getInstitucion().getIdInstitucion().equals(miInstitucion.getIdInstitucion())) {
-			return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Acceso denegado.");
-		}
 		try {
 			ProyectoEtapa etapaActual = proyectoEtapaService.obtenerEtapaPorClaveVisual(id, etapa);
 			return ResponseEntity.ok(proyectoEtapaService.obtenerDetalleActualEtapa(etapaActual));
@@ -155,11 +141,6 @@ public class AdminProyectosApiController {
 		if (pOpt.isEmpty())
 			return ResponseEntity.notFound().build();
 
-		Institucion miInstitucion = seguridadService.getInstitucionActual();
-		if (miInstitucion != null
-				&& !pOpt.get().getInstitucion().getIdInstitucion().equals(miInstitucion.getIdInstitucion())) {
-			return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Acceso denegado.");
-		}
 		try {
 			ProyectoEtapa etapaActual = proyectoEtapaService.obtenerEtapaPorClaveVisual(id, etapa);
 			return ResponseEntity.ok(proyectoEtapaService.obtenerHistorialEtapa(etapaActual));
@@ -177,12 +158,6 @@ public class AdminProyectosApiController {
 
 		Proyecto proyecto = pOpt.get();
 
-		Institucion miInstitucion = seguridadService.getInstitucionActual();
-		if (miInstitucion != null
-				&& !proyecto.getInstitucion().getIdInstitucion().equals(miInstitucion.getIdInstitucion())) {
-			return ResponseEntity.status(HttpStatus.FORBIDDEN)
-				.body("Acceso denegado. No puede modificar proyectos de otra empresa.");
-		}
 
 		String nuevoEstado = estado == null ? "" : estado.trim().toUpperCase();
 		if (!nuevoEstado.equals("ACTIVO") && !nuevoEstado.equals("INACTIVO") && !nuevoEstado.equals("FINALIZADO")) {

@@ -15,14 +15,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.demo.modelo.Institucion;
 import com.example.demo.modelo.Proyecto;
 import com.example.demo.modelo.ProyectoEtapa;
 import com.example.demo.modelo.SolicitudProyecto;
 import com.example.demo.repository.ProyectoRepository;
 import com.example.demo.repository.UsuarioRepository;
 import com.example.demo.service.ProyectoEtapaService;
-import com.example.demo.service.SeguridadService;
 
 @RestController
 @RequestMapping("/api/supervisor/proyectos")
@@ -34,14 +32,12 @@ public class SupervisorProyectosApiController {
 
 	private final ProyectoEtapaService proyectoEtapaService;
 
-	private final SeguridadService seguridadService;
 
 	public SupervisorProyectosApiController(ProyectoRepository proyectoRepo, UsuarioRepository usuarioRepo,
-			ProyectoEtapaService proyectoEtapaService, SeguridadService seguridadService) {
+			ProyectoEtapaService proyectoEtapaService) {
 		this.proyectoRepo = proyectoRepo;
 		this.usuarioRepo = usuarioRepo;
 		this.proyectoEtapaService = proyectoEtapaService;
-		this.seguridadService = seguridadService;
 	}
 
 	@GetMapping
@@ -53,10 +49,9 @@ public class SupervisorProyectosApiController {
 		}
 
 		Long supervisorId = usuarioOpt.get().getIdUsuario();
-		Institucion miInstitucion = seguridadService.getInstitucionActual();
 
 		var items = proyectoRepo
-			.findByInstitucionAndIdUsuarioSupervisorAndEstadoProyectoOrderByFechaAprobacionDesc(miInstitucion,
+			.findByIdUsuarioSupervisorAndEstadoProyectoOrderByFechaAprobacionDesc(
 					supervisorId, estado.toUpperCase())
 			.stream()
 			.map(p -> {
@@ -90,7 +85,6 @@ public class SupervisorProyectosApiController {
 		}
 
 		Long supervisorId = usuarioOpt.get().getIdUsuario();
-		Institucion miInstitucion = seguridadService.getInstitucionActual();
 
 		var pOpt = proyectoRepo.findById(id);
 		if (pOpt.isEmpty())
@@ -99,11 +93,6 @@ public class SupervisorProyectosApiController {
 		Proyecto p = pOpt.get();
 
 		if (!supervisorId.equals(p.getIdUsuarioSupervisor())) {
-			return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No tienes acceso a este proyecto");
-		}
-
-		if (!p.getInstitucion().getIdInstitucion().equals(miInstitucion.getIdInstitucion())
-				|| !supervisorId.equals(p.getIdUsuarioSupervisor())) {
 			return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No tienes acceso a este proyecto");
 		}
 
@@ -151,7 +140,6 @@ public class SupervisorProyectosApiController {
 
 		var supervisor = usuarioOpt.get();
 		Long supervisorId = supervisor.getIdUsuario();
-		Institucion miInstitucion = seguridadService.getInstitucionActual();
 
 		var pOpt = proyectoRepo.findById(id);
 		if (pOpt.isEmpty()) {
@@ -159,8 +147,8 @@ public class SupervisorProyectosApiController {
 		}
 
 		Proyecto p = pOpt.get();
-		if (!p.getInstitucion().getIdInstitucion().equals(miInstitucion.getIdInstitucion())
-				|| !supervisorId.equals(p.getIdUsuarioSupervisor())) {
+		
+		if (!supervisorId.equals(p.getIdUsuarioSupervisor())) {
 			return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No tienes acceso a este proyecto");
 		}
 
@@ -180,7 +168,7 @@ public class SupervisorProyectosApiController {
 
 		var supervisor = usuarioOpt.get();
 		Long supervisorId = supervisor.getIdUsuario();
-		Institucion miInstitucion = seguridadService.getInstitucionActual();
+
 
 		var pOpt = proyectoRepo.findById(id);
 		if (pOpt.isEmpty()) {
@@ -188,8 +176,8 @@ public class SupervisorProyectosApiController {
 		}
 
 		Proyecto p = pOpt.get();
-		if (!p.getInstitucion().getIdInstitucion().equals(miInstitucion.getIdInstitucion())
-				|| !supervisorId.equals(p.getIdUsuarioSupervisor())) {
+		
+		if (!supervisorId.equals(p.getIdUsuarioSupervisor())) {
 			return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No tienes acceso a este proyecto");
 		}
 
@@ -208,15 +196,15 @@ public class SupervisorProyectosApiController {
 		}
 
 		Long supervisorId = usuarioOpt.get().getIdUsuario();
-		Institucion miInstitucion = seguridadService.getInstitucionActual();
+
 
 		var pOpt = proyectoRepo.findById(id);
 		if (pOpt.isEmpty())
 			return ResponseEntity.notFound().build();
 
 		Proyecto p = pOpt.get();
-		if (!p.getInstitucion().getIdInstitucion().equals(miInstitucion.getIdInstitucion())
-				|| !supervisorId.equals(p.getIdUsuarioSupervisor())) {
+		
+		if (!supervisorId.equals(p.getIdUsuarioSupervisor())) {
 			return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No tienes acceso a este proyecto");
 		}
 
@@ -246,15 +234,15 @@ public class SupervisorProyectosApiController {
 		}
 
 		Long supervisorId = usuarioOpt.get().getIdUsuario();
-		Institucion miInstitucion = seguridadService.getInstitucionActual();
+
 
 		var pOpt = proyectoRepo.findById(id);
 		if (pOpt.isEmpty())
 			return ResponseEntity.notFound().build();
 
 		Proyecto p = pOpt.get();
-		if (!p.getInstitucion().getIdInstitucion().equals(miInstitucion.getIdInstitucion())
-				|| !supervisorId.equals(p.getIdUsuarioSupervisor())) {
+		
+		if (!supervisorId.equals(p.getIdUsuarioSupervisor())) {
 			return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No tienes acceso a este proyecto");
 		}
 
@@ -267,5 +255,4 @@ public class SupervisorProyectosApiController {
 
 		return ResponseEntity.ok(historial);
 	}
-
 }

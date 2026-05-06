@@ -32,7 +32,5 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
 	// Busca usuarios aprobados por rol DE ESA INSTITUCIÓN
 	List<Usuario> findByInstitucionAndActivoTrueAndRol_NombreIgnoreCase(Institucion institucion, String nombreRol);
 
-	// Para listar a todos los usuarios de la empresa
-	List<Usuario> findByInstitucion(Institucion institucion);
 
 }
