@@ -12,4 +12,8 @@ public interface StorageService {
 
 	String saveReporteImagen(Long userId, String username, Integer idProyecto, String etapa, MultipartFile file);
 
+	String saveInstitutionLogo(String abreviacion, MultipartFile file);
+
+	String publicLogoUrl(String key);
+
 }

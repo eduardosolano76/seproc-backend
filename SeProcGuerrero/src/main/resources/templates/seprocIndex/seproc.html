@@ -200,37 +200,23 @@
                 </div>
 
                 <div class="dependencias-grid">
-                    <!-- Institución 1 -->
-                    <a th:href="@{/login}" class="dependencia-card">
+                    <!-- Bucle dinámico que itera sobre la lista de instituciones -->
+                    <a
+                        th:each="inst : ${instituciones}"
+                        th:href="@{/login/{abrev}(abrev=${#strings.toLowerCase(inst.abreviacion)})}"
+                        class="dependencia-card"
+                    >
+                        <!-- Usamos el StorageService inyectado en Thymeleaf para generar la URL pública de Firebase -->
                         <img
-                            src="https://ui-avatars.com/api/?name=IG&background=155093&color=fff"
-                            alt="Logo"
+                            th:src="${inst.logoUrl != null and !inst.logoUrl.isEmpty() ? @storageService.publicLogoUrl(inst.logoUrl) : 'https://ui-avatars.com/api/?name=' + inst.abreviacion + '&background=155093&color=fff'}"
+                            th:alt="'Logo ' + ${inst.abreviacion}"
                             class="dependencia-logo"
                         />
-                        <span class="dependencia-name"
-                            >Instituto Guerrerense de la Infraestructura Física Educativa
-                            (IGIFE)</span
-                        >
-                    </a>
 
-                    <!-- Institución 2 -->
-                    <a th:href="@{/login}" class="dependencia-card">
-                        <img
-                            src="https://ui-avatars.com/api/?name=SEP&background=155093&color=fff"
-                            alt="Logo"
-                            class="dependencia-logo"
-                        />
-                        <span class="dependencia-name">Secretaría de Educación Pública</span>
-                    </a>
-
-                    <!-- Institución 3 -->
-                    <a th:href="@{/login}" class="dependencia-card">
-                        <img
-                            src="https://ui-avatars.com/api/?name=UAG&background=155093&color=fff"
-                            alt="Logo"
-                            class="dependencia-logo"
-                        />
-                        <span class="dependencia-name">Universidad Autónoma de Guerrero</span>
+                        <!-- Nombre oficial de la empresa -->
+                        <span class="dependencia-name" th:text="${inst.nombreOficial}">
+                            Nombre de la Institución
+                        </span>
                     </a>
                 </div>
             </div>

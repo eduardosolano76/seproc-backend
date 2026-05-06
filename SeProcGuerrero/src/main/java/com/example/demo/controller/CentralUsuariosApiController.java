@@ -1,30 +1,37 @@
 package com.example.demo.controller;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.example.demo.dto.UsuarioUpsertDto;
 import com.example.demo.modelo.Rol;
 import com.example.demo.modelo.Usuario;
 import com.example.demo.repository.RolRepository;
 import com.example.demo.repository.UsuarioRepository;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.*;
+import com.example.demo.service.SeguridadService;
 
 @RestController
 @RequestMapping("/api/central/usuarios")
 public class CentralUsuariosApiController {
 
 	private final UsuarioRepository usuarioRepo;
-
 	private final RolRepository rolRepo;
-
 	private final PasswordEncoder passwordEncoder;
+	private final SeguridadService seguridadService;
 
 	public CentralUsuariosApiController(UsuarioRepository usuarioRepo, RolRepository rolRepo,
-			PasswordEncoder passwordEncoder) {
+			PasswordEncoder passwordEncoder, SeguridadService seguridadService) {
 		this.usuarioRepo = usuarioRepo;
 		this.rolRepo = rolRepo;
 		this.passwordEncoder = passwordEncoder;
+		this.seguridadService = seguridadService;
 	}
 
 	@GetMapping("/{id}")
@@ -80,6 +87,8 @@ public class CentralUsuariosApiController {
 		u.setPassword(passwordEncoder.encode(dto.getPassword()));
 		u.setActivo(true);
 		u.setRol(rol);
+		
+		u.setInstitucion(seguridadService.getInstitucionActual());
 
 		usuarioRepo.save(u);
 		return ResponseEntity.status(HttpStatus.CREATED).build();

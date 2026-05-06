@@ -92,6 +92,12 @@ public class AdminController {
 			model.addAttribute("fotoUrl", fotoUrl);
 			model.addAttribute("nombreUsuario", nombreCompleto);
 			model.addAttribute("rolUsuario", rol);
+			
+			if (usuario.getInstitucion() != null) {
+				model.addAttribute("logoEmpresa", storageService.publicLogoUrl(usuario.getInstitucion().getLogoUrl()));
+			} else {
+				model.addAttribute("logoEmpresa", "/assets/iconos/logo.jpg");
+			}
 		}
 		else {
 			model.addAttribute("fotoUrl", "/assets/iconos/sinFotoPerfil.png");

@@ -22,7 +22,11 @@
             <aside class="sidebar" id="sidebar">
                 <div class="brand">
                     <div class="logo">
-                        <img th:src="@{/assets/logo.jpg}" alt="Logo" />
+                        <!-- Usamos la variable logoEmpresa que mandaremos desde el controlador -->
+                        <img
+                            th:src="${logoEmpresa != null ? logoEmpresa : '/assets/iconos/logoIgife.jpg'}"
+                            alt="Logo Institución"
+                        />
                     </div>
                 </div>
 

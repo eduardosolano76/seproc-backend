@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.example.demo.modelo.SolicitudInstitucion;
+import com.example.demo.repository.InstitucionRepository;
 import com.example.demo.repository.SolicitudInstitucionRepository;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -18,10 +19,14 @@ public class SeprocController {
 	
 	@Autowired
     private SolicitudInstitucionRepository solicitudRepository;
+	@Autowired
+	private InstitucionRepository institucionRepo;
 
 	@GetMapping("/seproc")
 	public String seproc(Model model, HttpServletRequest request) {
 		request.getSession(true);
+		
+		model.addAttribute("instituciones", institucionRepo.findByActiva(1));
 		
 		model.addAttribute("solicitud", new SolicitudInstitucion());
 		return "seprocIndex/seproc";

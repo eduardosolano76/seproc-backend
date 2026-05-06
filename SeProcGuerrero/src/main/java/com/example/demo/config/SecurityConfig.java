@@ -14,6 +14,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import com.example.demo.security.AdminSistemaDetailsService;
 import com.example.demo.security.CustomUserDetailsService;
 import com.example.demo.security.RoleRedirectSuccessHandler;
+import com.example.demo.security.TenantLogoutSuccessHandler;
 
 @Configuration
 @EnableWebSecurity
@@ -46,55 +47,73 @@ public class SecurityConfig {
 	@Bean
 	@Order(2)
 	SecurityFilterChain securityFilterChain(HttpSecurity http, RoleRedirectSuccessHandler successHandler,
-			CustomUserDetailsService customUserDetailsService, PasswordEncoder passwordEncoder, TenantFilter tenantFilter) throws Exception {
+			CustomUserDetailsService customUserDetailsService, PasswordEncoder passwordEncoder,
+			TenantFilter tenantFilter, TenantLogoutSuccessHandler logoutHandler) throws Exception {
 
 		// EXPLÍCITAMENTE para los clientes
 		DaoAuthenticationProvider clientProvider = new DaoAuthenticationProvider(customUserDetailsService);
 		clientProvider.setPasswordEncoder(passwordEncoder);
 
 		http.authenticationProvider(clientProvider)
-		.addFilterAfter(tenantFilter, UsernamePasswordAuthenticationFilter.class)
-		.authorizeHttpRequests(auth -> auth
-				// ESTÁTICOS
-				.requestMatchers("/assets/**", "/css/**", "/js/**", "/images/**", "/static/**", "/uploads/**")
-				.permitAll()
+				.addFilterAfter(tenantFilter, UsernamePasswordAuthenticationFilter.class)
+				.authorizeHttpRequests(auth -> auth
+						// ESTÁTICOS
+						.requestMatchers("/assets/**", "/css/**", "/js/**", "/images/**", "/static/**", "/uploads/**")
+						.permitAll()
 
-				// PÚBLICOS
-				.requestMatchers("/login", "/auth/**", "/public/**", "/registro/**", "/seproc/**",
-						"/solicitar-acceso/**")
-				.permitAll()
+						// PÚBLICOS
+						.requestMatchers("/login", "/login/**", "/auth/**", "/public/**", "/registro/**", "/seproc/**",
+								"/solicitar-acceso/**")
+						.permitAll()
 
-				// MÓDULOS POR ROL
-				.requestMatchers("/admin", "/admin/**").hasRole("ADMINISTRADOR").requestMatchers("/api/admin/**")
-				.hasRole("ADMINISTRADOR")
+						// MÓDULOS POR ROL
+						.requestMatchers("/admin", "/admin/**").hasRole("ADMINISTRADOR")
+						.requestMatchers("/api/admin/**").hasRole("ADMINISTRADOR")
 
-				.requestMatchers("/constructor", "/constructor/**").hasRole("CONTRATISTA")
-				.requestMatchers("/api/constructor/**").hasRole("CONTRATISTA")
+						.requestMatchers("/constructor", "/constructor/**").hasRole("CONTRATISTA")
+						.requestMatchers("/api/constructor/**").hasRole("CONTRATISTA")
 
-				.requestMatchers("/supervisor", "/supervisor/**").hasRole("SUPERVISOR")
-				.requestMatchers("/api/supervisor/**").hasRole("SUPERVISOR")
+						.requestMatchers("/supervisor", "/supervisor/**").hasRole("SUPERVISOR")
+						.requestMatchers("/api/supervisor/**").hasRole("SUPERVISOR")
 
-				.requestMatchers("/central", "/central/**").hasRole("CENTRAL").requestMatchers("/api/central/**")
-				.hasRole("CENTRAL")
+						.requestMatchers("/central", "/central/**").hasRole("CENTRAL")
+						.requestMatchers("/api/central/**").hasRole("CENTRAL")
 
-				.requestMatchers("/direccion", "/direccion/**").hasRole("DIRECCION")
-				.requestMatchers("/api/direccion/**").hasRole("DIRECCION")
+						.requestMatchers("/direccion", "/direccion/**").hasRole("DIRECCION")
+						.requestMatchers("/api/direccion/**").hasRole("DIRECCION")
 
-				.anyRequest().authenticated())
-				.formLogin(form -> form.loginPage("/login").loginProcessingUrl("/login").successHandler(successHandler) // <--
-																														// REDIRECCIÓN
-																														// POR
-																														// ROL
+						.anyRequest().authenticated())
+				.formLogin(form -> form
+						.loginPage("/login")
+						.loginProcessingUrl("/login")
+						.successHandler(successHandler)
 						.failureHandler((request, response, exception) -> {
-							if (exception instanceof org.springframework.security.authentication.DisabledException) {
-								response.sendRedirect("/login?pending=true");
-							} else {
-								response.sendRedirect("/login?error=true");
-							}
-						}).permitAll())
-				.logout(logout -> logout.logoutUrl("/logout").logoutSuccessUrl("/login?logout=true").permitAll());
+							
+							// 1. Leemos la empresa que mandamos oculta en el HTML
+							String empresa = request.getParameter("empresa");
+							String redirectUrl = "/login"; // Ruta por defecto (genérica)
 
-		return http.build();
+							// 2. Si venía de una empresa, armamos la URL dinámica
+							if (empresa != null && !empresa.trim().isEmpty()) {
+								redirectUrl = "/login/" + empresa.trim().toLowerCase();
+							}
+
+							// 3. Redirigimos con el error correspondiente a la URL que armamos
+							if (exception instanceof org.springframework.security.authentication.DisabledException) {
+								response.sendRedirect(redirectUrl + "?pending=true");
+							} else {
+								response.sendRedirect(redirectUrl + "?error=true");
+							}
+						})
+						.permitAll()
+					)
+					.logout(logout -> logout
+						.logoutUrl("/logout")
+						.logoutSuccessHandler(logoutHandler) 
+						.permitAll()
+					);
+
+					return http.build();
 	}
 
 	@Bean

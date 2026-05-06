@@ -3,7 +3,12 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>SEPROC | Solicitud enviada</title>
+        <!-- Título dinámico -->
+        <title
+            th:text="${institucion != null ? institucion.abreviacion + ' | Solicitud enviada' : 'SEPROC | Solicitud enviada'}"
+        >
+            SeProc | Solicitud enviada
+        </title>
 
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -16,19 +21,53 @@
     </head>
     <body class="success-page">
         <main class="success-shell">
-            <section class="success-card">
-                <h1 class="success-title">Solicitud enviada</h1>
+            <section class="success-card" style="text-align: center">
+                <!-- LOGO DINÁMICO DE LA INSTITUCIÓN -->
+                <div th:if="${institucion != null}" style="margin-bottom: 20px">
+                    <img
+                        th:src="${logoUrl != null ? logoUrl : '/assets/logo.jpg'}"
+                        th:alt="'Logo ' + ${institucion.abreviacion}"
+                        style="max-height: 95px; width: auto; mix-blend-mode: multiply"
+                    />
+                </div>
 
-                <p class="success-text">
-                    Tu cuenta quedó <strong>pendiente de aprobación</strong>. Un administrador
-                    revisará tu solicitud y te asignará un rol.
+                <h1 class="success-title">¡Solicitud enviada!</h1>
+
+                <!-- TEXTO DINÁMICO CON EL NOMBRE DE LA INSTITUCIÓN -->
+                <p class="success-text" style="text-align: center">
+                    Tu cuenta para
+                    <strong
+                        th:text="${institucion != null ? institucion.nombreOficial : 'esta institución'}"
+                        >la institución</strong
+                    >
+                    quedó <strong>pendiente de aprobación</strong>. Un administrador revisará tu
+                    solicitud y te asignará un rol.
                 </p>
 
-                <p class="success-text success-text-strong">
+                <p class="success-text success-text-strong" style="text-align: center">
                     Mientras tanto, no podrás iniciar sesión.
                 </p>
 
-                <a class="success-link" th:href="@{/login}">Regresar al login</a>
+                <!-- BOTÓN DINÁMICO PARA REGRESAR AL LOGIN DE ESA EMPRESA -->
+                <a
+                    th:href="@{/login/{abrev}(abrev=${abreviacionUrl})}"
+                    style="
+                        display: inline-block;
+                        padding: 12px 24px;
+                        background-color: #155093;
+                        color: white;
+                        text-decoration: none;
+                        border-radius: 999px;
+                        font-weight: 600;
+                        font-size: 14px;
+                        margin-top: 10px;
+                        transition: background-color 0.2s;
+                    "
+                    onmouseover="this.style.backgroundColor='#103f74'"
+                    onmouseout="this.style.backgroundColor='#155093'"
+                >
+                    Volver al inicio de sesión
+                </a>
             </section>
         </main>
     </body>

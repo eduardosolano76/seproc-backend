@@ -1,5 +1,12 @@
 package com.example.demo.controller;
 
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.example.demo.dto.SolicitudProyectoRequest;
 import com.example.demo.modelo.CatEstado;
 import com.example.demo.modelo.CatLocalidad;
@@ -12,9 +19,6 @@ import com.example.demo.repository.CatMunicipioRepository;
 import com.example.demo.repository.SolicitudProyectoRepository;
 import com.example.demo.repository.TipoEdificacionRepository;
 import com.example.demo.repository.UsuarioRepository;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/constructor")
@@ -69,6 +73,8 @@ public class ConstructorSolicitudController {
 		SolicitudProyecto s = new SolicitudProyecto();
 		s.setIdUsuarioContratista(usuario.get().getIdUsuario());
 		s.setEstadoSolicitud("PENDIENTE");
+		
+		s.setInstitucion(usuario.get().getInstitucion());
 
 		s.setNombreEscuela(req.nombreEscuela);
 		s.setCct1(req.cct1);

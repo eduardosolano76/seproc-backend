@@ -102,6 +102,13 @@ public class ConstructorController {
 			String rol = (usuario.getRol() != null) ? usuario.getRol().getNombre() : "sin rol";
 			model.addAttribute("rolUsuario", rol);
 			model.addAttribute("fotoUrl", storageService.publicUrl(usuario.getFoto()));
+			
+			if (usuario.getInstitucion() != null) {
+				String logoFirebase = storageService.publicLogoUrl(usuario.getInstitucion().getLogoUrl());
+				model.addAttribute("logoEmpresa", logoFirebase);
+			} else {
+				model.addAttribute("logoEmpresa", "/assets/iconos/logo.jpg");
+			}
 		}
 		else {
 			model.addAttribute("nombreUsuario", username);

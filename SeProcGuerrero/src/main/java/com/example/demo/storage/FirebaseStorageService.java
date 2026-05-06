@@ -10,15 +10,35 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.example.demo.modelo.Institucion;
+import com.example.demo.service.SeguridadService;
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.Bucket;
 import com.google.firebase.cloud.StorageClient;
 
-@Service
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@Service("storageService")
 @Primary
 public class FirebaseStorageService implements StorageService {
 
 	private static final Set<String> ALLOWED = Set.of("image/png", "image/jpeg", "image/webp");
+
+	private final SeguridadService seguridadService;
+
+	public FirebaseStorageService(SeguridadService seguridadService) {
+		this.seguridadService = seguridadService;
+	}
+
+	// Método auxiliar para obtener la carpeta raíz según el tenant
+	private String obtenerPrefijoTenant() {
+		Institucion inst = seguridadService.getInstitucionActual();
+		if (inst != null && inst.getAbreviacion() != null && !inst.getAbreviacion().isBlank()) {
+			return "institucion_" + inst.getAbreviacion().toLowerCase() + "/";
+		}
+		return "institucion_default/";
+	}
 
 	@Override
 	public String saveProfilePhoto(Long userId, String username, MultipartFile file) {
@@ -35,15 +55,14 @@ public class FirebaseStorageService implements StorageService {
 		String ext = extension(file.getOriginalFilename());
 		String safeUsername = sanitize(username);
 
-		String folder = "usuarios/" + userId + "_" + safeUsername;
+		String folder = obtenerPrefijoTenant() + "usuarios/" + userId + "_" + safeUsername;
 		String filename = folder + "/profile_" + UUID.randomUUID() + (ext.isBlank() ? "" : "." + ext);
 
 		try {
 			Bucket bucket = StorageClient.getInstance().bucket();
 			bucket.create(filename, file.getInputStream(), file.getContentType());
 			return filename;
-		}
-		catch (IOException e) {
+		} catch (IOException e) {
 			throw new RuntimeException("Error al subir imagen a Firebase", e);
 		}
 	}
@@ -59,9 +78,8 @@ public class FirebaseStorageService implements StorageService {
 			if (blob != null) {
 				blob.delete();
 			}
-		}
-		catch (Exception e) {
-			System.err.println("No se pudo eliminar el archivo anterior: " + e.getMessage());
+		} catch (Exception e) {
+			log.error("No se pudo eliminar el archivo anterior [{}]: {}", key, e.getMessage());
 		}
 	}
 
@@ -77,7 +95,7 @@ public class FirebaseStorageService implements StorageService {
 			return null;
 		}
 
-		URL signedUrl = blob.signUrl(3650, TimeUnit.DAYS);
+		URL signedUrl = blob.signUrl(1, TimeUnit.HOURS);
 		return signedUrl.toString();
 	}
 
@@ -115,8 +133,37 @@ public class FirebaseStorageService implements StorageService {
 
 		String ext = extension(file.getOriginalFilename());
 
-		String folder = "usuarios/" + userId + "_" + safeUsername + "/proyectos/" + idProyecto + "/" + etapa;
+		String folder = obtenerPrefijoTenant() + "usuarios/" + userId + "_" + safeUsername + "/proyectos/" + idProyecto
+				+ "/" + etapa;
 		String filename = folder + "/reporte_" + UUID.randomUUID() + (ext.isBlank() ? "" : "." + ext);
+
+		try {
+			Bucket bucket = StorageClient.getInstance().bucket();
+			bucket.create(filename, file.getInputStream(), file.getContentType());
+			return filename;
+		} catch (IOException e) {
+			throw new RuntimeException("Error al subir el reporte a Firebase", e);
+		}
+	}
+
+	@Override
+	public String saveInstitutionLogo(String abreviacion, MultipartFile file) {
+		if (file == null || file.isEmpty()) {
+			throw new IllegalArgumentException("Archivo vacío.");
+		}
+		if (!ALLOWED.contains(file.getContentType())) {
+			throw new IllegalArgumentException("Formato no permitido. Usa PNG/JPG/WEBP.");
+		}
+		if (file.getSize() > 5 * 1024 * 1024) { // 5MB es más que suficiente para un logo
+			throw new IllegalArgumentException("El logo no debe superar los 5MB.");
+		}
+
+		String ext = extension(file.getOriginalFilename());
+		String safeAbreviacion = sanitize(abreviacion);
+
+		// Carpeta exclusiva para los logos de la institución (ej. institucion_igife/logo/)
+		String folder = "institucion_" + safeAbreviacion + "/logo";
+		String filename = folder + "/logo_" + UUID.randomUUID() + (ext.isBlank() ? "" : "." + ext);
 
 		try {
 			Bucket bucket = StorageClient.getInstance().bucket();
@@ -124,8 +171,31 @@ public class FirebaseStorageService implements StorageService {
 			return filename;
 		}
 		catch (IOException e) {
-			throw new RuntimeException("Error al subir el reporte a Firebase", e);
+			throw new RuntimeException("Error al subir el logo a Firebase", e);
 		}
+	}
+
+	@Override
+	public String publicLogoUrl(String key) {
+		if (key == null || key.isBlank()) {
+			return "/assets/iconos/logoIgife.jpg"; // Fallback de seguridad
+		}
+
+		// Si en la base de datos detectamos que es tu ruta local antigua, la devolvemos tal cual.
+		if (key.startsWith("/assets/")) {
+			return key;
+		}
+
+		Bucket bucket = StorageClient.getInstance().bucket();
+		Blob blob = bucket.get(key);
+
+		if (blob == null) {
+			return "/assets/iconos/logoIgife.jpg";
+		}
+
+		// Como es un logo (público), generamos una firma por 10 años (3650 días)
+		URL signedUrl = blob.signUrl(3650, TimeUnit.DAYS);
+		return signedUrl.toString();
 	}
 
 }

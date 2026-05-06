@@ -3,7 +3,12 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>SEPROC | Iniciar sesión</title>
+        <!-- Título dinámico -->
+        <title
+            th:text="${institucion != null ? institucion.abreviacion + ' | Iniciar sesión' : 'SEPROC | Iniciar sesión'}"
+        >
+            SeProc | Iniciar sesión
+        </title>
 
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -33,11 +38,14 @@
 
                 <section class="login-form-panel">
                     <div class="login-form-box">
-                        <!-- Logo de la institución -->
-                        <div style="text-align: center; margin-bottom: 16px">
+                        <!-- Logo dinamico -->
+                        <div
+                            th:if="${institucion != null}"
+                            style="text-align: center; margin-bottom: 16px"
+                        >
                             <img
-                                th:src="@{/assets/logo.jpg}"
-                                alt="Logo Institución"
+                                th:src="${logoUrl != null ? logoUrl : '/assets/logo.jpg'}"
+                                th:alt="'Logo ' + ${institucion.abreviacion}"
                                 style="max-height: 115px; width: auto; mix-blend-mode: multiply"
                             />
                         </div>
@@ -73,11 +81,24 @@
                                 th:value="${_csrf.token}"
                             />
 
+                            <input
+                                type="hidden"
+                                name="empresa"
+                                th:if="${abreviacionUrl != null}"
+                                th:value="${abreviacionUrl}"
+                            />
+
                             <button class="btn-login" type="submit">Iniciar sesión</button>
 
-                            <p class="register-prompt">
+                            <!-- Registro dinamico (Solo si hay institución) -->
+                            <p class="register-prompt" th:if="${institucion != null}">
                                 ¿No tienes cuenta?
-                                <a class="btn-register-link" th:href="@{/registro}">Regístrate</a>
+                                <a
+                                    class="btn-register-link"
+                                    th:href="@{/registro/{abrev}(abrev=${abreviacionUrl})}"
+                                >
+                                    Regístrate en <span th:text="${institucion.abreviacion}"></span>
+                                </a>
                             </p>
 
                             <p class="form-message error" th:if="${param.error}">

@@ -49,6 +49,12 @@ public class SupervisorController {
 			String rol = (usuario.getRol() != null) ? usuario.getRol().getNombre() : "sin rol";
 			model.addAttribute("rolUsuario", rol);
 			model.addAttribute("fotoUrl", storageService.publicUrl(usuario.getFoto()));
+			
+			if (usuario.getInstitucion() != null) {
+				model.addAttribute("logoEmpresa", storageService.publicLogoUrl(usuario.getInstitucion().getLogoUrl()));
+			} else {
+				model.addAttribute("logoEmpresa", "/assets/iconos/logoIgife.jpg");
+			}
 		}
 		else {
 			model.addAttribute("nombreUsuario", username);

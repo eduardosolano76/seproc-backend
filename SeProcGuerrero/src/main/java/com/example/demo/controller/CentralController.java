@@ -59,8 +59,8 @@ public class CentralController {
 			// cargue su logo
 			Institucion miInstitucion = usuario.getInstitucion();
 			if (miInstitucion != null) {
-				model.addAttribute("logoEmpresa", miInstitucion.getLogoUrl());
-				model.addAttribute("nombreEmpresa", miInstitucion.getAbreviacion());
+			    model.addAttribute("logoEmpresa", storageService.publicLogoUrl(miInstitucion.getLogoUrl()));
+			    model.addAttribute("nombreEmpresa", miInstitucion.getAbreviacion());
 			}
 			else {
 				model.addAttribute("logoEmpresa", "/assets/iconos/logoIgife.jpg"); // Fallback
