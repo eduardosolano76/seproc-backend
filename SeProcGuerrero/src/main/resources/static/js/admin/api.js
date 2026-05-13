@@ -160,3 +160,13 @@ export async function deleteProfilePhoto() {
 
   return data;
 }
+
+export async function fetchDocumentacionInicialProyecto(idProyecto) {
+  return await fetchJson(`/api/admin/proyectos/${idProyecto}/documentacion-inicial`);
+}
+
+export async function fetchDocumentacionInicialSolicitud(idSolicitud) {
+  return await fetchJson(`/api/admin/solicitudes/${idSolicitud}/documentacion-inicial`, {
+    cache: 'no-store'
+  });
+}

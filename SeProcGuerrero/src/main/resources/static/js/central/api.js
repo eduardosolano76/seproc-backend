@@ -168,3 +168,30 @@ export async function deleteProfilePhoto() {
 
   return data;
 }
+
+export async function fetchDocumentacionInicialProyecto(idProyecto) {
+  const res = await fetch(`/api/central/proyectos/${idProyecto}/documentacion-inicial`, {
+    cache: 'no-store'
+  });
+
+  const text = await res.text();
+  let data = {};
+
+  try {
+    data = text ? JSON.parse(text) : {};
+  } catch (e) {
+    data = {};
+  }
+
+  if (!res.ok) {
+    throw new Error(data?.message || text || 'No se pudo cargar la documentación inicial.');
+  }
+
+  return data;
+}
+
+export async function fetchDocumentacionInicialSolicitud(idSolicitud) {
+  return await fetchJson(`/api/central/solicitudes/${idSolicitud}/documentacion-inicial`, {
+    cache: 'no-store'
+  });
+}

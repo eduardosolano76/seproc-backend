@@ -348,6 +348,28 @@ function iconoVisualDesdeEstado(estado) {
     return '/assets/iconos/bloqueado.png';
 }
 
+function renderProcessActionsSupervisor(dto) {
+    return `
+        <div class="process-actions">
+            <button class="btn-doc-inicial" type="button" data-doc-inicial="${dto.idProyecto}">
+                Documentación inicial
+            </button>
+
+            <div class="project-more-wrap">
+                <button class="project-more-trigger" type="button" data-more-trigger aria-label="Opciones">
+                    ⋮
+                </button>
+
+                <div class="project-more-menu">
+                    <button class="project-more-option" type="button" data-more-doc="${dto.idProyecto}">
+                        Documentación inicial
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
 export function renderProcesoSupervisor(dto) {
     const container = document.getElementById('supervisorProcesoContent');
     if (!container) return;
@@ -404,6 +426,10 @@ export function renderProcesoSupervisor(dto) {
         </div>
 
         <div class="process-mini-right">
+		<div class="process-mini-summary-top">
+		    ${renderProcessActionsSupervisor(dto)}
+		</div>
+		
           <div class="process-mini-progress-label">Avance en %</div>
           <div class="process-mini-track">
             <div class="process-mini-fill" style="width:25%;"></div>

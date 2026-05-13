@@ -77,18 +77,75 @@ export async function fetchLocalidades(municipioId) {
 
 export async function postSolicitud(payload) {
   const headers = buildHeaders({ 'Content-Type': 'application/json' });
+
   const res = await fetch('/api/constructor/solicitudes', {
     method: 'POST',
     headers,
     body: JSON.stringify(payload)
   });
 
-  if (!res.ok) {
-    const msg = await res.text();
-    throw new Error(msg || 'Error al guardar');
+  const text = await res.text();
+  let data = {};
+
+  try {
+    data = text ? JSON.parse(text) : {};
+  } catch (e) {
+    data = {};
   }
+
+  if (!res.ok) {
+    throw new Error(data?.message || text || 'Error al guardar');
+  }
+
+  return data;
 }
 
+export async function uploadDocumentoInicialSolicitud(idSolicitud, tipoDocumento, file) {
+  const { token, header } = getCsrf();
+
+  const form = new FormData();
+  form.append('file', file);
+
+  const res = await fetch(`/api/constructor/solicitudes/${idSolicitud}/documentos/${tipoDocumento}`, {
+    method: 'POST',
+    body: form,
+    headers: token && header ? { [header]: token } : {}
+  });
+
+  const text = await res.text();
+  let data = {};
+
+  try {
+    data = text ? JSON.parse(text) : {};
+  } catch (e) {
+    data = {};
+  }
+
+  if (!res.ok) {
+    throw new Error(data?.message || text || 'No se pudo subir el documento.');
+  }
+
+  return data;
+}
+
+export async function fetchDocumentacionInicialProyecto(idProyecto) {
+  const res = await fetch(`/api/constructor/proyectos/${idProyecto}/documentacion-inicial`);
+
+  const text = await res.text();
+  let data = {};
+
+  try {
+    data = text ? JSON.parse(text) : {};
+  } catch (e) {
+    data = {};
+  }
+
+  if (!res.ok) {
+    throw new Error(data?.message || text || 'No se pudo cargar la documentación inicial.');
+  }
+
+  return data;
+}
 
 export async function deleteProfilePhoto() {
   const headers = buildHeaders();

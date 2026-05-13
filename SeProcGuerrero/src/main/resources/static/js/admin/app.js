@@ -53,13 +53,27 @@ async function loadAndRender() {
 async function openDetalleSolicitud(idSolicitud) {
     try {
         selectedSolicitudId = idSolicitud;
+
         const dto = await api.fetchDetalleSolicitud(idSolicitud);
         ui.renderDetalleSolicitud(dto);
-        ui.openModal(document.getElementById('detalleModal'), document.getElementById('detalleBackdrop'));
+
+        try {
+            const docs = await api.fetchDocumentacionInicialSolicitud(idSolicitud);
+            ui.renderDocumentacionInicialSolicitud(docs);
+        } catch (docsError) {
+            console.warn('No se pudo cargar documentación inicial:', docsError);
+        }
+
+        ui.openModal(
+            document.getElementById('detalleModal'),
+            document.getElementById('detalleBackdrop')
+        );
     } catch (e) {
         await ui.showCustomAlert(`No se pudo cargar detalle: ${e.message}`, 'Error');
     }
 }
+
+
 
 function bindTabs() {
     document.querySelectorAll('#tabsSolicitudes .tab').forEach(t => {

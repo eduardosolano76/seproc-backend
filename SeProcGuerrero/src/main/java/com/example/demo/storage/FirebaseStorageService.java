@@ -145,6 +145,59 @@ public class FirebaseStorageService implements StorageService {
 			throw new RuntimeException("Error al subir el reporte a Firebase", e);
 		}
 	}
+	
+	@Override
+	public String saveDocumentoInicialPdf(
+	        Long userId,
+	        String username,
+	        Integer idSolicitud,
+	        String tipoDocumento,
+	        MultipartFile file) {
+
+	    if (file == null || file.isEmpty()) {
+	        throw new IllegalArgumentException("Archivo vacío.");
+	    }
+
+	    String contentType = file.getContentType();
+	    String originalName = file.getOriginalFilename() == null
+	            ? ""
+	            : file.getOriginalFilename().toLowerCase();
+
+	    boolean esPdf = "application/pdf".equalsIgnoreCase(contentType)
+	            || originalName.endsWith(".pdf");
+
+	    if (!esPdf) {
+	        throw new IllegalArgumentException("Formato no permitido. Solo se aceptan archivos PDF.");
+	    }
+
+	    if (file.getSize() > 20 * 1024 * 1024) {
+	        throw new IllegalArgumentException("El PDF no debe superar los 20MB.");
+	    }
+
+	    String safeUsername = sanitize(username);
+	    String safeTipo = sanitize(tipoDocumento);
+	    String ext = extension(file.getOriginalFilename());
+
+	    if (ext.isBlank()) {
+	        ext = "pdf";
+	    }
+
+	    String folder = obtenerPrefijoTenant()
+	            + "usuarios/" + userId + "_" + safeUsername
+	            + "/solicitudes/" + idSolicitud
+	            + "/documentacion_inicial/" + safeTipo;
+
+	    String filename = folder + "/documento_" + UUID.randomUUID() + "." + ext;
+
+	    try {
+	        Bucket bucket = StorageClient.getInstance().bucket();
+	        bucket.create(filename, file.getInputStream(), "application/pdf");
+	        return filename;
+	    }
+	    catch (IOException e) {
+	        throw new RuntimeException("Error al subir documento inicial a Firebase", e);
+	    }
+	}
 
 	@Override
 	public String saveInstitutionLogo(String abreviacion, MultipartFile file) {

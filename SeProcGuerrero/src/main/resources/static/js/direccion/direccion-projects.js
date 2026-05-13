@@ -1,5 +1,6 @@
 import * as api from './api.js';
 import { showCustomAlert } from './ui.js';
+import { abrirModalDocumentacionInicial } from '../modalDocumentacion/documentacion-inicial-modal.js';
 
 let currentEstado = 'ACTIVO';
 let currentList = [];
@@ -208,6 +209,27 @@ function renderCards(items) {
   }
 }
 
+function renderProcessActionsDireccion(dto) {
+  return `
+    <div class="process-actions">
+      <div class="project-more-wrap">
+        <button class="project-more-trigger" type="button" data-more-trigger aria-label="Opciones">
+          ⋮
+        </button>
+
+        <div class="project-more-menu">
+          <button
+            class="project-more-option"
+            type="button"
+            data-more-doc="${dto.idProyecto}">
+            Documentación inicial
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
 function renderProcesoDireccion(dto) {
   const container = document.getElementById('direccionProcesoContent');
   if (!container) return;
@@ -231,11 +253,16 @@ function renderProcesoDireccion(dto) {
   container.innerHTML = `
     <div class="process-mini-shell">
       <div class="process-mini-top">
-        <button class="process-mini-back" id="btnBackProcesoDireccion" type="button" aria-label="Volver"><img src="/assets/iconos/regresar.png" alt="Volver"></button>
+        <button class="process-mini-back" id="btnBackProcesoDireccion" type="button" aria-label="Volver">
+          <img src="/assets/iconos/regresar.png" alt="Volver">
+        </button>
         <div class="process-mini-chip">PROCESO CONSTRUCTIVO</div>
         <div class="process-mini-spacer"></div>
       </div>
+
       <div class="process-mini-summary">
+        ${renderProcessActionsDireccion(dto)}
+
         <div class="process-mini-left">
           <div class="process-mini-school">${escapeHtml(dto.nombreEscuela ?? '')}</div>
           <div class="process-mini-meta">Tipo de obra: <span>${escapeHtml(dto.tipoObra ?? '')}</span></div>
@@ -243,11 +270,15 @@ function renderProcesoDireccion(dto) {
           <div class="process-mini-meta">Constructor: <span>${escapeHtml(dto.quienEnvia ?? '—')}</span></div>
           <div class="process-mini-meta">Supervisor: <span>${escapeHtml(dto.supervisorAsignado ?? '—')}</span></div>
         </div>
+
         <div class="process-mini-right">
           <div class="process-mini-progress-label">Avance en %</div>
-          <div class="process-mini-track"><div class="process-mini-fill" style="width:${Number(dto.porcentajeAvance || 0)}%;"></div></div>
+          <div class="process-mini-track">
+            <div class="process-mini-fill" style="width:25%;"></div>
+          </div>
         </div>
       </div>
+
       <div class="process-mini-list">
         ${cardBtn('Trabajos preliminares', 'preliminares', preliminaresEstado)}
         ${cardBtn('Cimentación', 'cimentacion', cimentacionEstado)}
@@ -591,6 +622,48 @@ function bindPanelEvents() {
       openEtapa(btn.dataset.etapa, btn.dataset.nombre || btn.textContent.trim());
     };
   });
+  
+  document.querySelectorAll('[data-doc-inicial]').forEach(btn => {
+      btn.onclick = () => {
+          abrirDocumentacionInicialDireccion(btn.dataset.docInicial);
+      };
+  });
+
+  document.querySelectorAll('[data-more-trigger]').forEach(btn => {
+    btn.onclick = (ev) => {
+      ev.stopPropagation();
+
+      document.querySelectorAll('.project-more-menu.open').forEach(menu => {
+        if (menu !== btn.parentElement?.querySelector('.project-more-menu')) {
+          menu.classList.remove('open');
+        }
+      });
+
+      const menu = btn.parentElement?.querySelector('.project-more-menu');
+      menu?.classList.toggle('open');
+    };
+  });
+
+  document.querySelectorAll('[data-more-doc]').forEach(btn => {
+    btn.onclick = () => {
+      document.querySelectorAll('.project-more-menu.open')
+        .forEach(menu => menu.classList.remove('open'));
+
+      abrirDocumentacionInicialDireccion(btn.dataset.moreDoc);
+    };
+  });
+}
+
+async function abrirDocumentacionInicial(idProyecto) {
+  try {
+    const data = await api.fetchDocumentacionInicialProyecto(idProyecto);
+    abrirModalDocumentacionInicial(data, { puedeSubir: false });
+  } catch (e) {
+    await showCustomAlert(
+      'No se pudo cargar la documentación inicial: ' + e.message,
+      'Error'
+    );
+  }
 }
 
 async function loadAndRenderProjects() {
@@ -679,6 +752,18 @@ async function openHistorial() {
   }
 }
 
+async function abrirDocumentacionInicialDireccion(idProyecto) {
+    try {
+        const data = await api.fetchDocumentacionInicialProyecto(idProyecto);
+        abrirModalDocumentacionInicial(data, { puedeSubir: false });
+    } catch (e) {
+        await showCustomAlert(
+            'No se pudo cargar la documentación inicial: ' + e.message,
+            'Error'
+        );
+    }
+}
+
 function volverAListaProyectos() {
   bloqueStack = [];
   currentBloqueKey = null;
@@ -721,4 +806,11 @@ function initProjectsModule() {
 document.addEventListener('DOMContentLoaded', initProjectsModule);
 window.addEventListener('panelLoaded', (e) => {
   if (e.detail?.view === 'proyectos') initProjectsModule();
+});
+
+document.addEventListener('click', (e) => {
+    if (!e.target.closest('.project-more-wrap')) {
+        document.querySelectorAll('.project-more-menu.open')
+            .forEach(menu => menu.classList.remove('open'));
+    }
 });

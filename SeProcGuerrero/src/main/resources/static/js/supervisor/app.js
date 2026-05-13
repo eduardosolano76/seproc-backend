@@ -2,6 +2,7 @@
 import * as api from './api.js';
 import * as ui from './ui.js';
 import { getParam, getViewFromUrl, syncSidebarWithView, loadPanelFromUrl } from './navigation.js';
+import { abrirModalDocumentacionInicial } from '../modalDocumentacion/documentacion-inicial-modal.js';
 
 let currentView = getParam('view') || 'proyectos';
 let currentEstado = 'ACTIVO';
@@ -416,6 +417,50 @@ function bindPanelEventsSupervisor() {
             }
         };
     }
+
+	document.querySelectorAll('[data-doc-inicial]').forEach(btn => {
+	  btn.onclick = () => {
+	    abrirDocumentacionInicialSupervisor(btn.dataset.docInicial);
+	  };
+	});
+
+	document.querySelectorAll('[data-more-trigger]').forEach(btn => {
+	  btn.onclick = (ev) => {
+	    ev.stopPropagation();
+
+	    document.querySelectorAll('.project-more-menu.open')
+	      .forEach(menu => {
+	        if (menu !== btn.parentElement?.querySelector('.project-more-menu')) {
+	          menu.classList.remove('open');
+	        }
+	      });
+
+	    const menu = btn.parentElement?.querySelector('.project-more-menu');
+	    menu?.classList.toggle('open');
+	  };
+	});
+
+	document.querySelectorAll('[data-more-doc]').forEach(btn => {
+	  btn.onclick = () => {
+	    document.querySelectorAll('.project-more-menu.open')
+	      .forEach(menu => menu.classList.remove('open'));
+
+	    abrirDocumentacionInicialSupervisor(btn.dataset.moreDoc);
+	  };
+	});
+	
+}
+
+async function abrirDocumentacionInicialSupervisor(idProyecto) {
+  try {
+    const data = await api.fetchDocumentacionInicialProyecto(idProyecto);
+    abrirModalDocumentacionInicial(data, { puedeSubir: false });
+  } catch (e) {
+    await ui.showCustomAlert(
+      'No se pudo cargar la documentación inicial: ' + e.message,
+      'Error'
+    );
+  }
 }
 
 function showSupervisorView(viewName) {
@@ -550,5 +595,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     initProfilePhoto();
 
     await loadAndRender();
+});
+
+document.addEventListener('click', (e) => {
+    if (!e.target.closest('.project-more-wrap')) {
+        document.querySelectorAll('.project-more-menu.open')
+            .forEach(menu => menu.classList.remove('open'));
+    }
 });
 

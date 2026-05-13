@@ -380,3 +380,47 @@ document.addEventListener('click', (e) => {
     closeProfileMenu();
   }
 });
+
+export function renderDocumentacionInicialSolicitud(data) {
+  const detalleBody = document.getElementById('detalleBody');
+  if (!detalleBody) return;
+
+  document.getElementById('docInicialSolicitudBox')?.remove();
+
+  const documentos = Array.isArray(data?.documentos) ? data.documentos : [];
+
+  const html = `
+    <div class="doc-solicitud-box" id="docInicialSolicitudBox">
+      <h3>Documentación inicial</h3>
+
+      <div class="doc-solicitud-alert ${data?.completo ? 'ok' : 'warn'}">
+        ${escapeHtml(data?.mensaje || 'Faltan documentos iniciales por subir.')}
+      </div>
+
+      <div class="doc-solicitud-list">
+        ${documentos.map(doc => `
+          <div class="doc-solicitud-item">
+            <div class="doc-solicitud-info">
+              <strong>${escapeHtml(doc.nombreDocumento || '')}</strong>
+              <span>${doc.subido ? 'Subido' : 'Pendiente'}</span>
+              <small>Fecha límite: ${escapeHtml(doc.fechaLimite || '—')}</small>
+            </div>
+
+            <div class="doc-solicitud-action">
+              ${
+                doc.subido && doc.archivoUrl
+                  ? `<a class="doc-solicitud-link" href="${doc.archivoUrl}" target="_blank">
+                      <span class="doc-solicitud-check">✓</span>
+                      <span>${escapeHtml(doc.nombreArchivoOriginal || 'Ver PDF')}</span>
+                    </a>`
+                  : `<span class="doc-solicitud-pending">Sin archivo</span>`
+              }
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+
+  detalleBody.insertAdjacentHTML('beforeend', html);
+}

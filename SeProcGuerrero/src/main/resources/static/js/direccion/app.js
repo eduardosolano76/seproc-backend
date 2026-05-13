@@ -168,6 +168,8 @@ document.addEventListener('DOMContentLoaded', () => {
   bindPasswordForm();
 });
 
+
+
 window.addEventListener('panelLoaded', (e) => {
   currentView = e.detail?.view || getParam('view') || 'proyectos';
   syncSidebarWithView(currentView);

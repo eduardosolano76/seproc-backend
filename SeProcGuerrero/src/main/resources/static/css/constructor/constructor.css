@@ -1,3 +1,5 @@
+@import url("../modalDocumentacion/documentacion-inicial.css");
+
 :root{
   --orange:#155093;
   --orange-2:#103f74;
@@ -2744,4 +2746,165 @@ body{
     min-width: 0; 
     display: block; 
     width: 100%;
+}
+
+#formSolicitudProyecto {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+#formSolicitudProyecto .dg-row,
+#formSolicitudProyecto .dg-2,
+#formSolicitudProyecto .dg-3 {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+
+#formSolicitudProyecto input,
+#formSolicitudProyecto select,
+#formSolicitudProyecto textarea {
+  width: 100%;
+}
+
+.doc-form-section {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 18px;
+  padding: 18px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, .38);
+  border: 1px solid rgba(0, 0, 0, .08);
+}
+
+.doc-form-section h3 {
+  text-align: center;
+  margin: 0;
+  font-size: 18px;
+  font-weight: 900;
+  color: #111;
+}
+
+.doc-form-section p {
+  margin: -4px auto 4px;
+  max-width: 680px;
+  text-align: center;
+  font-size: 12px;
+  line-height: 1.45;
+  color: rgba(0, 0, 0, .62);
+}
+
+.doc-upload-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 14px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, .62);
+}
+
+.doc-upload-label {
+  font-size: 13px;
+  font-weight: 900;
+  color: #111;
+}
+
+.doc-upload-control {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 46px;
+  padding: 7px;
+  border-radius: 16px;
+  background: #eceae6;
+  overflow: hidden;
+}
+
+.doc-upload-button {
+  flex-shrink: 0;
+  border-radius: 999px;
+  background: #155093;
+  color: #fff;
+  padding: 9px 14px;
+  font-size: 12px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.doc-upload-name {
+  min-width: 0;
+  font-size: 12px;
+  color: #333;
+  line-height: 1.25;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+.doc-upload-input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+@media (max-width: 520px) {
+  .doc-form-section {
+    padding: 14px;
+  }
+
+  .doc-upload-control {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .doc-upload-button {
+    width: fit-content;
+  }
+
+  .doc-upload-name {
+    width: 100%;
+  }
+}
+
+#projModal .modal-card,
+#projModal .dg-modal-card,
+#projModal .proj-modal-card {
+  max-height: 88vh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+#projModal .dg-head {
+  position: relative;
+  justify-content: center;
+  padding-right: 54px;
+}
+
+#projModal .dg-chip#projModalTitle {
+  width: auto;
+  max-width: max-content;
+  margin: 0 auto;
+  padding: 8px 22px;
+  text-align: center;
+}
+
+#projModal .dg-actions {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+@media (max-width: 520px) {
+  #projModal .dg-head {
+    padding-right: 48px;
+  }
+
+  #projModal .dg-chip#projModalTitle {
+    font-size: 13px;
+    padding: 7px 18px;
+  }
 }

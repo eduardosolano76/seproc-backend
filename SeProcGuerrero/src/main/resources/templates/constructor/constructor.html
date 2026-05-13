@@ -22,7 +22,6 @@
             <aside class="sidebar" id="sidebar">
                 <div class="brand">
                     <div class="logo">
-                        <!-- Usamos la variable logoEmpresa que mandaremos desde el controlador -->
                         <img
                             th:src="${logoEmpresa != null ? logoEmpresa : '/assets/iconos/logoIgife.jpg'}"
                             alt="Logo Institución"
@@ -457,6 +456,63 @@
                                     />
                                 </div>
                             </div>
+                            
+           <div class="doc-form-section">
+    <h3>Documentación inicial</h3>
+
+    <p>
+        Estos documentos no son obligatorios para enviar la solicitud.
+        Si no los tienes ahora, tendrás un mes para subirlos.
+    </p>
+
+    <label class="doc-upload-card">
+        <span class="doc-upload-label">Licencia de construcción</span>
+
+        <div class="doc-upload-control">
+            <span class="doc-upload-button">Elegir archivo</span>
+            <span class="doc-upload-name">No se ha seleccionado ningún archivo</span>
+
+            <input
+                class="doc-upload-input"
+                type="file"
+                name="licenciaConstruccion"
+                accept="application/pdf,.pdf"
+            />
+        </div>
+    </label>
+
+    <label class="doc-upload-card">
+        <span class="doc-upload-label">Estudio de mecánica de suelos</span>
+
+        <div class="doc-upload-control">
+            <span class="doc-upload-button">Elegir archivo</span>
+            <span class="doc-upload-name">No se ha seleccionado ningún archivo</span>
+
+            <input
+                class="doc-upload-input"
+                type="file"
+                name="mecanicaSuelos"
+                accept="application/pdf,.pdf"
+            />
+        </div>
+    </label>
+
+    <label class="doc-upload-card">
+        <span class="doc-upload-label">Estudio ambiental</span>
+
+        <div class="doc-upload-control">
+            <span class="doc-upload-button">Elegir archivo</span>
+            <span class="doc-upload-name">No se ha seleccionado ningún archivo</span>
+
+            <input
+                class="doc-upload-input"
+                type="file"
+                name="estudioAmbiental"
+                accept="application/pdf,.pdf"
+            />
+        </div>
+    </label>
+</div>
 
                             <div class="dg-foot">
                                 <span class="dg-hint"
@@ -500,7 +556,7 @@
                 </div>
             </div>
         </div>
-
+        
         <script type="module" th:src="@{/js/constructor/app.js}" defer></script>
     </body>
 </html>

@@ -15,5 +15,13 @@ public interface StorageService {
 	String saveInstitutionLogo(String abreviacion, MultipartFile file);
 
 	String publicLogoUrl(String key);
+	
+	String saveDocumentoInicialPdf(
+	        Long userId,
+	        String username,
+	        Integer idSolicitud,
+	        String tipoDocumento,
+	        MultipartFile file
+	);
 
 }

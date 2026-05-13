@@ -76,3 +76,9 @@ export async function changePassword(payload) {
     body: JSON.stringify(payload)
   });
 }
+
+export async function fetchDocumentacionInicialProyecto(idProyecto) {
+  return await fetchJson(`/api/direccion/proyectos/${idProyecto}/documentacion-inicial`, {
+    cache: 'no-store'
+  });
+}

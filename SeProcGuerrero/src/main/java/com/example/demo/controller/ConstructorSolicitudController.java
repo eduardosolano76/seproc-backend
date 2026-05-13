@@ -19,6 +19,8 @@ import com.example.demo.repository.CatMunicipioRepository;
 import com.example.demo.repository.SolicitudProyectoRepository;
 import com.example.demo.repository.TipoEdificacionRepository;
 import com.example.demo.repository.UsuarioRepository;
+import java.util.Map;
+import com.example.demo.service.DocumentoInicialService;
 
 @RestController
 @RequestMapping("/api/constructor")
@@ -35,16 +37,20 @@ public class ConstructorSolicitudController {
 	private final TipoEdificacionRepository tipoEdificacionRepo;
 
 	private final UsuarioRepository usuarioRepo;
+	
+	private final DocumentoInicialService documentoInicialService;
 
 	public ConstructorSolicitudController(SolicitudProyectoRepository solRepo, CatEstadoRepository estadoRepo,
-			CatMunicipioRepository municipioRepo, CatLocalidadRepository localidadRepo,
-			TipoEdificacionRepository tipoEdificacionRepo, UsuarioRepository usuarioRepo) {
-		this.solRepo = solRepo;
-		this.estadoRepo = estadoRepo;
-		this.municipioRepo = municipioRepo;
-		this.localidadRepo = localidadRepo;
-		this.tipoEdificacionRepo = tipoEdificacionRepo;
-		this.usuarioRepo = usuarioRepo;
+	        CatMunicipioRepository municipioRepo, CatLocalidadRepository localidadRepo,
+	        TipoEdificacionRepository tipoEdificacionRepo, UsuarioRepository usuarioRepo,
+	        DocumentoInicialService documentoInicialService) {
+	    this.solRepo = solRepo;
+	    this.estadoRepo = estadoRepo;
+	    this.municipioRepo = municipioRepo;
+	    this.localidadRepo = localidadRepo;
+	    this.tipoEdificacionRepo = tipoEdificacionRepo;
+	    this.usuarioRepo = usuarioRepo;
+	    this.documentoInicialService = documentoInicialService;
 	}
 
 	@PostMapping("/solicitudes")
@@ -96,9 +102,14 @@ public class ConstructorSolicitudController {
 
 		s.setTipoObra(req.tipoObra);
 
-		solRepo.save(s);
+		SolicitudProyecto guardada = solRepo.save(s);
 
-		return ResponseEntity.ok().body("OK");
+		documentoInicialService.crearPendientesSiNoExisten(guardada);
+
+		return ResponseEntity.ok(Map.of(
+		        "idSolicitud", guardada.getIdSolicitud(),
+		        "mensaje", "Solicitud enviada correctamente."
+		));
 	}
 
 }

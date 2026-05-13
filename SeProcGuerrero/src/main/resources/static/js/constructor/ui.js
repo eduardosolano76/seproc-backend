@@ -348,6 +348,26 @@ export function renderProcesoProyecto(dto) {
       <span class="process-mini-stage-label">${escapeHtml(label)}</span>
     </button>
   `;
+  
+  const renderProcessActions = (dto) => `
+    <div class="process-actions">
+      <button class="btn-doc-inicial" type="button" data-doc-inicial="${dto.idProyecto}">
+        Documentación inicial
+      </button>
+
+      <div class="project-more-wrap">
+        <button class="project-more-trigger" type="button" data-more-trigger aria-label="Opciones">
+          ⋮
+        </button>
+
+        <div class="project-more-menu">
+          <button class="project-more-option" type="button" data-more-doc="${dto.idProyecto}">
+            Documentación inicial
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
 
     container.innerHTML = `
     <div class="process-mini-shell">
@@ -367,6 +387,9 @@ export function renderProcesoProyecto(dto) {
         </div>
 
         <div class="process-mini-right">
+		<div class="process-mini-summary-top">
+		  ${renderProcessActions(dto)}
+		</div>
           <div class="process-mini-progress-label">Avance en %</div>
           <div class="process-mini-track">
             <div class="process-mini-fill" style="width: 25%;"></div>

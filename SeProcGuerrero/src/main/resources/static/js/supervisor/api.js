@@ -132,3 +132,24 @@ export async function aprobarEtapa(idProyecto, etapa) {
   if (!res.ok) throw new Error(await res.text() || 'No se pudo aprobar la etapa');
   return await res.text();
 }
+
+export async function fetchDocumentacionInicialProyecto(idProyecto) {
+  const res = await fetch(`/api/supervisor/proyectos/${idProyecto}/documentacion-inicial`, {
+    cache: 'no-store'
+  });
+
+  const text = await res.text();
+  let data = {};
+
+  try {
+    data = text ? JSON.parse(text) : {};
+  } catch (e) {
+    data = {};
+  }
+
+  if (!res.ok) {
+    throw new Error(data?.message || text || 'No se pudo cargar la documentación inicial.');
+  }
+
+  return data;
+}

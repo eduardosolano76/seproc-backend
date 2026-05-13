@@ -1,5 +1,6 @@
 import * as api from './api.js';
-import { showCustomAlert, showCustomConfirm } from './ui.js';
+import { showCustomAlert } from './ui.js';
+import { abrirModalDocumentacionInicial } from '../modalDocumentacion/documentacion-inicial-modal.js';
 
 let currentEstado = 'ACTIVO';
 let currentList = [];
@@ -264,6 +265,35 @@ function renderProcessStateMenu(dto) {
     `;
 }
 
+function renderProcessActions(dto) {
+    return `
+        <div class="process-actions">
+            <div class="project-more-wrap">
+                <button class="project-more-trigger" type="button" data-more-trigger aria-label="Opciones">
+                    ⋮
+                </button>
+
+                <div class="project-more-menu">
+                    <button
+                        class="project-more-option"
+                        type="button"
+                        data-more-state
+                        data-id-proyecto="${dto.idProyecto}">
+                        Cambiar estado
+                    </button>
+
+                    <button
+                        class="project-more-option"
+                        type="button"
+                        data-more-doc="${dto.idProyecto}">
+                        Documentación inicial
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
 function renderProcesoCentral(dto) {
     const container = document.getElementById('centralProcesoContent');
     if (!container) return;
@@ -324,7 +354,7 @@ function renderProcesoCentral(dto) {
 
                 <div class="process-mini-right">
                     <div class="process-mini-summary-top">
-                        ${renderProcessStateMenu(dto)}
+                        ${renderProcessActions(dto)}
                     </div>
                     <div class="process-mini-progress-label">Avance en %</div>
                     <div class="process-mini-track">
@@ -797,6 +827,104 @@ function bindSearch() {
     });
 }
 
+function cerrarModalCambioEstadoProyecto() {
+  document.getElementById('estadoProyectoModalBackdrop')?.remove();
+}
+
+function abrirModalCambioEstadoProyecto(idProyecto, estadoActual) {
+  cerrarModalCambioEstadoProyecto();
+
+  let estadoSeleccionado = String(estadoActual || 'ACTIVO').toUpperCase();
+
+  const labelEstado = (estado) => {
+    const s = String(estado || '').toUpperCase();
+
+    if (s === 'ACTIVO') return 'Activo';
+    if (s === 'INACTIVO') return 'Inactivo';
+    if (s === 'FINALIZADO') return 'Finalizado';
+
+    return 'Activo';
+  };
+
+  const modal = document.createElement('div');
+  modal.className = 'estado-proyecto-backdrop';
+  modal.id = 'estadoProyectoModalBackdrop';
+
+  modal.innerHTML = `
+    <div class="estado-proyecto-modal">
+      <button class="estado-proyecto-close" type="button" id="btnCerrarEstadoProyecto">×</button>
+
+      <h3>Cambiar estado</h3>
+
+      <p>Selecciona el nuevo estado del proyecto.</p>
+
+      <div class="estado-select-wrap">
+        <button class="estado-select-trigger" type="button" id="estadoSelectTrigger">
+          <span id="estadoSelectLabel">${labelEstado(estadoSeleccionado)}</span>
+          <span>▾</span>
+        </button>
+
+        <div class="estado-select-menu" id="estadoSelectMenu">
+          <button type="button" data-estado-option="ACTIVO">Activo</button>
+          <button type="button" data-estado-option="INACTIVO">Inactivo</button>
+          <button type="button" data-estado-option="FINALIZADO">Finalizado</button>
+        </div>
+      </div>
+
+      <div class="estado-proyecto-actions">
+        <button type="button" class="estado-btn-primary" id="btnGuardarEstadoProyecto">
+          Guardar
+        </button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  const trigger = document.getElementById('estadoSelectTrigger');
+  const menu = document.getElementById('estadoSelectMenu');
+  const label = document.getElementById('estadoSelectLabel');
+
+  trigger?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    menu?.classList.toggle('open');
+  });
+
+  menu?.querySelectorAll('[data-estado-option]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      estadoSeleccionado = btn.dataset.estadoOption;
+      if (label) label.textContent = labelEstado(estadoSeleccionado);
+      menu.classList.remove('open');
+    });
+  });
+
+  document.getElementById('btnCerrarEstadoProyecto')?.addEventListener('click', cerrarModalCambioEstadoProyecto);
+
+  document.getElementById('btnGuardarEstadoProyecto')?.addEventListener('click', async () => {
+    try {
+      await cambiarEstadoDesdeModal(idProyecto, estadoSeleccionado);
+
+      cerrarModalCambioEstadoProyecto();
+
+      await showCustomAlert('Estado del proyecto actualizado correctamente.', 'Éxito');
+
+      await openDetalleProyecto(idProyecto);
+    } catch (e) {
+      await showCustomAlert('No se pudo actualizar el estado: ' + e.message, 'Error');
+    }
+  });
+
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) {
+      cerrarModalCambioEstadoProyecto();
+    }
+  });
+}
+
+async function cambiarEstadoDesdeModal(idProyecto, nuevoEstado) {
+  await api.cambiarEstadoProyecto(idProyecto, nuevoEstado);
+}
+
 function bindPanelEvents() {
     const btnBackProceso = document.getElementById('btnBackProcesoCentral');
     if (btnBackProceso) btnBackProceso.onclick = volverAListaProyectos;
@@ -850,7 +978,43 @@ function bindPanelEvents() {
         });
     }
 
-    bindProjectStateDropdown();
+    document.querySelectorAll('[data-more-trigger]').forEach(btn => {
+        btn.onclick = (ev) => {
+            ev.stopPropagation();
+
+            document.querySelectorAll('.project-more-menu.open').forEach(menu => {
+                if (menu !== btn.parentElement?.querySelector('.project-more-menu')) {
+                    menu.classList.remove('open');
+                }
+            });
+
+            const menu = btn.parentElement?.querySelector('.project-more-menu');
+            menu?.classList.toggle('open');
+        };
+    });
+
+    document.querySelectorAll('[data-more-doc]').forEach(btn => {
+        btn.onclick = () => {
+            document.querySelectorAll('.project-more-menu.open')
+                .forEach(menu => menu.classList.remove('open'));
+
+            abrirDocumentacionInicial(btn.dataset.moreDoc);
+        };
+    });
+
+    document.querySelectorAll('[data-more-state]').forEach(btn => {
+        btn.onclick = () => {
+            const idProyecto = btn.dataset.idProyecto || currentProcesoDto?.idProyecto;
+            const estadoActual = currentProcesoDto?.estadoProyecto || 'ACTIVO';
+
+            if (!idProyecto) return;
+
+            document.querySelectorAll('.project-more-menu.open')
+                .forEach(menu => menu.classList.remove('open'));
+
+            abrirModalCambioEstadoProyecto(idProyecto, estadoActual);
+        };
+    });
 }
 
 function bindProjectStateDropdown() {
@@ -873,19 +1037,32 @@ function bindProjectStateDropdown() {
     });
 }
 
+async function abrirDocumentacionInicial(idProyecto) {
+    try {
+        const data = await api.fetchDocumentacionInicialProyecto(idProyecto);
+        abrirModalDocumentacionInicial(data, { puedeSubir: false });
+    } catch (e) {
+        await showCustomAlert('No se pudo cargar la documentación inicial: ' + e.message, 'Error');
+    }
+}
+
 function bindProjectStateOutsideClickOnce() {
     if (window.__centralStateOutsideBound) return;
     window.__centralStateOutsideBound = true;
 
-    document.addEventListener('click', (ev) => {
-        const wrap = document.querySelector('.project-status-wrap');
-        const menu = document.getElementById('centralProjectStateMenu');
-        if (!wrap || !menu) return;
+	document.addEventListener('click', (ev) => {
+	    const wrap = document.querySelector('.project-status-wrap');
+	    const menu = document.getElementById('centralProjectStateMenu');
 
-        if (!ev.target.closest('.project-status-wrap')) {
-            menu.classList.remove('open');
-        }
-    });
+	    if (wrap && menu && !ev.target.closest('.project-status-wrap')) {
+	        menu.classList.remove('open');
+	    }
+
+	    if (!ev.target.closest('.project-more-wrap')) {
+	        document.querySelectorAll('.project-more-menu.open')
+	            .forEach(menu => menu.classList.remove('open'));
+	    }
+	});
 }
 
 async function handleChangeProjectState(nuevoEstado) {

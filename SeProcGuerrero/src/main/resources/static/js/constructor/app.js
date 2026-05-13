@@ -2,6 +2,7 @@
 import * as api from './api.js';
 import * as ui from './ui.js';
 import * as nav from './navigation.js';
+import { abrirModalDocumentacionInicial } from '../modalDocumentacion/documentacion-inicial-modal.js';
 
 let currentEstado = 'ACTIVO';
 let currentList = [];
@@ -147,8 +148,26 @@ function bindPanelEvents() {
     if (btnBackHistorial) {
         btnBackHistorial.onclick = volverAEtapaConstructor;
     }
+	
+	document.querySelectorAll('[data-doc-inicial]').forEach(btn => {
+	    btn.addEventListener('click', () => {
+	        abrirDocumentacionInicial(btn.dataset.docInicial);
+	    });
+	});
 
+	document.querySelectorAll('[data-more-trigger]').forEach(btn => {
+	    btn.addEventListener('click', (ev) => {
+	        ev.stopPropagation();
+	        const menu = btn.parentElement?.querySelector('.project-more-menu');
+	        menu?.classList.toggle('open');
+	    });
+	});
 
+	document.querySelectorAll('[data-more-doc]').forEach(btn => {
+	    btn.addEventListener('click', () => {
+	        abrirDocumentacionInicial(btn.dataset.moreDoc);
+	    });
+	});
 }
 
 function registerGlobalEvents() {
@@ -519,15 +538,45 @@ async function handleProjectSubmit(form) {
         tipoObra: form.tipoObra.value
     };
 
-    try {
-        await api.postSolicitud(payload);
-        closeProjModal();
-        form.reset();
-        await ui.showCustomAlert('Solicitud enviada correctamente.', 'Éxito');
-        loadAndRenderProjects();
-    } catch (e) {
-        await ui.showCustomAlert('No se pudo enviar: ' + e.message, 'Error');
-    }
+	try {
+	    const result = await api.postSolicitud(payload);
+	    const idSolicitud = result.idSolicitud;
+
+	    const documentos = [
+	        {
+	            tipo: 'LICENCIA_CONSTRUCCION',
+	            input: form.querySelector('input[name="licenciaConstruccion"]')
+	        },
+	        {
+	            tipo: 'MECANICA_SUELOS',
+	            input: form.querySelector('input[name="mecanicaSuelos"]')
+	        },
+	        {
+	            tipo: 'ESTUDIO_AMBIENTAL',
+	            input: form.querySelector('input[name="estudioAmbiental"]')
+	        }
+	    ];
+
+	    for (const doc of documentos) {
+	        const file = doc.input?.files?.[0];
+
+	        if (file) {
+	            await api.uploadDocumentoInicialSolicitud(idSolicitud, doc.tipo, file);
+	        }
+	    }
+
+	    closeProjModal();
+	    form.reset();
+
+	    await ui.showCustomAlert(
+	        'Solicitud enviada correctamente. Si faltan documentos, podrás subirlos después desde Documentación inicial.',
+	        'Éxito'
+	    );
+
+	    loadAndRenderProjects();
+	} catch (e) {
+	    await ui.showCustomAlert('No se pudo enviar: ' + e.message, 'Error');
+	}
 }
 
 async function loadEstados() {
@@ -711,3 +760,64 @@ async function openHistorialConstructor() {
         await ui.showCustomAlert('No se pudo cargar el historial: ' + e.message, 'Error');
     }
 }
+
+async function abrirDocumentacionInicial(idProyecto) {
+    try {
+        const data = await api.fetchDocumentacionInicialProyecto(idProyecto);
+
+        abrirModalDocumentacionInicial(data, {
+            puedeSubir: true,
+            onUpload: async (tipoDocumento, file) => {
+                try {
+                    if (!data.idSolicitud) {
+                        throw new Error('No se encontró la solicitud relacionada al proyecto.');
+                    }
+
+                    await api.uploadDocumentoInicialSolicitud(
+                        data.idSolicitud,
+                        tipoDocumento,
+                        file
+                    );
+
+                    await abrirDocumentacionInicial(idProyecto);
+                } catch (e) {
+                    await ui.showCustomAlert(
+                        'No se pudo subir el documento: ' + e.message,
+                        'Error'
+                    );
+                }
+            }
+        });
+    } catch (e) {
+        await ui.showCustomAlert(
+            'No se pudo cargar la documentación inicial: ' + e.message,
+            'Error'
+        );
+    }
+}
+
+document.addEventListener('click', (e) => {
+    if (!e.target.closest('.project-more-wrap')) {
+        document.querySelectorAll('.project-more-menu.open')
+            .forEach(menu => menu.classList.remove('open'));
+    }
+});
+
+function bindDocumentoInicialFileNames() {
+  document.querySelectorAll('.doc-upload-input').forEach(input => {
+    if (input.dataset.fileBound === 'true') return;
+    input.dataset.fileBound = 'true';
+
+    input.addEventListener('change', () => {
+      const nameBox = input.closest('.doc-upload-card')?.querySelector('.doc-upload-name');
+      const fileName = input.files?.[0]?.name || 'No se ha seleccionado ningún archivo';
+
+      if (nameBox) {
+        nameBox.textContent = fileName;
+      }
+    });
+  });
+}
+
+document.addEventListener('DOMContentLoaded', bindDocumentoInicialFileNames);
+window.addEventListener('panelLoaded', bindDocumentoInicialFileNames);
