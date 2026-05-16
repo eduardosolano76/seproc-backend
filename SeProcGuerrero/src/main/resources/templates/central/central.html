@@ -13,14 +13,14 @@
         />
 
         <link rel="stylesheet" th:href="@{/css/central/central.css}" />
-
+        <link rel="stylesheet" th:href="@{/css/shared/mobile-role-menu.css}" />
         <meta name="_csrf" th:content="${_csrf.token}" />
         <meta name="_csrf_header" th:content="${_csrf.headerName}" />
     </head>
 
     <body>
         <div class="layout">
-            <aside class="sidebar" id="sidebar">
+            <aside class="sidebar mobile-role-menu" id="sidebar" data-mobile-role-menu>
                 <div class="brand">
                     <div class="logo">
                         <!-- Usamos la variable logoEmpresa que mandaremos desde el controlador -->
@@ -30,8 +30,24 @@
                         />
                     </div>
                 </div>
+                
+                <div class="mobile-top">
+    <button class="hamburger" id="btnMenu" type="button" aria-label="Abrir menú">
+        ☰
+    </button>
+</div>
 
                 <nav class="nav" aria-label="Menú Central">
+                
+                 <!-- Buscador dentro de menu de hamburguesa -->
+                <button class="nav-item mobile-search-only" type="button" aria-label="Buscar">
+    <span class="nav-left">
+        <span class="icon">
+            <img th:src="@{/assets/iconos/buscar.png}" alt="" />
+        </span>
+        <span class="label">Buscar</span>
+    </span>
+</button>
                     <a
                         class="nav-item"
                         id="navSolicitudes"
@@ -621,5 +637,6 @@
         
         <script type="module" th:src="@{/js/central/app.js}" defer></script>
 <script type="module" th:src="@{/js/central/central-projects.js}" defer></script>
+<script th:src="@{/js/shared/mobile-role-menu.js}"></script>
     </body>
 </html>

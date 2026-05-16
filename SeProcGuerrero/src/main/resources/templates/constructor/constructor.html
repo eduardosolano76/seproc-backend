@@ -13,13 +13,14 @@
         />
 
         <link rel="stylesheet" th:href="@{/css/constructor/constructor.css}" />
+        <link rel="stylesheet" th:href="@{/css/shared/mobile-role-menu.css}" />
         <meta name="_csrf" th:content="${_csrf.token}" />
         <meta name="_csrf_header" th:content="${_csrf.headerName}" />
     </head>
 
     <body>
         <div class="layout">
-            <aside class="sidebar" id="sidebar">
+            <aside class="sidebar mobile-role-menu" id="sidebar" data-mobile-role-menu>
                 <div class="brand">
                     <div class="logo">
                         <img
@@ -28,8 +29,24 @@
                         />
                     </div>
                 </div>
+                
+                <div class="mobile-top">
+    <button class="hamburger" id="btnMenu" type="button" aria-label="Abrir menú">
+        ☰
+    </button>
+</div>
 
                 <nav class="nav" aria-label="Menú Constructor">
+                
+                 <!-- Buscador dentro de menu de hamburguesa -->
+                <button class="nav-item mobile-search-only" type="button" aria-label="Buscar">
+    <span class="nav-left">
+        <span class="icon">
+            <img th:src="@{/assets/iconos/buscar.png}" alt="" />
+        </span>
+        <span class="label">Buscar</span>
+    </span>
+</button>
                     <a
                         class="nav-item"
                         id="navProyectos"
@@ -343,27 +360,27 @@
                             <div class="dg-row dg-3">
                                 <div class="dg-field">
                                     <label class="dg-label">Estado<span class="req">*</span></label>
-                                    <select class="dg-select" name="estado" required>
-                                        <option value="" selected disabled>Seleccionar</option>
-                                    </select>
+                                    <select class="dg-select" name="estado" required data-searchable-select>
+    <option value="" selected disabled>Seleccionar</option>
+</select>
                                 </div>
 
                                 <div class="dg-field">
                                     <label class="dg-label"
                                         >Municipio<span class="req">*</span></label
                                     >
-                                    <select class="dg-select" name="municipio" required>
-                                        <option value="" selected disabled>Seleccionar</option>
-                                    </select>
+                                   <select class="dg-select" name="municipio" required data-searchable-select>
+    <option value="" selected disabled>Seleccionar</option>
+</select>
                                 </div>
 
                                 <div class="dg-field">
                                     <label class="dg-label"
                                         >Localidad<span class="req">*</span></label
                                     >
-                                    <select class="dg-select" name="ciudad" required>
-                                        <option value="" selected disabled>Seleccionar</option>
-                                    </select>
+                                    <select class="dg-select" name="ciudad" required data-searchable-select>
+    <option value="" selected disabled>Seleccionar</option>
+</select>
                                 </div>
                             </div>
 
@@ -425,22 +442,22 @@
                                     <label class="dg-label"
                                         >Tipo de obra<span class="req">*</span></label
                                     >
-                                    <select class="dg-select" name="tipoObra" required>
-                                        <option value="" selected disabled>Seleccionar</option>
-                                        <option value="Edificación">Edificación</option>
-                                        <option value="Barda perimetral">Barda perimetral</option>
-                                        <option value="Techado">Techado</option>
-                                        <option value="Pisos">Pisos</option>
-                                    </select>
+                                    <select class="dg-select" name="tipoObra" required data-searchable-select>
+    <option value="" selected disabled>Seleccionar</option>
+    <option value="Edificación">Edificación</option>
+    <option value="Barda perimetral">Barda perimetral</option>
+    <option value="Techado">Techado</option>
+    <option value="Pisos">Pisos</option>
+</select>
                                 </div>
 
                                 <div class="dg-field">
                                     <label class="dg-label"
                                         >Tipo de edificación<span class="req">*</span></label
                                     >
-                                    <select class="dg-select" name="tipoEdificacion" required>
-                                        <option value="" selected disabled>Seleccionar</option>
-                                    </select>
+                                    <select class="dg-select" name="tipoEdificacion" required data-searchable-select>
+    <option value="" selected disabled>Seleccionar</option>
+</select>
                                 </div>
 
                                 <div class="dg-field">
@@ -557,6 +574,8 @@
             </div>
         </div>
         
+        <script type="module" th:src="@{/js/shared/searchable-select.js}"></script>
         <script type="module" th:src="@{/js/constructor/app.js}" defer></script>
+        <script th:src="@{/js/shared/mobile-role-menu.js}"></script>
     </body>
 </html>

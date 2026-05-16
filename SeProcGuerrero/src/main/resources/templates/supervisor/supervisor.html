@@ -14,6 +14,7 @@
 
         <!-- CSS del módulo -->
         <link rel="stylesheet" th:href="@{/css/supervisor/supervisor.css}" />
+        <link rel="stylesheet" th:href="@{/css/shared/mobile-role-menu.css}" />
 
         <!-- CSRF -->
         <meta name="_csrf" th:content="${_csrf.token}" />
@@ -23,7 +24,7 @@
     <body>
         <div class="layout">
             <!-- SIDEBAR -->
-            <aside class="sidebar" id="sidebar">
+            <aside class="sidebar mobile-role-menu" id="sidebar" data-mobile-role-menu>
                 <div class="brand">
                     <div class="logo">
                         <!-- Usamos la variable logoEmpresa que mandaremos desde el controlador -->
@@ -33,8 +34,25 @@
                         />
                     </div>
                 </div>
+                
+                <div class="mobile-top">
+    <button class="hamburger" id="btnMenu" type="button" aria-label="Abrir menú">
+        ☰
+    </button>
+</div>
 
                 <nav class="nav" aria-label="Menú Supervisor">
+                
+                 <!-- Buscador dentro de menu de hamburguesa -->
+                
+                <button class="nav-item mobile-search-only" type="button" aria-label="Buscar">
+    <span class="nav-left">
+        <span class="icon">
+            <img th:src="@{/assets/iconos/buscar.png}" alt="" />
+        </span>
+        <span class="label">Buscar</span>
+    </span>
+</button>
                     <!-- Proyectos -->
                     <a
                         id="navProyectos"
@@ -333,5 +351,6 @@
         </div>
         
         <script type="module" th:src="@{/js/supervisor/app.js}" defer></script>
+        <script th:src="@{/js/shared/mobile-role-menu.js}"></script>
     </body>
 </html>

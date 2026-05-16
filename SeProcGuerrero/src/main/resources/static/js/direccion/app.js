@@ -44,12 +44,6 @@ function bindNavigation() {
   });
 }
 
-function bindHamburger() {
-  const btn = document.getElementById('btnMenu');
-  const sidebar = document.getElementById('sidebar');
-  btn?.addEventListener('click', () => sidebar?.classList.toggle('menu-open'));
-}
-
 function bindSearch() {
   const input = document.getElementById('searchDireccion');
   if (!input || input.dataset.bound === 'true') return;
@@ -162,7 +156,6 @@ function bindPasswordForm() {
 document.addEventListener('DOMContentLoaded', () => {
   syncSidebarWithView(currentView);
   bindNavigation();
-  bindHamburger();
   bindSearch();
   initProfilePhoto();
   bindPasswordForm();

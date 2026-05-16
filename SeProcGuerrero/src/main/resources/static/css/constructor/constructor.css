@@ -1831,13 +1831,6 @@ body{
   .dg-3{grid-template-columns:1fr 1fr}
 }
 
-@media (max-width:720px){
-  .layout{flex-direction:column}
-  .sidebar{width:100%;border-radius:0 0 24px 24px}
-  .topbar{flex-direction:column;align-items:stretch}
-  .userbox{justify-content:space-between;width:100%}
-}
-
 @media (max-width:640px){
   .modal-card{padding:16px;border-radius:22px}
   .dg-2,.dg-3{grid-template-columns:1fr}
@@ -2906,5 +2899,178 @@ body{
   #projModal .dg-chip#projModalTitle {
     font-size: 13px;
     padding: 7px 18px;
+  }
+}
+
+/* select filtra por letras que se agregan */
+
+.dg-field {
+  position: relative;
+}
+
+.dg-select-native-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  left: 0 !important;
+  bottom: 0 !important;
+}
+
+.dg-search-select {
+  position: relative;
+  width: 100%;
+}
+
+.dg-search-trigger {
+  width: 100%;
+  min-height: 40px;
+  border: none;
+  outline: none;
+  border-radius: 999px;
+  background: #dedcd7;
+  padding: 0 14px;
+  font-family: inherit;
+  font-size: 13px;
+  color: #111;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.dg-search-trigger:focus {
+  box-shadow: 0 0 0 3px rgba(21, 80, 147, .18);
+}
+
+.dg-search-label {
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.dg-search-label.is-placeholder {
+  color: #111;
+}
+
+.dg-search-arrow {
+  color: #8a8a8a;
+  font-size: 17px;
+  line-height: 1;
+  transition: transform .16s ease;
+}
+
+.dg-search-select.open .dg-search-arrow {
+  transform: rotate(180deg);
+}
+
+.dg-search-menu {
+  display: none;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% + 6px);
+  z-index: 5000;
+  background: #fff;
+  border-radius: 18px;
+  padding: 10px;
+  box-shadow: 0 14px 30px rgba(0, 0, 0, .18);
+  border: 1px solid rgba(0, 0, 0, .08);
+}
+
+.dg-search-select.open .dg-search-menu {
+  display: block;
+}
+
+.dg-search-input {
+  width: 100%;
+  height: 38px;
+  border: 1px solid rgba(0, 0, 0, .10);
+  outline: none;
+  border-radius: 999px;
+  padding: 0 13px;
+  font-family: inherit;
+  font-size: 13px;
+  background: #f7f7f7;
+  margin-bottom: 8px;
+}
+
+.dg-search-input:focus {
+  border-color: rgba(21, 80, 147, .45);
+  box-shadow: 0 0 0 3px rgba(21, 80, 147, .12);
+}
+
+.dg-search-list {
+  max-height: 220px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-right: 4px;
+}
+
+.dg-search-option {
+  width: 100%;
+  min-height: 36px;
+  border: none;
+  background: transparent;
+  color: #111;
+  border-radius: 12px;
+  padding: 8px 10px;
+  font-family: inherit;
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.dg-search-option:hover,
+.dg-search-option.active {
+  background: rgba(21, 80, 147, .12);
+  color: #155093;
+  font-weight: 800;
+}
+
+.dg-search-empty {
+  padding: 12px 10px;
+  color: #777;
+  font-size: 13px;
+  text-align: center;
+}
+
+.dg-search-list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.dg-search-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.dg-search-list::-webkit-scrollbar-thumb {
+  background: #c8c3bd;
+  border-radius: 999px;
+}
+
+@media (max-width: 520px) {
+  .dg-search-menu {
+    position: static;
+    margin-top: 8px;
+    border-radius: 16px;
+    box-shadow: none;
+    border: 1px solid rgba(0, 0, 0, .08);
+    padding: 8px;
+  }
+
+  .dg-search-list {
+    max-height: 170px;
+  }
+
+  .dg-search-option {
+    min-height: 34px;
+    font-size: 12px;
   }
 }

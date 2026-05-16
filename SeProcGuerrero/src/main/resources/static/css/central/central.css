@@ -75,23 +75,6 @@ button,input,select,textarea{font:inherit;}
   object-fit:cover;
 }
 
-.mobile-top{
-  display:none;
-  justify-content:flex-end;
-  padding:0 14px;
-}
-
-.hamburger{
-  border:none;
-  background:rgba(255,255,255,.18);
-  color:#fff;
-  width:44px;
-  height:44px;
-  border-radius:12px;
-  font-size:22px;
-  cursor:pointer;
-}
-
 .nav{
   margin-top:8px;
   display:flex;
@@ -1805,45 +1788,6 @@ button,input,select,textarea{font:inherit;}
 }
 
 @media (max-width:768px){
-  .layout{flex-direction:column;}
-
-  .sidebar{
-    width:100%;
-    padding:12px 14px;
-    flex-direction:row;
-    align-items:center;
-    justify-content:space-between;
-    gap:10px;
-    position:sticky;
-    top:0;
-    z-index:50;
-  }
-
-  .mobile-top{display:flex;}
-  .brand{padding:0;}
-  .brand .logo{
-    width:56px;
-    height:56px;
-    border:3px solid #fff;
-    outline:2px solid rgba(255,255,255,.20);
-  }
-
-  .nav{
-    display:none;
-    position:absolute;
-    left:0;
-    top:78px;
-    width:100%;
-    background:var(--primary);
-    padding:10px 10px 14px;
-    gap:6px;
-  }
-
-  .sidebar.menu-open .nav{display:flex;}
-  .submenu{
-    position:static;
-    padding:0 0 10px 52px;
-  }
 
   .content{
     padding:14px;
@@ -1857,7 +1801,6 @@ button,input,select,textarea{font:inherit;}
     padding:10px 6px 12px;
   }
 
-  .search{max-width:100%;}
   .userbox{
     justify-content:space-between;
     width:100%;
