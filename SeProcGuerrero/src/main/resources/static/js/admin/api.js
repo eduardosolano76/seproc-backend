@@ -170,3 +170,52 @@ export async function fetchDocumentacionInicialSolicitud(idSolicitud) {
     cache: 'no-store'
   });
 }
+
+//Para la correción de la documentación por si está mal
+export async function solicitarCorreccionDocumentoInicial(idDocumento, motivo) {
+  const res = await fetch(`/api/admin/documentos-iniciales/${idDocumento}/solicitar-correccion`, {
+    method: 'POST',
+    headers: buildHeaders({
+      'Content-Type': 'application/json'
+    }),
+    body: JSON.stringify({ motivo })
+  });
+
+  const text = await res.text();
+  let data = {};
+
+  try {
+    data = text ? JSON.parse(text) : {};
+  } catch (e) {
+    data = {};
+  }
+
+  if (!res.ok) {
+    throw new Error(data?.message || text || 'No se pudo solicitar la corrección.');
+  }
+
+  return data;
+}
+
+//Para aprobar documento
+export async function aprobarDocumentoInicial(idDocumento) {
+  const res = await fetch(`/api/admin/documentos-iniciales/${idDocumento}/aprobar`, {
+    method: 'POST',
+    headers: buildHeaders()
+  });
+
+  const text = await res.text();
+  let data = {};
+
+  try {
+    data = text ? JSON.parse(text) : {};
+  } catch (e) {
+    data = {};
+  }
+
+  if (!res.ok) {
+    throw new Error(data?.message || text || 'No se pudo aprobar el documento.');
+  }
+
+  return data;
+}

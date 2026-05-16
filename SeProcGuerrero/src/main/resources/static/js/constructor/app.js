@@ -767,6 +767,7 @@ async function abrirDocumentacionInicial(idProyecto) {
 
         abrirModalDocumentacionInicial(data, {
             puedeSubir: true,
+
             onUpload: async (tipoDocumento, file) => {
                 try {
                     if (!data.idSolicitud) {
@@ -779,12 +780,19 @@ async function abrirDocumentacionInicial(idProyecto) {
                         file
                     );
 
+                    await ui.showCustomAlert(
+                        'Documento subido correctamente.',
+                        'Éxito'
+                    );
+
                     await abrirDocumentacionInicial(idProyecto);
                 } catch (e) {
                     await ui.showCustomAlert(
                         'No se pudo subir el documento: ' + e.message,
                         'Error'
                     );
+
+                    await abrirDocumentacionInicial(idProyecto);
                 }
             }
         });

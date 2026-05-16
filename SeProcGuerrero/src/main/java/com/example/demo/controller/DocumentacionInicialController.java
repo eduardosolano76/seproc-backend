@@ -3,6 +3,7 @@ package com.example.demo.controller;
 import java.util.Map;
 
 
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
@@ -168,6 +170,49 @@ public ResponseEntity<?> obtenerDocumentacionSolicitud(
         }
 
     }
+    
+    @PostMapping({
+        "/admin/documentos-iniciales/{idDocumento}/solicitar-correccion",
+        "/central/documentos-iniciales/{idDocumento}/solicitar-correccion"
+})
+public ResponseEntity<?> solicitarCorreccionDocumento(
+        @PathVariable Long idDocumento,
+        @RequestBody Map<String, String> body,
+        Authentication auth) {
+
+    Usuario usuario = usuarioActual(auth);
+
+    String motivo = body != null ? body.get("motivo") : null;
+
+    try {
+        return ResponseEntity.ok(
+                documentoInicialService.solicitarCorreccion(idDocumento, usuario, motivo)
+        );
+    } catch (IllegalArgumentException e) {
+        return ResponseEntity.badRequest()
+                .body(Map.of("message", e.getMessage()));
+    }
+}
+    
+    @PostMapping({
+        "/admin/documentos-iniciales/{idDocumento}/aprobar",
+        "/central/documentos-iniciales/{idDocumento}/aprobar"
+})
+public ResponseEntity<?> aprobarDocumentoInicial(
+        @PathVariable Long idDocumento,
+        Authentication auth) {
+
+    Usuario usuario = usuarioActual(auth);
+
+    try {
+        return ResponseEntity.ok(
+                documentoInicialService.aprobarDocumento(idDocumento, usuario)
+        );
+    } catch (IllegalArgumentException e) {
+        return ResponseEntity.badRequest()
+                .body(Map.of("message", e.getMessage()));
+    }
+}
     
     
 }

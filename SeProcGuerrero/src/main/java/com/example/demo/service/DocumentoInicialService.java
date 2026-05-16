@@ -95,8 +95,23 @@ public class DocumentoInicialService {
         LocalDateTime ahora = LocalDateTime.now();
 
         List<Map<String, Object>> items = documentos.stream().map(doc -> {
-            boolean subido = SolicitudProyectoDocumento.ESTADO_SUBIDO.equalsIgnoreCase(doc.getEstadoDocumento());
-            boolean vencido = !subido && doc.getFechaLimite() != null && ahora.isAfter(doc.getFechaLimite());
+        	boolean subido = SolicitudProyectoDocumento.ESTADO_SUBIDO
+        	        .equalsIgnoreCase(doc.getEstadoDocumento());
+
+        	boolean requiereCorreccion = SolicitudProyectoDocumento.ESTADO_REQUIERE_CORRECCION
+        	        .equalsIgnoreCase(doc.getEstadoDocumento());
+
+        	boolean aprobado = SolicitudProyectoDocumento.ESTADO_APROBADO
+        	        .equalsIgnoreCase(doc.getEstadoDocumento());
+
+        	boolean tieneArchivo = doc.getArchivoStoragePath() != null
+        	        && !doc.getArchivoStoragePath().isBlank();
+
+        	boolean pendiente = !subido && !aprobado;
+
+            boolean vencido = pendiente
+                    && doc.getFechaLimite() != null
+                    && ahora.isAfter(doc.getFechaLimite());
 
             Map<String, Object> item = new LinkedHashMap<>();
 
@@ -104,24 +119,35 @@ public class DocumentoInicialService {
             item.put("tipoDocumento", doc.getTipoDocumento());
             item.put("nombreDocumento", nombreVisible(doc.getTipoDocumento()));
             item.put("estadoDocumento", doc.getEstadoDocumento());
+
             item.put("subido", subido);
-            item.put("pendiente", !subido);
+            item.put("pendiente", pendiente);
+            item.put("requiereCorreccion", requiereCorreccion);
+            item.put("aprobado", aprobado);
+            item.put("tieneArchivo", tieneArchivo);
             item.put("vencido", vencido);
+
             item.put("fechaLimite", formatearFecha(doc.getFechaLimite()));
             item.put("fechaSubida", formatearFecha(doc.getFechaSubida()));
+            item.put("fechaCorreccion", formatearFecha(doc.getFechaCorreccion()));
+
+            item.put("motivoCorreccion",
+                    doc.getMotivoCorreccion() != null ? doc.getMotivoCorreccion() : "");
+
             item.put("nombreArchivoOriginal",
                     doc.getNombreArchivoOriginal() != null ? doc.getNombreArchivoOriginal() : "");
+
             item.put("archivoUrl", storageService.publicUrl(doc.getArchivoStoragePath()));
 
             return item;
         }).toList();
 
         long pendientes = documentos.stream()
-                .filter(d -> !SolicitudProyectoDocumento.ESTADO_SUBIDO.equalsIgnoreCase(d.getEstadoDocumento()))
+                .filter(d -> !documentoCompleto(d))
                 .count();
 
         boolean vencido = documentos.stream()
-                .anyMatch(d -> !SolicitudProyectoDocumento.ESTADO_SUBIDO.equalsIgnoreCase(d.getEstadoDocumento())
+                .anyMatch(d -> !documentoCompleto(d)
                         && d.getFechaLimite() != null
                         && ahora.isAfter(d.getFechaLimite()));
 
@@ -168,9 +194,14 @@ public class DocumentoInicialService {
         doc.setArchivoStoragePath(key);
         doc.setArchivoUrl(storageService.publicUrl(key));
         doc.setEstadoDocumento(SolicitudProyectoDocumento.ESTADO_SUBIDO);
-        doc.setFechaSubida(LocalDateTime.now());
-        doc.setFechaActualizacion(LocalDateTime.now());
-        doc.setUsuarioSubio(usuario);
+        doc.setMotivoCorreccion(null);
+        doc.setFechaCorreccion(null);
+        doc.setUsuarioSolicitoCorreccion(null);
+
+        // Si el documento estaba en corrección, se limpia al volver a subirlo
+        doc.setMotivoCorreccion(null);
+        doc.setFechaCorreccion(null);
+        doc.setUsuarioSolicitoCorreccion(null);
 
         documentoRepo.save(doc);
 
@@ -217,6 +248,52 @@ public class DocumentoInicialService {
             return "Documentación inicial pendiente vencida.";
         }
 
-        return "Faltan documentos iniciales por subir.";
+        return "Documentación inicial pendiente de aprobación o corrección.";
+    }
+    
+    public Map<String, Object> solicitarCorreccion(Long idDocumento, Usuario usuario, String motivo) {
+        SolicitudProyectoDocumento doc = documentoRepo.findById(idDocumento)
+                .orElseThrow(() -> new IllegalArgumentException("Documento no encontrado."));
+
+        if (doc.getArchivoStoragePath() == null || doc.getArchivoStoragePath().isBlank()) {
+            throw new IllegalArgumentException("No se puede solicitar corrección de un documento que aún no se ha subido.");
+        }
+
+        if (motivo == null || motivo.trim().isBlank()) {
+            throw new IllegalArgumentException("Debes escribir el motivo de la corrección.");
+        }
+
+        doc.setEstadoDocumento(SolicitudProyectoDocumento.ESTADO_REQUIERE_CORRECCION);
+        doc.setMotivoCorreccion(motivo.trim());
+        doc.setFechaCorreccion(LocalDateTime.now());
+        doc.setFechaActualizacion(LocalDateTime.now());
+        doc.setUsuarioSolicitoCorreccion(usuario);
+
+        documentoRepo.save(doc);
+
+        return obtenerPorSolicitud(doc.getSolicitud());
+    }
+    
+    public Map<String, Object> aprobarDocumento(Long idDocumento, Usuario usuario) {
+        SolicitudProyectoDocumento doc = documentoRepo.findById(idDocumento)
+                .orElseThrow(() -> new IllegalArgumentException("Documento no encontrado."));
+
+        if (doc.getArchivoStoragePath() == null || doc.getArchivoStoragePath().isBlank()) {
+            throw new IllegalArgumentException("No se puede aprobar un documento que aún no se ha subido.");
+        }
+
+        doc.setEstadoDocumento(SolicitudProyectoDocumento.ESTADO_APROBADO);
+        doc.setMotivoCorreccion(null);
+        doc.setFechaCorreccion(null);
+        doc.setUsuarioSolicitoCorreccion(null);
+        doc.setFechaActualizacion(LocalDateTime.now());
+
+        documentoRepo.save(doc);
+
+        return obtenerPorSolicitud(doc.getSolicitud());
+    }
+    
+    private boolean documentoCompleto(SolicitudProyectoDocumento doc) {
+        return SolicitudProyectoDocumento.ESTADO_APROBADO.equalsIgnoreCase(doc.getEstadoDocumento());
     }
 }

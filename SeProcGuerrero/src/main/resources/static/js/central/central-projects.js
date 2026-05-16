@@ -1038,12 +1038,60 @@ function bindProjectStateDropdown() {
 }
 
 async function abrirDocumentacionInicial(idProyecto) {
-    try {
-        const data = await api.fetchDocumentacionInicialProyecto(idProyecto);
-        abrirModalDocumentacionInicial(data, { puedeSubir: false });
-    } catch (e) {
-        await showCustomAlert('No se pudo cargar la documentación inicial: ' + e.message, 'Error');
-    }
+  try {
+    const data = await api.fetchDocumentacionInicialProyecto(idProyecto);
+
+    abrirModalDocumentacionInicial(data, {
+      puedeSubir: false,
+      puedeSolicitarCorreccion: true,
+      puedeAprobar: true,
+
+      onCorreccion: async (idDocumento, motivo) => {
+        try {
+          await api.solicitarCorreccionDocumentoInicial(idDocumento, motivo);
+
+          await showCustomAlert(
+            'Se solicitó la corrección del documento.',
+            'Éxito'
+          );
+
+          await abrirDocumentacionInicial(idProyecto);
+        } catch (e) {
+          await showCustomAlert(
+            'No se pudo solicitar la corrección: ' + e.message,
+            'Error'
+          );
+
+          await abrirDocumentacionInicial(idProyecto);
+        }
+      },
+
+      onAprobar: async (idDocumento) => {
+        try {
+          await api.aprobarDocumentoInicial(idDocumento);
+
+          await showCustomAlert(
+            'Documento aprobado correctamente.',
+            'Éxito'
+          );
+
+          await abrirDocumentacionInicial(idProyecto);
+        } catch (e) {
+          await showCustomAlert(
+            'No se pudo aprobar el documento: ' + e.message,
+            'Error'
+          );
+
+          await abrirDocumentacionInicial(idProyecto);
+        }
+      }
+    });
+  } catch (e) {
+    await showCustomAlert(
+      'No se pudo cargar la documentación inicial: ' + e.message,
+      'Error'
+    );
+  }
 }
 
 function bindProjectStateOutsideClickOnce() {

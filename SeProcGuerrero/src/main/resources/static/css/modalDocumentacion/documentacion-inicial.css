@@ -1,3 +1,5 @@
+/* menú de 3 puntos proceso constructivo */
+
 .process-mini-summary {
   position: relative;
   padding-right: 70px;
@@ -19,7 +21,6 @@
   display: none !important;
 }
 
-/* 3 puntitos */
 .project-more-wrap {
   position: relative;
   display: inline-flex !important;
@@ -73,435 +74,7 @@
   background: rgba(0, 0, 0, .06);
 }
 
-/* modal de documentacion inicial */
-
-.doc-modal-backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, .38);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 16px;
-  z-index: 4000;
-}
-
-.doc-modal-card {
-  width: min(430px, 100%);
-  max-height: 88vh;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  background: #eeeeee;
-  border-radius: 28px;
-  padding: 28px 24px 22px;
-  position: relative;
-  box-shadow: 0 18px 45px rgba(0, 0, 0, .18);
-}
-
-.doc-modal-title {
-  text-align: center;
-  font-size: 20px;
-  font-weight: 900;
-  margin: 2px 36px 20px;
-}
-
-.doc-modal-close {
-  position: absolute;
-  top: 17px;
-  right: 20px;
-  border: none;
-  background: transparent;
-  font-size: 23px;
-  font-weight: 900;
-  cursor: pointer;
-}
-
-.doc-alert {
-  border-radius: 16px;
-  padding: 10px 12px;
-  font-size: 13px;
-  font-weight: 800;
-  margin-bottom: 16px;
-  text-align: center;
-}
-
-.doc-alert-ok {
-  background: rgba(53, 190, 90, .14);
-  color: #1d7d38;
-}
-
-.doc-alert-warning {
-  background: rgba(255, 193, 7, .18);
-  color: #8a6400;
-}
-
-.doc-alert-danger {
-  background: rgba(220, 53, 69, .15);
-  color: #a31d2a;
-}
-
-.doc-inicial-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.doc-inicial-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 14px;
-  background: rgba(255, 255, 255, .66);
-  border-radius: 18px;
-  padding: 12px 14px;
-}
-
-.doc-inicial-info {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-}
-
-.doc-inicial-info strong {
-  font-size: 14px;
-}
-
-.doc-inicial-info span,
-.doc-inicial-info small {
-  font-size: 12px;
-  color: rgba(0, 0, 0, .62);
-}
-
-.doc-inicial-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-shrink: 0;
-}
-
-.doc-file-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  max-width: 160px;
-  text-decoration: none;
-}
-
-.doc-file-link.pending {
-  pointer-events: none;
-}
-
-.doc-file-icon {
-  width: 34px;
-  height: 34px;
-  border-radius: 999px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: #fff;
-  color: #111;
-  font-weight: 900;
-  flex-shrink: 0;
-}
-
-.doc-file-icon.success {
-  background: #63c132;
-  color: #fff;
-}
-
-.doc-file-name {
-  font-size: 12px;
-  font-weight: 800;
-  color: #155093;
-  line-height: 1.2;
-  word-break: break-word;
-  overflow-wrap: anywhere;
-}
-
-.doc-file-link.pending .doc-file-name {
-  color: #777;
-}
-
-.doc-modal-save {
-  display: block;
-  margin: 22px auto 0;
-  min-width: 110px;
-  border: none;
-  border-radius: 999px;
-  padding: 9px 20px;
-  background: #155093;
-  color: #fff;
-  font-weight: 800;
-  cursor: pointer;
-}
-
-/* modal cambiar estado del proyecto */
-
-.estado-proyecto-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 4200;
-  background: rgba(0, 0, 0, .35);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 16px;
-}
-
-.estado-proyecto-modal {
-  width: min(330px, 100%);
-  background: #eeeeee;
-  border-radius: 24px;
-  padding: 24px 20px 20px;
-  position: relative;
-  box-shadow: 0 18px 45px rgba(0, 0, 0, .20);
-}
-
-.estado-proyecto-modal h3 {
-  margin: 0 32px 10px;
-  text-align: center;
-  font-size: 18px;
-  font-weight: 900;
-}
-
-.estado-proyecto-modal p {
-  margin: 0 0 16px;
-  text-align: center;
-  font-size: 12px;
-  color: rgba(0, 0, 0, .62);
-}
-
-.estado-proyecto-close {
-  position: absolute;
-  top: 14px;
-  right: 16px;
-  border: none;
-  background: transparent;
-  font-size: 22px;
-  font-weight: 900;
-  cursor: pointer;
-}
-
-.estado-proyecto-select {
-  width: 100%;
-  height: 44px;
-  border: none;
-  border-radius: 999px;
-  padding: 0 16px;
-  background: #fff;
-  font-weight: 800;
-  outline: none;
-}
-
-.estado-proyecto-actions {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  margin-top: 18px;
-}
-
-.estado-btn-secondary,
-.estado-btn-primary {
-  border: none;
-  border-radius: 999px;
-  min-height: 38px;
-  padding: 8px 16px;
-  font-weight: 800;
-  cursor: pointer;
-}
-
-.estado-btn-secondary {
-  background: #fff;
-  color: #111;
-}
-
-.estado-btn-primary {
-  background: #155093;
-  color: #fff;
-}
-
-/* textos centrados en proceso constructivo */
-
-.process-mini-stage {
-  position: relative;
-  justify-content: center;
-}
-
-.process-mini-stage-icon {
-  position: absolute;
-  left: 22px;
-}
-
-.process-mini-stage-label {
-  width: 100%;
-  flex: unset !important;
-  text-align: center !important;
-  padding: 0 42px;
-}
-
-/* una sola fila de los tabs */
-
-@media (max-width: 650px) {
-  .tabs {
-    display: flex !important;
-    flex-wrap: nowrap !important;
-    align-items: center;
-    gap: 6px;
-    width: 100%;
-    overflow: visible;
-  }
-
-  .tabs .tab {
-    flex: 1 1 0;
-    min-width: 0;
-    padding: 8px 6px;
-    border-radius: 999px;
-    font-size: 11px;
-    font-weight: 800;
-    text-align: center;
-    white-space: nowrap;
-  }
-
-  .process-mini-summary {
-    padding-right: 54px;
-  }
-
-  .process-actions {
-    top: 10px;
-    right: 10px;
-  }
-
-  .project-more-trigger {
-    width: 36px;
-    height: 36px;
-    font-size: 21px;
-  }
-
-  .project-more-menu {
-    min-width: 190px;
-  }
-
-  .doc-modal-card {
-    border-radius: 22px;
-    padding: 24px 18px 20px;
-  }
-
-  .doc-inicial-row {
-    align-items: flex-start;
-  }
-
-  .doc-inicial-actions {
-    flex-direction: column;
-    align-items: flex-end;
-  }
-
-  .doc-file-link {
-    max-width: 120px;
-  }
-
-  .estado-proyecto-actions {
-    flex-direction: column;
-  }
-
-  .estado-btn-secondary,
-  .estado-btn-primary {
-    width: 100%;
-  }
-}
-
-@media (max-width: 370px) {
-  .tabs .tab {
-    font-size: 10px;
-    padding: 7px 4px;
-  }
-}
-
-.estado-option-list {
-  display: flex;
-  flex-direction: column;
-  gap: 9px;
-  margin-top: 14px;
-}
-
-.estado-option {
-  width: 100%;
-  border: none;
-  border-radius: 999px;
-  padding: 11px 14px;
-  background: #fff;
-  color: #111;
-  font-weight: 800;
-  text-align: center;
-  cursor: pointer;
-}
-
-.estado-option.selected {
-  background: #155093;
-  color: #fff;
-}
-
-.estado-option:hover {
-  background: #dce8f6;
-}
-
-.estado-option.selected:hover {
-  background: #155093;
-}
-
-.doc-upload-mini {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 34px;
-  padding: 8px 12px;
-  border-radius: 999px;
-  background: #155093;
-  color: #fff;
-  font-size: 12px;
-  font-weight: 900;
-  cursor: pointer;
-  white-space: nowrap;
-}
-
-.doc-upload-mini input {
-  display: none !important;
-}
-
-.doc-inicial-row {
-  align-items: center;
-}
-
-.doc-inicial-info {
-  max-width: 62%;
-}
-
-.doc-inicial-actions {
-  max-width: 38%;
-}
-
-@media (max-width: 520px) {
-  .doc-inicial-row {
-    display: grid;
-    grid-template-columns: 1fr auto;
-    align-items: start;
-  }
-
-  .doc-inicial-info {
-    max-width: none;
-  }
-
-  .doc-inicial-actions {
-    max-width: 120px;
-    align-items: flex-end;
-  }
-
-  .doc-file-name {
-    max-width: 80px;
-  }
-}
-
-/*  */
+/* modal de la documentacion inicial */
 
 .doc-modal-backdrop {
   position: fixed !important;
@@ -515,7 +88,7 @@
 }
 
 .doc-modal-card {
-  width: min(430px, 100%) !important;
+  width: min(460px, 100%) !important;
   max-height: 88vh !important;
   overflow-y: auto !important;
   -webkit-overflow-scrolling: touch !important;
@@ -530,7 +103,8 @@
   text-align: center !important;
   font-size: 20px !important;
   font-weight: 900 !important;
-  margin: 2px 36px 20px !important;
+  margin: 2px 40px 18px !important;
+  line-height: 1.15 !important;
 }
 
 .doc-modal-close {
@@ -551,20 +125,18 @@
   font-weight: 800 !important;
   margin-bottom: 16px !important;
   text-align: center !important;
+  background: #ffffff !important;
 }
 
 .doc-alert-ok {
-  background: rgba(53, 190, 90, .18) !important;
-  color: #1d7d38 !important;
+  color: #155093 !important;
 }
 
 .doc-alert-warning {
-  background: rgba(255, 193, 7, .22) !important;
   color: #8a6400 !important;
 }
 
 .doc-alert-danger {
-  background: rgba(220, 53, 69, .16) !important;
   color: #a31d2a !important;
 }
 
@@ -576,170 +148,315 @@
 
 .doc-inicial-row {
   display: grid !important;
-  grid-template-columns: minmax(0, 1fr) auto !important;
+  grid-template-columns: minmax(0, 1fr) 150px !important;
   align-items: center !important;
   gap: 12px !important;
   border-radius: 18px !important;
   padding: 14px !important;
-  border: 2px solid transparent !important;
+  background: #ffffff !important;
+  border: 1px solid rgba(0, 0, 0, .06) !important;
+  min-height: 104px !important;
 }
 
-.doc-inicial-row.is-uploaded {
-  background: #79d13a !important;
-  border-color: rgba(80, 150, 38, .35) !important;
-}
-
-.doc-inicial-row.is-pending {
-  background: #e5c915 !important;
-  border-color: rgba(143, 121, 0, .25) !important;
+.doc-inicial-row.is-uploaded,
+.doc-inicial-row.is-pending,
+.doc-inicial-row.is-correction,
+.doc-inicial-row.is-approved,
+.doc-inicial-row.is-expired {
+  background: #ffffff !important;
+  border-color: rgba(0, 0, 0, .06) !important;
 }
 
 .doc-inicial-info {
   min-width: 0 !important;
   display: flex !important;
   flex-direction: column !important;
-  gap: 2px !important;
+  gap: 3px !important;
 }
 
 .doc-inicial-info strong {
   font-size: 14px !important;
   font-weight: 900 !important;
   color: #111 !important;
-  line-height: 1.2 !important;
+  line-height: 1.15 !important;
 }
 
 .doc-inicial-info span,
 .doc-inicial-info small {
   font-size: 12px !important;
   font-weight: 700 !important;
-  color: rgba(0, 0, 0, .70) !important;
+  color: rgba(0, 0, 0, .58) !important;
+  line-height: 1.2 !important;
 }
 
 .doc-inicial-actions {
+  width: 150px !important;
+  min-height: 88px !important;
   display: flex !important;
-  align-items: center !important;
-  justify-content: flex-end !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  justify-content: center !important;
   gap: 8px !important;
-  min-width: 98px !important;
 }
 
-.doc-evidencia-link {
+.doc-file-link-current {
+  width: 150px !important;
+  display: inline-block !important;
+  color: #155093 !important;
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  font-size: 12px !important;
+  font-weight: 900 !important;
+  line-height: 1.2 !important;
+  text-decoration: underline !important;
+  text-align: center !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+/* Botones con mismo tamaño */
+
+.doc-btn-correccion,
+.doc-btn-aprobar,
+.doc-correccion-status,
+.doc-evidencia-pendiente,
+.doc-upload-submit {
+  width: 150px !important;
+  min-height: 34px !important;
+  border-radius: 999px !important;
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
-  min-height: 34px !important;
-  padding: 8px 13px !important;
-  border-radius: 999px !important;
+  padding: 7px 10px !important;
+  font-size: 12px !important;
+  font-weight: 900 !important;
+  line-height: 1.1 !important;
+  text-align: center !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+.doc-btn-correccion,
+.doc-btn-aprobar,
+.doc-upload-submit {
   background: #155093 !important;
   color: #fff !important;
-  font-size: 12px !important;
-  font-weight: 900 !important;
   text-decoration: none !important;
-  white-space: nowrap !important;
-}
-
-.doc-evidencia-pendiente {
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  min-height: 34px !important;
-  padding: 8px 12px !important;
-  border-radius: 999px !important;
-  background: rgba(255, 255, 255, .65) !important;
-  color: #111 !important;
-  font-size: 12px !important;
-  font-weight: 900 !important;
-  white-space: nowrap !important;
-}
-
-.doc-upload-action {
-  display: inline-flex !important;
-  align-items: center !important;
-  gap: 8px !important;
+  border: none !important;
   cursor: pointer !important;
 }
 
-.doc-upload-action input {
-  display: none !important;
+.doc-correccion-status,
+.doc-evidencia-pendiente {
+  background: #f2f2f2 !important;
+  color: #555 !important;
+  border: none !important;
 }
 
-.doc-upload-icon {
-  width: 34px !important;
-  height: 34px !important;
+/* icono único para subir/reemplazar PDF */
+.doc-upload-icon-only {
+  width: 38px !important;
+  height: 38px !important;
   border-radius: 999px !important;
-  background: rgba(255, 255, 255, .78) !important;
+  background: #f3f3f3 !important;
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
+  cursor: pointer !important;
   overflow: hidden !important;
-  flex-shrink: 0 !important;
+  align-self: center !important;
 }
 
-.doc-upload-icon img {
-  width: 19px !important;
-  height: 19px !important;
+.doc-upload-icon-only img {
+  width: 22px !important;
+  height: 22px !important;
   object-fit: contain !important;
 }
 
-.doc-upload-text {
-  min-height: 34px !important;
-  padding: 8px 12px !important;
+.doc-upload-icon-only input {
+  display: none !important;
+}
+
+.doc-hidden-upload-input {
+  display: none !important;
+}
+
+/* Motivo de corrección */
+.doc-motivo-correccion {
+  margin-top: 6px !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 2px !important;
+}
+
+.doc-motivo-correccion strong {
+  font-size: 11px !important;
+  font-weight: 900 !important;
+  color: #111 !important;
+}
+
+.doc-motivo-correccion span {
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  color: rgba(0, 0, 0, .65) !important;
+  line-height: 1.25 !important;
+}
+
+/* Archivo seleccionado antes de subir */
+.doc-upload-block {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  gap: 8px !important;
+  width: 150px !important;
+}
+
+.doc-upload-top {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  width: 100% !important;
+}
+
+.doc-selected-file-wrap {
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  width: 150px !important;
+  min-height: 32px !important;
+  padding: 6px 10px !important;
+  border-radius: 12px !important;
+  background: #f6f6f6 !important;
+}
+
+.doc-selected-file-name {
+  flex: 1 !important;
+  min-width: 0 !important;
+  font-size: 11px !important;
+  font-weight: 800 !important;
+  color: #155093 !important;
+  text-decoration: underline !important;
+  overflow: hidden !important;
+  white-space: nowrap !important;
+  text-overflow: ellipsis !important;
+}
+
+.doc-remove-selected-file {
+  border: none !important;
+  background: transparent !important;
+  color: #666 !important;
+  font-size: 16px !important;
+  font-weight: 900 !important;
+  cursor: pointer !important;
+  width: 18px !important;
+  height: 18px !important;
+  min-width: 18px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+  line-height: 1 !important;
+}
+
+.doc-upload-submit:disabled {
+  opacity: .72 !important;
+  cursor: not-allowed !important;
+}
+
+/* Modal pequeño para escribir motivo de corrección */
+.doc-correccion-backdrop {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 5400 !important;
+  background: rgba(0, 0, 0, .42) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 16px !important;
+}
+
+.doc-correccion-card {
+  width: min(360px, 100%) !important;
+  background: #eeeeee !important;
+  border-radius: 24px !important;
+  padding: 24px 20px 20px !important;
+  position: relative !important;
+  box-shadow: 0 18px 45px rgba(0, 0, 0, .22) !important;
+}
+
+.doc-correccion-card h3 {
+  margin: 0 32px 10px !important;
+  text-align: center !important;
+  font-size: 18px !important;
+  font-weight: 900 !important;
+}
+
+.doc-correccion-card p {
+  margin: 0 0 14px !important;
+  text-align: center !important;
+  font-size: 12px !important;
+  color: rgba(0, 0, 0, .65) !important;
+  line-height: 1.35 !important;
+}
+
+.doc-correccion-close {
+  position: absolute !important;
+  top: 14px !important;
+  right: 16px !important;
+  border: none !important;
+  background: transparent !important;
+  font-size: 22px !important;
+  font-weight: 900 !important;
+  cursor: pointer !important;
+}
+
+.doc-correccion-textarea {
+  width: 100% !important;
+  min-height: 110px !important;
+  border: none !important;
+  border-radius: 16px !important;
+  background: #fff !important;
+  padding: 12px !important;
+  font-family: inherit !important;
+  font-size: 13px !important;
+  resize: vertical !important;
+  outline: none !important;
+}
+
+.doc-correccion-submit {
+  display: block !important;
+  margin: 16px auto 0 !important;
+  border: none !important;
   border-radius: 999px !important;
   background: #155093 !important;
   color: #fff !important;
-  font-size: 12px !important;
+  padding: 9px 18px !important;
+  font-size: 13px !important;
   font-weight: 900 !important;
-  white-space: nowrap !important;
+  cursor: pointer !important;
 }
 
+/* Oculta restos viejos */
 .doc-modal-save,
-.doc-icon-btn,
+.doc-upload-mini,
+.doc-upload-action,
+.doc-upload-text,
 .doc-file-link,
 .doc-file-icon,
 .doc-file-name,
+.doc-icon-btn,
 .doc-check,
 .doc-pending {
   display: none !important;
 }
 
-@media (max-width: 520px) {
-  .doc-modal-card {
-    width: min(330px, 100%) !important;
-    border-radius: 22px !important;
-    padding: 24px 18px 20px !important;
-  }
-
-  .doc-inicial-row {
-    grid-template-columns: minmax(0, 1fr) auto !important;
-    padding: 12px !important;
-  }
-
-  .doc-inicial-info strong {
-    font-size: 13px !important;
-  }
-
-  .doc-inicial-info span,
-  .doc-inicial-info small {
-    font-size: 11px !important;
-  }
-
-  .doc-inicial-actions {
-    min-width: auto !important;
-  }
-
-  .doc-upload-action {
-    flex-direction: column !important;
-    align-items: center !important;
-    gap: 6px !important;
-  }
-
-  .doc-upload-text {
-    padding: 7px 10px !important;
-    font-size: 11px !important;
-  }
-}
-
-/* cambio de estado modal */
+/* modal de cambio de estado */
 
 .estado-proyecto-backdrop {
   position: fixed !important;
@@ -861,226 +578,76 @@
   display: none !important;
 }
 
-/*  */
+/* etapas centradas */
 
-.doc-modal-backdrop {
-  position: fixed !important;
-  inset: 0 !important;
-  z-index: 5000 !important;
-  background: rgba(0, 0, 0, .38) !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  padding: 16px !important;
-}
-
-.doc-modal-card {
-  width: min(430px, 100%) !important;
-  max-height: 88vh !important;
-  overflow-y: auto !important;
-  -webkit-overflow-scrolling: touch !important;
-  background: #eeeeee !important;
-  border-radius: 28px !important;
-  padding: 28px 24px 24px !important;
-  position: relative !important;
-  box-shadow: 0 18px 45px rgba(0, 0, 0, .20) !important;
-}
-
-.doc-modal-title {
-  text-align: center !important;
-  font-size: 20px !important;
-  font-weight: 900 !important;
-  margin: 2px 36px 20px !important;
-}
-
-.doc-modal-close {
-  position: absolute !important;
-  top: 17px !important;
-  right: 20px !important;
-  border: none !important;
-  background: transparent !important;
-  font-size: 23px !important;
-  font-weight: 900 !important;
-  cursor: pointer !important;
-}
-
-.doc-alert {
-  border-radius: 16px !important;
-  padding: 10px 12px !important;
-  font-size: 13px !important;
-  font-weight: 800 !important;
-  margin-bottom: 16px !important;
-  text-align: center !important;
-}
-
-.doc-alert-ok {
-  background: #ffffff !important;
-  color: #155093 !important;
-}
-
-.doc-alert-warning {
-  background: #ffffff !important;
-  color: #8a6400 !important;
-}
-
-.doc-inicial-list {
-  display: flex !important;
-  flex-direction: column !important;
-  gap: 12px !important;
-}
-
-.doc-inicial-row {
-  display: grid !important;
-  grid-template-columns: minmax(0, 1fr) auto !important;
-  align-items: center !important;
-  gap: 12px !important;
-  border-radius: 18px !important;
-  padding: 14px !important;
-  background: #ffffff !important;
-  border: 1px solid rgba(0, 0, 0, .06) !important;
-}
-
-.doc-inicial-row.is-uploaded,
-.doc-inicial-row.is-pending,
-.doc-inicial-row.is-expired {
-  background: #ffffff !important;
-  border-color: rgba(0, 0, 0, .06) !important;
-}
-
-.doc-inicial-info {
-  min-width: 0 !important;
-  display: flex !important;
-  flex-direction: column !important;
-  gap: 2px !important;
-}
-
-.doc-inicial-info strong {
-  font-size: 14px !important;
-  font-weight: 900 !important;
-  color: #111 !important;
-  line-height: 1.2 !important;
-}
-
-.doc-inicial-info span,
-.doc-inicial-info small {
-  font-size: 12px !important;
-  font-weight: 700 !important;
-  color: rgba(0, 0, 0, .58) !important;
-}
-
-.doc-inicial-actions {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: flex-end !important;
-  gap: 8px !important;
-}
-
-.doc-upload-icon-only {
-  width: 38px !important;
-  height: 38px !important;
-  border-radius: 999px !important;
-  background: #f3f3f3 !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  cursor: pointer !important;
-  overflow: hidden !important;
-}
-
-.doc-upload-icon-only img {
-  width: 22px !important;
-  height: 22px !important;
-  object-fit: contain !important;
-}
-
-.doc-upload-icon-only input {
-  display: none !important;
-}
-
-.doc-evidencia-link {
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  min-height: 34px !important;
-  padding: 8px 13px !important;
-  border-radius: 999px !important;
-  background: #155093 !important;
-  color: #fff !important;
-  font-size: 12px !important;
-  font-weight: 900 !important;
-  text-decoration: none !important;
-  white-space: nowrap !important;
-}
-
-.doc-evidencia-pendiente {
-  font-size: 12px !important;
-  font-weight: 800 !important;
-  color: rgba(0, 0, 0, .55) !important;
-}
-
-.doc-modal-save,
-.doc-upload-mini,
-.doc-upload-action,
-.doc-upload-text,
-.doc-file-link,
-.doc-file-icon,
-.doc-file-name,
-.doc-icon-btn,
-.doc-check,
-.doc-pending {
-  display: none !important;
-}
-
-@media (max-width: 520px) {
-  .doc-modal-card {
-    width: min(330px, 100%) !important;
-    border-radius: 22px !important;
-    padding: 24px 18px 20px !important;
-  }
-
-  .doc-inicial-row {
-    grid-template-columns: minmax(0, 1fr) auto !important;
-    padding: 12px !important;
-  }
-
-  .doc-inicial-info strong {
-    font-size: 13px !important;
-  }
-
-  .doc-inicial-info span,
-  .doc-inicial-info small {
-    font-size: 11px !important;
-  }
-
-  .doc-upload-icon-only {
-    width: 36px !important;
-    height: 36px !important;
-  }
-}
-
-.process-mini-summary {
+.process-mini-stage {
   position: relative;
+  justify-content: center;
 }
 
-.process-mini-summary > .process-actions {
-  position: absolute !important;
-  top: 14px !important;
-  right: 14px !important;
-  z-index: 80 !important;
+.process-mini-stage-icon {
+  position: absolute;
+  left: 22px;
 }
 
-.process-mini-summary > .process-actions .project-more-wrap {
-  position: relative !important;
+.process-mini-stage-label {
+  width: 100%;
+  flex: unset !important;
+  text-align: center !important;
+  padding: 0 42px;
 }
 
-.process-mini-summary > .process-actions .project-more-menu {
-  top: calc(100% + 8px) !important;
-  right: 0 !important;
+/* tabs en una sola fila */
+
+@media (max-width: 650px) {
+  .tabs {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+    overflow: visible;
+  }
+
+  .tabs .tab {
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 8px 6px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 800;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  .process-mini-summary {
+    padding-right: 54px;
+  }
+
+  .process-actions {
+    top: 10px;
+    right: 10px;
+  }
+
+  .project-more-trigger {
+    width: 36px;
+    height: 36px;
+    font-size: 21px;
+  }
+
+  .project-more-menu {
+    min-width: 190px;
+  }
 }
 
-/* =========================================================
-   HEADER GLOBAL: FLECHA + TÍTULO + HISTORIAL
-   ========================================================= */
+@media (max-width: 370px) {
+  .tabs .tab {
+    font-size: 10px;
+    padding: 7px 4px;
+  }
+}
+
+/* fecha, título e historial*/
 
 .process-mini-top,
 .etapa-mini-top {
@@ -1099,8 +666,8 @@
   grid-column: 1 !important;
   justify-self: start !important;
   align-self: center !important;
-
   position: static !important;
+
   width: 32px !important;
   height: 32px !important;
   min-width: 32px !important;
@@ -1117,13 +684,13 @@
   z-index: 20 !important;
 }
 
-/* Botón de historial: va a la derecha */
+/* Botón de historial a la derecha */
 .etapa-mini-history {
   grid-column: 3 !important;
   justify-self: end !important;
   align-self: center !important;
-
   position: static !important;
+
   width: 32px !important;
   height: 32px !important;
   min-width: 32px !important;
@@ -1185,8 +752,105 @@
   display: block !important;
 }
 
-/* Celular */
+/* documentacion responsiva */
+
 @media (max-width: 520px) {
+  .doc-modal-card {
+    width: min(330px, 100%) !important;
+    border-radius: 22px !important;
+    padding: 24px 16px 20px !important;
+  }
+
+  .doc-modal-title {
+    font-size: 18px !important;
+    margin: 0 40px 16px !important;
+  }
+
+  .doc-alert {
+    font-size: 11px !important;
+    padding: 9px 10px !important;
+  }
+
+  .doc-inicial-row {
+    grid-template-columns: minmax(0, 1fr) 118px !important;
+    gap: 8px !important;
+    padding: 12px !important;
+    border-radius: 16px !important;
+    min-height: 100px !important;
+  }
+
+  .doc-inicial-info strong {
+    font-size: 11px !important;
+  }
+
+  .doc-inicial-info span,
+  .doc-inicial-info small {
+    font-size: 10px !important;
+  }
+
+  .doc-inicial-actions,
+  .doc-upload-block,
+  .doc-selected-file-wrap,
+  .doc-upload-submit,
+  .doc-file-link-current,
+  .doc-btn-correccion,
+  .doc-btn-aprobar,
+  .doc-correccion-status,
+  .doc-evidencia-pendiente {
+    width: 118px !important;
+  }
+
+  .doc-inicial-actions {
+    gap: 6px !important;
+    min-height: 82px !important;
+  }
+
+  .doc-upload-top {
+    justify-content: center !important;
+  }
+
+  .doc-upload-icon-only {
+    width: 34px !important;
+    height: 34px !important;
+    align-self: center !important;
+  }
+
+  .doc-upload-icon-only img {
+    width: 20px !important;
+    height: 20px !important;
+  }
+
+  .doc-selected-file-wrap {
+    min-height: 30px !important;
+    padding: 5px 8px !important;
+  }
+
+  .doc-selected-file-name {
+    font-size: 9.5px !important;
+  }
+
+  .doc-remove-selected-file {
+    width: 16px !important;
+    height: 16px !important;
+    min-width: 16px !important;
+    font-size: 14px !important;
+  }
+
+  .doc-upload-submit,
+  .doc-btn-correccion,
+  .doc-btn-aprobar,
+  .doc-correccion-status,
+  .doc-evidencia-pendiente {
+    min-height: 30px !important;
+    padding: 6px 8px !important;
+    font-size: 9.5px !important;
+  }
+
+  .doc-file-link-current {
+    width: 118px !important;
+    font-size: 10px !important;
+  }
+
   .process-mini-top,
   .etapa-mini-top {
     grid-template-columns: 28px minmax(0, 1fr) 28px !important;
@@ -1229,5 +893,30 @@
     max-width: min(185px, 100%) !important;
     padding: 8px 14px !important;
     font-size: 13px !important;
+  }
+
+  .doc-inicial-row {
+    grid-template-columns: minmax(0, 1fr) 108px !important;
+  }
+
+  .doc-inicial-actions,
+  .doc-upload-block,
+  .doc-selected-file-wrap,
+  .doc-upload-submit,
+  .doc-file-link-current,
+  .doc-btn-correccion,
+  .doc-btn-aprobar,
+  .doc-correccion-status,
+  .doc-evidencia-pendiente {
+    width: 108px !important;
+  }
+
+  .doc-upload-submit,
+  .doc-file-link-current,
+  .doc-btn-correccion,
+  .doc-btn-aprobar,
+  .doc-correccion-status,
+  .doc-evidencia-pendiente {
+    font-size: 9px !important;
   }
 }

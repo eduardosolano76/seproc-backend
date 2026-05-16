@@ -2,6 +2,7 @@ package com.example.demo.modelo;
 
 import java.time.LocalDateTime;
 
+
 import org.hibernate.annotations.TenantId;
 
 import jakarta.persistence.Column;
@@ -27,6 +28,8 @@ public class SolicitudProyectoDocumento {
 
     public static final String ESTADO_PENDIENTE = "PENDIENTE";
     public static final String ESTADO_SUBIDO = "SUBIDO";
+    public static final String ESTADO_REQUIERE_CORRECCION = "REQUIERE_CORRECCION";
+    public static final String ESTADO_APROBADO = "APROBADO";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -73,6 +76,16 @@ public class SolicitudProyectoDocumento {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_usuario_subio")
     private Usuario usuarioSubio;
+    
+    @Column(name = "motivo_correccion", columnDefinition = "TEXT")
+    private String motivoCorreccion;
+
+    @Column(name = "fecha_correccion")
+    private LocalDateTime fechaCorreccion;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_usuario_solicito_correccion")
+    private Usuario usuarioSolicitoCorreccion;
 
     @TenantId
     @Column(name = "id_institucion", nullable = false)

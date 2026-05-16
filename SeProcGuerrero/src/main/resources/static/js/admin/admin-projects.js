@@ -1,4 +1,9 @@
-import { fetchJson, buildHeaders } from './api.js';
+import {
+  fetchJson,
+  buildHeaders,
+  solicitarCorreccionDocumentoInicial,
+  aprobarDocumentoInicial
+} from './api.js';
 import { showCustomAlert, showCustomConfirm } from './ui.js';
 import { abrirModalDocumentacionInicial } from '../modalDocumentacion/documentacion-inicial-modal.js';
 
@@ -1038,9 +1043,57 @@ function bindPanelEvents() {
 async function abrirDocumentacionInicial(idProyecto) {
   try {
     const data = await apiGet(`/api/admin/proyectos/${idProyecto}/documentacion-inicial`);
-    abrirModalDocumentacionInicial(data, { puedeSubir: false });
+
+    abrirModalDocumentacionInicial(data, {
+      puedeSubir: false,
+      puedeSolicitarCorreccion: true,
+      puedeAprobar: true,
+
+      onCorreccion: async (idDocumento, motivo) => {
+        try {
+          await solicitarCorreccionDocumentoInicial(idDocumento, motivo);
+
+          await showCustomAlert(
+            'Se solicitó la corrección del documento.',
+            'Éxito'
+          );
+
+          await abrirDocumentacionInicial(idProyecto);
+        } catch (e) {
+          await showCustomAlert(
+            'No se pudo solicitar la corrección: ' + e.message,
+            'Error'
+          );
+
+          await abrirDocumentacionInicial(idProyecto);
+        }
+      },
+
+      onAprobar: async (idDocumento) => {
+        try {
+          await aprobarDocumentoInicial(idDocumento);
+
+          await showCustomAlert(
+            'Documento aprobado correctamente.',
+            'Éxito'
+          );
+
+          await abrirDocumentacionInicial(idProyecto);
+        } catch (e) {
+          await showCustomAlert(
+            'No se pudo aprobar el documento: ' + e.message,
+            'Error'
+          );
+
+          await abrirDocumentacionInicial(idProyecto);
+        }
+      }
+    });
   } catch (e) {
-    await showCustomAlert('No se pudo cargar la documentación inicial: ' + e.message, 'Error');
+    await showCustomAlert(
+      'No se pudo cargar la documentación inicial: ' + e.message,
+      'Error'
+    );
   }
 }
 
