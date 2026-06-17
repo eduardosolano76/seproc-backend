@@ -83,20 +83,6 @@ body{
   gap:16px;
   margin-bottom:18px;
 }
-.search{
-  flex:1;
-  max-width:640px;
-  background:#fff;
-  border:1px solid rgba(0,0,0,.08);
-  border-radius:999px;
-  padding:10px 14px;
-  display:flex;
-  align-items:center;
-  gap:10px;
-  box-shadow:0 10px 22px rgba(0,0,0,.06);
-}
-.search .s-icon img{width:18px;height:18px;opacity:.7}
-.search input{width:100%;border:0;outline:none;font:inherit;background:transparent}
 
 .userbox{
   position:relative;
@@ -1377,20 +1363,7 @@ body{
   gap:16px;
   margin-bottom:18px;
 }
-.search{
-  flex:1;
-  max-width:640px;
-  background:#fff;
-  border:1px solid rgba(0,0,0,.08);
-  border-radius:999px;
-  padding:10px 14px;
-  display:flex;
-  align-items:center;
-  gap:10px;
-  box-shadow:0 10px 22px rgba(0,0,0,.06);
-}
-.search .s-icon img{width:18px;height:18px;opacity:.7}
-.search input{width:100%;border:0;outline:none;font:inherit;background:transparent}
+
 
 .userbox{
   position:relative;

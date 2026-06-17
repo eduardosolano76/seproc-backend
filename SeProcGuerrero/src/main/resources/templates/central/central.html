@@ -38,16 +38,6 @@
 </div>
 
                 <nav class="nav" aria-label="Menú Central">
-                
-                 <!-- Buscador dentro de menu de hamburguesa -->
-                <button class="nav-item mobile-search-only" type="button" aria-label="Buscar">
-    <span class="nav-left">
-        <span class="icon">
-            <img th:src="@{/assets/iconos/buscar.png}" alt="" />
-        </span>
-        <span class="label">Buscar</span>
-    </span>
-</button>
                     <a
                         class="nav-item"
                         id="navSolicitudes"
@@ -143,18 +133,6 @@
 
             <main class="content">
                 <header class="topbar">
-                    <div class="search" role="search">
-                        <span class="s-icon" aria-hidden="true">
-                            <img th:src="@{/assets/iconos/buscar.png}" alt="" />
-                        </span>
-                        <input
-                            id="searchCentral"
-                            type="search"
-                            placeholder="Buscar..."
-                            autocomplete="off"
-                        />
-                    </div>
-
                     <!-- Saludo en el perfil -->
                     <div class="userbox" style="position: relative">
                         <div class="hello">
@@ -462,9 +440,9 @@
                         </div>
 
                         <label class="dg-label">Supervisor<span class="req">*</span></label>
-                        <select class="dg-select" id="selectSupervisor" required>
-                            <option value="" selected disabled>Seleccionar</option>
-                        </select>
+<select class="dg-select" id="selectSupervisor" required data-pretty-select>
+    <option value="" selected disabled>Seleccionar</option>
+</select>
 
                         <div class="mini-actions">
                             <button class="dg-btn" type="button" id="btnConfirmarAprobar">
@@ -634,8 +612,8 @@
                 </div>
             </div>
         </div>
-        
-        <script type="module" th:src="@{/js/central/app.js}" defer></script>
+ <script type="module" th:src="@{/js/shared/pretty-select.js}"></script>       
+<script type="module" th:src="@{/js/central/app.js}" defer></script>
 <script type="module" th:src="@{/js/central/central-projects.js}" defer></script>
 <script th:src="@{/js/shared/mobile-role-menu.js}"></script>
     </body>

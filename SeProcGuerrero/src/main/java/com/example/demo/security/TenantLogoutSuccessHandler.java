@@ -24,7 +24,7 @@ public class TenantLogoutSuccessHandler implements LogoutSuccessHandler{
 	}
 
 	@Override
-	@Transactional // <-- ESTO SOLUCIONA EL PROBLEMA DEL LAZY LOADING
+	@Transactional 
 	public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication)
 			throws IOException, ServletException {
 		
@@ -46,7 +46,6 @@ public class TenantLogoutSuccessHandler implements LogoutSuccessHandler{
 				}
 			}
 		} catch (Exception e) {
-			// Si llega a ocurrir cualquier otro error, lo imprimimos en consola pero no rompemos la app
 			System.out.println("Error al calcular el logout dinámico: " + e.getMessage());
 		}
 

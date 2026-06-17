@@ -31,7 +31,7 @@ public class TenantFilter extends OncePerRequestFilter {
         // Obtener la sesión actual de Spring Security
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        // Si hay alguien logueado (y no es el visitante anónimo por defecto)
+        // Si hay alguien logueado
         if (authentication != null && authentication.isAuthenticated() 
                 && !"anonymousUser".equals(authentication.getPrincipal())) {
             
@@ -47,11 +47,10 @@ public class TenantFilter extends OncePerRequestFilter {
         }
 
         try {
-            // Continuar con la petición (dejar que pase al Controlador)
+            // Continuar con la petición 
             filterChain.doFilter(request, response);
         } finally {
-            // MUY IMPORTANTE: Limpiar el contexto al terminar para evitar fugas de memoria
-            // y que el ID no se quede "pegado" en el hilo de Tomcat para el siguiente request.
+            
             TenantContext.clear();
         }
     }
