@@ -97,6 +97,8 @@ public class SupervisorProyectosApiController {
 		}
 
 		SolicitudProyecto s = p.getSolicitud();
+		
+		proyectoEtapaService.asegurarEtapasProyectoInicializadas(p);
 
 		var constructor = usuarioRepo.findById(s.getIdUsuarioContratista()).orElse(null);
 		var supervisor = usuarioRepo.findById(p.getIdUsuarioSupervisor()).orElse(null);

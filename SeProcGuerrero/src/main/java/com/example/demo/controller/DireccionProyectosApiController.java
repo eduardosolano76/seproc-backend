@@ -95,6 +95,8 @@ public class DireccionProyectosApiController {
 		dto.put("tipoObra", s.getTipoObra());
 		dto.put("tipoEdificacion", s.getTipoEdificacion() != null ? s.getTipoEdificacion().getNombre() : "");
 
+		proyectoEtapaService.asegurarEtapasProyectoInicializadas(p);
+		
 		dto.put("estadosEtapa", proyectoEtapaService.obtenerEstadosVisuales(id));
 		dto.put("soloLectura", true);
 

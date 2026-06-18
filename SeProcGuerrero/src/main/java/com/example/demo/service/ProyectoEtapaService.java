@@ -77,6 +77,13 @@ public class ProyectoEtapaService {
 
 		List<EtapaPlantilla> plantillas = obtenerTerminalesEnSecuencia(tipoObra, nivelesProyecto);
 		List<EtapaProgramada> secuencia = construirSecuenciaProgramada(plantillas, nivelesProyecto);
+		
+		if (secuencia.isEmpty()) {
+		    throw new IllegalStateException(
+		        "No existen plantillas activas en public.etapa_plantilla para el tipo de obra: "
+		        + tipoObra
+		    );
+		}
 
 		int orden = 1;
 		boolean primeraActiva = false;
@@ -654,14 +661,30 @@ public class ProyectoEtapaService {
 	}
 
 	private List<EtapaPlantilla> obtenerTerminalesEnSecuencia(String tipoObra, int nivelesProyecto) {
-		List<EtapaPlantilla> roots = etapaPlantillaRepo
-			.findByEtapaPadreIsNullAndTipoObraAndActivoTrueOrderByOrdenVisualAsc(tipoObra);
+	    String tipoObraNormalizado = normalizarTipoObra(tipoObra);
 
-		List<EtapaPlantilla> terminales = new ArrayList<>();
-		for (EtapaPlantilla root : roots) {
-			appendTerminales(root, nivelesProyecto, terminales);
-		}
-		return terminales;
+	    List<EtapaPlantilla> roots = etapaPlantillaRepo
+	            .buscarRaicesActivasPorTipoObra(tipoObraNormalizado);
+
+	    if (roots.isEmpty() && "Edificación".equalsIgnoreCase(tipoObraNormalizado)) {
+	        roots = etapaPlantillaRepo.buscarRaicesActivasPorTipoObra("Edificacion");
+	    }
+
+	    List<EtapaPlantilla> terminales = new ArrayList<>();
+
+	    for (EtapaPlantilla root : roots) {
+	        appendTerminales(root, nivelesProyecto, terminales);
+	    }
+
+	    return terminales;
+	}
+	
+	private String normalizarTipoObra(String tipoObra) {
+	    if (tipoObra == null || tipoObra.isBlank()) {
+	        return "Edificación";
+	    }
+
+	    return tipoObra.trim();
 	}
 
 	private void appendTerminales(EtapaPlantilla plantilla, int nivelesProyecto, List<EtapaPlantilla> destino) {
@@ -670,8 +693,7 @@ public class ProyectoEtapaService {
 		}
 
 		List<EtapaPlantilla> hijos = etapaPlantillaRepo
-			.findByEtapaPadre_IdEtapaPlantillaOrderByOrdenVisualAsc(
-					plantilla.getIdEtapaPlantilla());
+		        .buscarHijasActivasPorPadre(plantilla.getIdEtapaPlantilla());
 
 		if (hijos == null || hijos.isEmpty()) {
 			if (Boolean.TRUE.equals(plantilla.getEsTerminal())) {
@@ -783,6 +805,53 @@ public class ProyectoEtapaService {
 
 		document.close();
 		return out.toByteArray();
+	}
+	
+	public void asegurarEtapasProyectoInicializadas(Proyecto proyecto) {
+	    if (proyecto == null || proyecto.getIdProyecto() == null) {
+	        return;
+	    }
+
+	    List<ProyectoEtapa> etapas = proyectoEtapaRepo
+	            .findByProyecto_IdProyectoOrderByOrdenVisualAsc(proyecto.getIdProyecto());
+
+	    if (etapas.isEmpty()) {
+	        inicializarEtapasProyecto(proyecto);
+
+	        etapas = proyectoEtapaRepo
+	                .findByProyecto_IdProyectoOrderByOrdenVisualAsc(proyecto.getIdProyecto());
+	    }
+
+	    if (etapas.isEmpty()) {
+	        throw new IllegalStateException(
+	                "No se pudieron inicializar las etapas del proyecto. Revisa que existan plantillas activas en public.etapa_plantilla para el tipo de obra."
+	        );
+	    }
+
+	    boolean existeEtapaAbierta = etapas.stream().anyMatch(etapa -> {
+	        String estado = etapa.getEstado() == null ? "" : etapa.getEstado().toUpperCase();
+
+	        return ESTADO_EN_PROCESO.equals(estado)
+	                || ESTADO_CON_OBSERVACIONES.equals(estado);
+	    });
+
+	    if (existeEtapaAbierta) {
+	        return;
+	    }
+
+	    ProyectoEtapa siguienteDisponible = etapas.stream()
+	            .filter(etapa -> {
+	                String estado = etapa.getEstado() == null ? "" : etapa.getEstado().toUpperCase();
+	                return !ESTADO_APROBADA.equals(estado);
+	            })
+	            .findFirst()
+	            .orElse(null);
+
+	    if (siguienteDisponible != null) {
+	        activarPrimeraEtapa(siguienteDisponible);
+	        siguienteDisponible.setFechaActualizacion(LocalDateTime.now());
+	        proyectoEtapaRepo.save(siguienteDisponible);
+	    }
 	}
 
 }

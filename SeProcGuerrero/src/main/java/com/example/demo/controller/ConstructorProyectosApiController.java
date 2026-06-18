@@ -34,15 +34,10 @@ import com.example.demo.storage.StorageService;
 public class ConstructorProyectosApiController {
 
 	private final ProyectoRepository proyectoRepo;
-
 	private final UsuarioRepository usuarioRepo;
-
 	private final StorageService storageService;
-
 	private final ProyectoEtapaService proyectoEtapaService;
 
-
-	
 	public ConstructorProyectosApiController(ProyectoRepository proyectoRepo, UsuarioRepository usuarioRepo,
 			StorageService storageService, ProyectoEtapaRepository proyectoEtapaRepo,
 			ProyectoEtapaEntregaRepository entregaRepo, ProyectoEtapaService proyectoEtapaService) {
@@ -110,7 +105,9 @@ public class ConstructorProyectosApiController {
 		if (!constructorId.equals(s.getIdUsuarioContratista())) {
 			return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No tienes acceso a este proyecto");
 		}
-
+		
+		proyectoEtapaService.asegurarEtapasProyectoInicializadas(p);
+		
 		var constructor = usuarioRepo.findById(s.getIdUsuarioContratista()).orElse(null);
 		var supervisor = usuarioRepo.findById(p.getIdUsuarioSupervisor()).orElse(null);
 

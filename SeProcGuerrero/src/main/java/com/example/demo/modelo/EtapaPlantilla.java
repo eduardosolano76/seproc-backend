@@ -17,7 +17,7 @@ import lombok.Data;
 
 @Entity
 @Data
-@Table(name = "etapa_plantilla")
+@Table(name = "etapa_plantilla", schema = "public")
 public class EtapaPlantilla {
 
 	@Id
@@ -78,12 +78,5 @@ public class EtapaPlantilla {
 
 	@Column(name = "activo")
 	private Boolean activo;
-	
-    @Column(name = "id_institucion", nullable = false)
-    private String idInstitucion;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_institucion", insertable = false, updatable = false)
-    private Institucion institucion;
 
 }

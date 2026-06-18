@@ -117,6 +117,8 @@ public class CentralProyectosApiController {
 		dto.put("puedeSubir", false);
 		dto.put("puedeComentar", false);
 		dto.put("puedeAprobar", false);
+		
+		proyectoEtapaService.asegurarEtapasProyectoInicializadas(p);
 
 		dto.put("estadosEtapa", proyectoEtapaService.obtenerEstadosVisuales(id));
 
