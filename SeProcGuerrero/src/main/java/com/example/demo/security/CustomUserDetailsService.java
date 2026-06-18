@@ -8,8 +8,14 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
+import com.example.demo.modelo.Usuario;
 import com.example.demo.repository.UsuarioRepository;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
@@ -20,30 +26,65 @@ public class CustomUserDetailsService implements UserDetailsService {
 		this.repo = repo;
 	}
 
-	@Override
-	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-		var u = repo.findByUsername(username)
-			.orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado: " + username));
+    @Override
+    @Transactional(readOnly = true)
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 
-		// Bloqueo si no esta aprobado
-		if (u.getActivo() == null || !u.getActivo()) {
-			throw new DisabledException("Tu cuenta está pendiente de aprobación.");
-		}
+        String empresa = obtenerEmpresaDesdeRequest();
 
-		// roles.nombre -> "administrador", "central", etc.
-		String roleName = (u.getRol() != null && u.getRol().getNombre() != null) ? u.getRol().getNombre() : "PENDIENTE"; // fallback
-																															// por
-																															// si
-																															// un
-																															// usuario
-																															// quedó
-																															// sin
-																															// rol
+        if (empresa == null || empresa.isBlank()) {
+            throw new UsernameNotFoundException("Debes iniciar sesión desde el portal de tu institución.");
+        }
 
-		String role = "ROLE_" + roleName.toUpperCase();
+        Usuario u = repo.findByUsernameAndInstitucionAbreviacion(username, empresa)
+                .orElseThrow(() -> new UsernameNotFoundException(
+                        "Usuario no encontrado para la institución: " + empresa
+                ));
 
-		return new org.springframework.security.core.userdetails.User(u.getUsername(), u.getPassword(),
-				List.of(new SimpleGrantedAuthority(role)));
-	}
+        if (u.getInstitucion() == null) {
+            throw new UsernameNotFoundException("El usuario no tiene institución asignada.");
+        }
 
+        if (u.getInstitucion().getActiva() == null || u.getInstitucion().getActiva() == 0) {
+            throw new DisabledException("La institución se encuentra inactiva.");
+        }
+
+        if (u.getActivo() == null || !u.getActivo()) {
+            throw new DisabledException("Tu cuenta está pendiente de aprobación.");
+        }
+
+        String roleName = u.getRol() != null && u.getRol().getNombre() != null
+                ? u.getRol().getNombre()
+                : "PENDIENTE";
+
+        String role = "ROLE_" + roleName.toUpperCase();
+
+        return new org.springframework.security.core.userdetails.User(
+                u.getUsername(),
+                u.getPassword(),
+                List.of(new SimpleGrantedAuthority(role))
+        );
+    }
+
+    private String obtenerEmpresaDesdeRequest() {
+        try {
+            ServletRequestAttributes attrs =
+                    (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+
+            if (attrs == null) {
+                return null;
+            }
+            
+            HttpServletRequest request = attrs.getRequest();
+            String empresa = request.getParameter("empresa");
+
+            if (empresa == null) {
+                return null;
+            }
+
+            return empresa.trim().toLowerCase();
+        } catch (Exception e) {
+            return null;
+        }
+    }
 }

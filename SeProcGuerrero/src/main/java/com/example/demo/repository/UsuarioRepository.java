@@ -17,6 +17,19 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
 	Optional<Usuario> findByUsername(@Param("username") String username);
 	
     @Query("""
+            SELECT u
+            FROM Usuario u
+            JOIN FETCH u.institucion i
+            LEFT JOIN FETCH u.rol r
+            WHERE LOWER(u.username) = LOWER(:username)
+              AND LOWER(i.abreviacion) = LOWER(:abreviacion)
+        """)
+    Optional<Usuario> findByUsernameAndInstitucionAbreviacion(
+            @Param("username") String username,
+            @Param("abreviacion") String abreviacion
+    );
+	
+    @Query("""
             SELECT i.schemaName
             FROM Usuario u
             JOIN u.institucion i
