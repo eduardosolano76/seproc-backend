@@ -8,10 +8,10 @@ public class TenantIdentifierResolver implements CurrentTenantIdentifierResolver
 	
 	@Override
     public String resolveCurrentTenantIdentifier() {
-        String tenantId = TenantContext.getCurrentTenant();
+        String tenantSchema = TenantContext.getCurrentTenant();
         // Si no hay un tenant establecido (ej. en la pantalla de login o peticiones públicas),
         // asignamos un tenant por defecto para que Hibernate no arroje error.
-        return tenantId != null ? tenantId : "PUBLIC_TENANT";
+        return tenantSchema != null ? tenantSchema : "public";
     }
 
     @Override
@@ -19,5 +19,4 @@ public class TenantIdentifierResolver implements CurrentTenantIdentifierResolver
         // Obliga a Hibernate a validar que la sesión coincida con el tenant actual
         return true; 
     }
-
 }

@@ -7,7 +7,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.example.demo.modelo.Usuario;
 import com.example.demo.repository.UsuarioRepository;
 
 import jakarta.servlet.FilterChain;
@@ -17,42 +16,42 @@ import jakarta.servlet.http.HttpServletResponse;
 
 @Component
 public class TenantFilter extends OncePerRequestFilter {
-	
-	private final UsuarioRepository usuarioRepository;
+
+    private final UsuarioRepository usuarioRepository;
 
     public TenantFilter(UsuarioRepository usuarioRepository) {
         this.usuarioRepository = usuarioRepository;
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-            throws ServletException, IOException {
-        
-        // Obtener la sesión actual de Spring Security
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        // Si hay alguien logueado
-        if (authentication != null && authentication.isAuthenticated() 
-                && !"anonymousUser".equals(authentication.getPrincipal())) {
-            
-            String username = authentication.getName();
-            
-            // Buscamos el usuario en la BD para saber a qué institución pertenece
-            Usuario usuario = usuarioRepository.findByUsername(username).orElse(null);
-            
-            if (usuario != null && usuario.getInstitucion() != null) {
-                // Guardamos el ID de la institución en el contexto del hilo
-                TenantContext.setCurrentTenant(usuario.getInstitucion().getIdInstitucion());
-            }
-        }
+    protected void doFilterInternal(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            FilterChain filterChain
+    ) throws ServletException, IOException {
 
         try {
-            // Continuar con la petición 
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+            if (authentication != null
+                    && authentication.isAuthenticated()
+                    && !"anonymousUser".equals(authentication.getPrincipal())) {
+
+                String username = authentication.getName();
+
+                String schemaName = usuarioRepository.findSchemaNameByUsername(username)
+                        .filter(s -> s != null && !s.isBlank())
+                        .orElse("public");
+
+                TenantContext.setCurrentTenant(schemaName);
+            } else {
+                TenantContext.setCurrentTenant("public");
+            }
+
             filterChain.doFilter(request, response);
+
         } finally {
-            
             TenantContext.clear();
         }
     }
-
 }

@@ -31,5 +31,8 @@ public class Institucion {
 
 	@Column(columnDefinition = "TINYINT DEFAULT 1")
 	private Integer activa;
-
+	
+    @Column(name = "schema_name", length = 63, unique = true)
+    private String schemaName;
+    
 }

@@ -1,5 +1,7 @@
 package com.example.demo.controller;
 
+import java.util.Map;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,7 +21,6 @@ import com.example.demo.repository.CatMunicipioRepository;
 import com.example.demo.repository.SolicitudProyectoRepository;
 import com.example.demo.repository.TipoEdificacionRepository;
 import com.example.demo.repository.UsuarioRepository;
-import java.util.Map;
 import com.example.demo.service.DocumentoInicialService;
 
 @RestController
@@ -79,8 +80,15 @@ public class ConstructorSolicitudController {
 		SolicitudProyecto s = new SolicitudProyecto();
 		s.setIdUsuarioContratista(usuario.get().getIdUsuario());
 		s.setEstadoSolicitud("PENDIENTE");
-		
-		s.setInstitucion(usuario.get().getInstitucion());
+
+		var institucion = usuario.get().getInstitucion();
+
+		if (institucion == null) {
+		    return ResponseEntity.badRequest().body("El usuario no tiene institución asignada");
+		}
+
+		s.setIdInstitucion(institucion.getIdInstitucion());
+		s.setInstitucion(institucion);
 
 		s.setNombreEscuela(req.nombreEscuela);
 		s.setCct1(req.cct1);

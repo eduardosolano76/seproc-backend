@@ -7,8 +7,8 @@ public class TenantContext {
         return CURRENT_TENANT.get();
     }
 
-    public static void setCurrentTenant(String tenantId) {
-        CURRENT_TENANT.set(tenantId);
+    public static void setCurrentTenant(String schemaName) {
+        CURRENT_TENANT.set(schemaName);
     }
 
     public static void clear() {

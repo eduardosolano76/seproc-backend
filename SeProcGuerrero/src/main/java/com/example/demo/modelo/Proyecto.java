@@ -2,8 +2,6 @@ package com.example.demo.modelo;
 
 import java.time.LocalDateTime;
 
-import org.hibernate.annotations.TenantId;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -48,9 +46,8 @@ public class Proyecto {
 			estadoProyecto = "ACTIVO";
 	}
 
-	@TenantId
     @Column(name = "id_institucion", nullable = false)
-    private String idInstitucionTenant;
+    private String idInstitucion;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_institucion", insertable = false, updatable = false)

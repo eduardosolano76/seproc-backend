@@ -2,6 +2,7 @@ package com.example.demo.service;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -17,7 +18,6 @@ import com.example.demo.repository.ProyectoRepository;
 import com.example.demo.repository.SolicitudProyectoDocumentoRepository;
 import com.example.demo.repository.SolicitudProyectoRepository;
 import com.example.demo.storage.StorageService;
-import java.util.LinkedHashMap;
 
 @Service
 @Transactional
@@ -66,7 +66,7 @@ public class DocumentoInicialService {
         doc.setFechaLimite(fechaBase.plusMonths(1));
 
         if (solicitud.getInstitucion() != null) {
-            doc.setIdInstitucionTenant(solicitud.getInstitucion().getIdInstitucion());
+        	doc.setIdInstitucion(solicitud.getIdInstitucion());
         }
 
         documentoRepo.save(doc);

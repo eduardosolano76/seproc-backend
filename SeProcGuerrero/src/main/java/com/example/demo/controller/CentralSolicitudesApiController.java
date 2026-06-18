@@ -174,7 +174,7 @@ public class CentralSolicitudesApiController {
 		p.setSolicitud(s);
 		p.setIdUsuarioSupervisor(supervisorId);
 		p.setEstadoProyecto("ACTIVO");
-
+		p.setIdInstitucion(s.getIdInstitucion());
 
 		Proyecto proyectoGuardado = proyectoRepo.save(p);
 		proyectoEtapaService.inicializarEtapasProyecto(proyectoGuardado);

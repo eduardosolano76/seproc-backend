@@ -15,6 +15,14 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
 	// -- Metodos globales --
 	@Query("SELECT u FROM Usuario u WHERE u.username = :username")
 	Optional<Usuario> findByUsername(@Param("username") String username);
+	
+    @Query("""
+            SELECT i.schemaName
+            FROM Usuario u
+            JOIN u.institucion i
+            WHERE u.username = :username
+        """)
+        Optional<String> findSchemaNameByUsername(@Param("username") String username);
 
 	// Validaciones de registro (evita duplicados globales)
 	boolean existsByUsername(String username);

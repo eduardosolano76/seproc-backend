@@ -29,105 +29,181 @@ public class AdminSistemaService {
     private final UsuarioRepository usuarioRepo;
     private final RolRepository rolRepo;
     private final PasswordEncoder passwordEncoder;
+    private final InstitucionSchemaNameService schemaNameService;
+    private final InstitucionProvisioningService provisioningService;
 
-    // Inyección de dependencias
-    public AdminSistemaService(SolicitudInstitucionRepository solicitudRepo, InstitucionRepository institucionRepo,
-                               UsuarioRepository usuarioRepo, RolRepository rolRepo, PasswordEncoder passwordEncoder) {
+    public AdminSistemaService(
+            SolicitudInstitucionRepository solicitudRepo,
+            InstitucionRepository institucionRepo,
+            UsuarioRepository usuarioRepo,
+            RolRepository rolRepo,
+            PasswordEncoder passwordEncoder,
+            InstitucionSchemaNameService schemaNameService,
+            InstitucionProvisioningService provisioningService
+    ) {
         this.solicitudRepo = solicitudRepo;
         this.institucionRepo = institucionRepo;
         this.usuarioRepo = usuarioRepo;
         this.rolRepo = rolRepo;
         this.passwordEncoder = passwordEncoder;
+        this.schemaNameService = schemaNameService;
+        this.provisioningService = provisioningService;
     }
 
-    // Obtener solo las solicitudes que están en estado PENDIENTE
     public List<SolicitudInstitucion> obtenerSolicitudesPendientes() {
         return solicitudRepo.findAll().stream()
                 .filter(s -> s.getEstado() == EstadoSolicitud.PENDIENTE)
                 .toList();
     }
 
-    // Lógica para APROBAR una solicitud (Crea el Tenant y el primer Usuario)
     @Transactional
     public void aprobarSolicitud(Integer idSolicitud) {
         SolicitudInstitucion sol = solicitudRepo.findById(idSolicitud)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Solicitud no encontrada"));
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Solicitud no encontrada"
+                ));
 
         if (sol.getEstado() != EstadoSolicitud.PENDIENTE) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La solicitud ya fue procesada anteriormente.");
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "La solicitud ya fue procesada anteriormente."
+            );
         }
 
-        // Marcar solicitud como aprobada ---
-        sol.setEstado(EstadoSolicitud.APROBADA);
-        sol.setFechaResolucion(LocalDateTime.now());
-        solicitudRepo.save(sol);
+        String abreviacion = obtenerAbreviacionValida(sol, idSolicitud);
 
-        // Crear la nueva Institución (Tenant) ---
+        if (institucionRepo.existsByAbreviacionIgnoreCase(abreviacion)) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Ya existe una institución registrada con la abreviación: " + abreviacion
+            );
+        }
+
+        String schemaName = schemaNameService.generarSchemaDesdeAbreviacion(abreviacion);
+
+        if (institucionRepo.existsBySchemaName(schemaName)) {
+            schemaName = schemaName + "_" + idSolicitud;
+        }
+
+        provisioningService.crearTenantInstitucion(schemaName);
+
         Institucion nuevaInst = new Institucion();
-        nuevaInst.setIdInstitucion(UUID.randomUUID().toString()); // UUID aleatorio de 36 caracteres
+        nuevaInst.setIdInstitucion(UUID.randomUUID().toString());
         nuevaInst.setNombreOficial(sol.getNombreDependencia());
-        
-        // Asignar abreviación (si no pusieron, le ponemos "N/A" para que no truene el unique constraint)
-        String abreviacion = (sol.getAbreviacion() != null && !sol.getAbreviacion().isBlank()) ? sol.getAbreviacion() : "N/A-" + idSolicitud;
         nuevaInst.setAbreviacion(abreviacion);
-        
         nuevaInst.setCorreo(sol.getEmailContacto());
         nuevaInst.setTelefono(sol.getTelefonoContacto());
         nuevaInst.setActiva(1);
+        nuevaInst.setSchemaName(schemaName);
+
         institucionRepo.save(nuevaInst);
 
-        // Crear el primer usuario (Administrador del Tenant) ---
-        Usuario adminTenant = new Usuario();
-        adminTenant.setInstitucion(nuevaInst);
-        
-        // Tratar de separar el nombre del contacto en Nombre y Apellido (ej. "Juan Perez")
-        String nombreContacto = sol.getNombreContacto();
-        String nombre = nombreContacto;
-        String apellido = "Admin"; // Por defecto
-        
-        if (nombreContacto != null && nombreContacto.contains(" ")) {
-            int lastSpace = nombreContacto.lastIndexOf(" ");
-            nombre = nombreContacto.substring(0, lastSpace);
-            apellido = nombreContacto.substring(lastSpace + 1);
-        }
-        
-        adminTenant.setNombre(nombre);
-        adminTenant.setApellido(apellido);
-        adminTenant.setEmail(sol.getEmailContacto());
-        
-        // El username será la parte antes del @ del correo (Ej. contacto@escuela.com -> username: contacto)
-        String baseUsername = sol.getEmailContacto().split("@")[0];
-        if (usuarioRepo.existsByUsername(baseUsername)) {
-            baseUsername = baseUsername + "_" + idSolicitud; // Para evitar usernames duplicados
-        }
-        adminTenant.setUsername(baseUsername);
-        
-        // Contraseña por defecto: "12345"
-        adminTenant.setPassword(passwordEncoder.encode("12345"));
-        adminTenant.setFechaRegistro(LocalDate.now());
-        adminTenant.setActivo(true); // Usuario activado de inmediato
+        Usuario adminTenant = crearUsuarioAdministrador(sol, nuevaInst, idSolicitud);
 
-        // Buscar el rol 'administrador'
-        Rol rolAdmin = rolRepo.findByNombre("administrador")
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "El rol 'administrador' no existe en la base de datos."));
-        adminTenant.setRol(rolAdmin);
-
-        // Guardar el nuevo administrador
         usuarioRepo.save(adminTenant);
+
+        sol.setEstado(EstadoSolicitud.APROBADA);
+        sol.setFechaResolucion(LocalDateTime.now());
+
+        solicitudRepo.save(sol);
     }
 
-    // Lógica para RECHAZAR una solicitud
     @Transactional
     public void rechazarSolicitud(Integer idSolicitud) {
         SolicitudInstitucion sol = solicitudRepo.findById(idSolicitud)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Solicitud no encontrada"));
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Solicitud no encontrada"
+                ));
 
         if (sol.getEstado() != EstadoSolicitud.PENDIENTE) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La solicitud ya fue procesada anteriormente.");
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "La solicitud ya fue procesada anteriormente."
+            );
         }
 
         sol.setEstado(EstadoSolicitud.RECHAZADA);
         sol.setFechaResolucion(LocalDateTime.now());
+
         solicitudRepo.save(sol);
+    }
+
+    private String obtenerAbreviacionValida(SolicitudInstitucion sol, Integer idSolicitud) {
+        String abreviacion = sol.getAbreviacion();
+
+        if (abreviacion == null || abreviacion.isBlank()) {
+            return "INST-" + idSolicitud;
+        }
+
+        return abreviacion.trim().toUpperCase();
+    }
+
+    private Usuario crearUsuarioAdministrador(
+            SolicitudInstitucion sol,
+            Institucion institucion,
+            Integer idSolicitud
+    ) {
+        Usuario usuario = new Usuario();
+
+        usuario.setInstitucion(institucion);
+
+        String nombreContacto = sol.getNombreContacto();
+        String nombre = nombreContacto;
+        String apellido = "Admin";
+
+        if (nombreContacto != null && nombreContacto.trim().contains(" ")) {
+            String limpio = nombreContacto.trim();
+            int lastSpace = limpio.lastIndexOf(" ");
+
+            nombre = limpio.substring(0, lastSpace);
+            apellido = limpio.substring(lastSpace + 1);
+        }
+
+        usuario.setNombre(nombre);
+        usuario.setApellido(apellido);
+        
+        if (usuarioRepo.existsByEmail(sol.getEmailContacto())) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Ya existe un usuario registrado con el correo: " + sol.getEmailContacto()
+            );
+        }
+        
+        usuario.setEmail(sol.getEmailContacto());
+
+        String username = generarUsername(sol.getEmailContacto(), idSolicitud);
+
+        usuario.setUsername(username);
+        usuario.setPassword(passwordEncoder.encode("12345"));
+        usuario.setFechaRegistro(LocalDate.now());
+        usuario.setActivo(true);
+
+        Rol rolAdmin = rolRepo.findByNombre("administrador")
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.INTERNAL_SERVER_ERROR,
+                        "El rol 'administrador' no existe en la base de datos."
+                ));
+
+        usuario.setRol(rolAdmin);
+
+        return usuario;
+    }
+
+    private String generarUsername(String email, Integer idSolicitud) {
+        String username = "admin_inst_" + idSolicitud;
+
+        if (email != null && email.contains("@")) {
+            username = email.substring(0, email.indexOf("@"));
+        }
+
+        username = username.trim().toLowerCase();
+
+        if (usuarioRepo.existsByUsername(username)) {
+            username = username + "_" + idSolicitud;
+        }
+
+        return username;
     }
 }

@@ -9,9 +9,11 @@ import com.example.demo.modelo.Institucion;
 
 public interface InstitucionRepository extends JpaRepository<Institucion, String> {
 	
-	// Busca ignorando mayúsculas/minúsculas (ej: "igife" o "IGIFE")
-	Optional<Institucion> findByAbreviacionIgnoreCase(String abreviacion);
-	
-	List<Institucion> findByActiva(Integer activa);
+    Optional<Institucion> findByAbreviacionIgnoreCase(String abreviacion);
+
+    List<Institucion> findByActiva(Integer activa);
+
+    boolean existsByAbreviacionIgnoreCase(String abreviacion);
+    boolean existsBySchemaName(String schemaName);
 
 }
