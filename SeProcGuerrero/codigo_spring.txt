@@ -31920,6 +31920,13 @@ public class ProyectoEtapaService {
 
 		List<EtapaPlantilla> plantillas = obtenerTerminalesEnSecuencia(tipoObra, nivelesProyecto);
 		List<EtapaProgramada> secuencia = construirSecuenciaProgramada(plantillas, nivelesProyecto);
+		
+		if (secuencia.isEmpty()) {
+		    throw new IllegalStateException(
+		        "No existen plantillas activas en public.etapa_plantilla para el tipo de obra: "
+		        + tipoObra
+		    );
+		}
 
 		int orden = 1;
 		boolean primeraActiva = false;
@@ -33128,6 +33135,48 @@ public class TenantLogoutSuccessHandler implements LogoutSuccessHandler{
 	}
 }
 
+==================================================
+ARCHIVO: src/main/java/com/example/demo/controller/SeprocApiController.java
+==================================================
+
+package com.example.demo.controller;
+
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import com.example.demo.modelo.SolicitudInstitucion;
+import com.example.demo.repository.InstitucionRepository;
+import com.example.demo.repository.SolicitudInstitucionRepository;
+
+@RestController
+@RequestMapping("/api/seproc")
+@CrossOrigin(origins = "*")
+public class SeprocApiController {
+
+    @Autowired
+    private SolicitudInstitucionRepository solicitudRepository;
+
+    @Autowired
+    private InstitucionRepository institucionRepo;
+
+    @GetMapping("/instituciones")
+    public Object obtenerInstituciones() {
+        return institucionRepo.findByActiva(1);
+    }
+
+    @PostMapping("/solicitudes")
+    public Map<String, String> guardarSolicitud(@RequestBody SolicitudInstitucion solicitud) {
+
+        solicitudRepository.save(solicitud);
+
+        return Map.of(
+            "mensaje",
+            "¡Tu solicitud ha sido enviada correctamente! El equipo de SeProc se pondrá en contacto pronto."
+        );
+    }
+}
 ==================================================
 ARCHIVO: src/main/java/com/example/demo/controller/GeoApiController.java
 ==================================================
@@ -35865,72 +35914,6 @@ public ResponseEntity<?> aprobarDocumentoInicial(
     
     
 }
-==================================================
-ARCHIVO: src/main/java/com/example/demo/controller/SeprocController.java
-==================================================
-
-package com.example.demo.controller;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
-import com.example.demo.modelo.SolicitudInstitucion;
-import com.example.demo.repository.InstitucionRepository;
-import com.example.demo.repository.SolicitudInstitucionRepository;
-
-import jakarta.servlet.http.HttpServletRequest;
-
-@Controller
-public class SeprocController {
-	
-	@Autowired
-    private SolicitudInstitucionRepository solicitudRepository;
-	@Autowired
-	private InstitucionRepository institucionRepo;
-
-	@GetMapping("/seproc")
-	public String seproc(Model model, HttpServletRequest request) {
-		request.getSession(true);
-		
-		model.addAttribute("instituciones", institucionRepo.findByActiva(1));
-		
-		model.addAttribute("solicitud", new SolicitudInstitucion());
-		return "seprocIndex/seproc";
-	}  
-	
-	// Muestra la pantalla del formulario
-	@GetMapping("/solicitar-acceso")
-    public String mostrarFormularioSolicitud(Model model) {
-        // Le pasamos un objeto vacío a Thymeleaf para que lo llene con el formulario
-        model.addAttribute("solicitud", new SolicitudInstitucion());
-        
-        return "seprocIndex/solicitar-acceso"; 
-    }
-	
-	// Recibe los datos cuando el usuario da clic en "Enviar"
-    @PostMapping("/solicitar-acceso")
-    public String guardarSolicitud(@ModelAttribute("solicitud") SolicitudInstitucion solicitud, 
-                                   RedirectAttributes redirectAttributes) {
-        
-        // Guardamos la solicitud en la base de datos.
-        // Nota: El estado 'PENDIENTE' y la fecha se asignan automáticamente 
-        solicitudRepository.save(solicitud);
-        
-        // Agregamos un mensaje de éxito temporal (Flash Attribute)
-        redirectAttributes.addFlashAttribute("mensajeExito", 
-            "¡Tu solicitud ha sido enviada correctamente! El equipo de SeProc se pondrá en contacto pronto.");
-        
-        // Redirigimos a la página principal. Usar "redirect" evita que el 
-        // formulario se reenvíe por accidente si el usuario recarga la página.
-        return "redirect:/seproc"; 
-    }
-}
-
 ==================================================
 ARCHIVO: src/main/java/com/example/demo/controller/AdminSolicitudesApiController.java
 ==================================================
@@ -38705,13 +38688,6 @@ public class EtapaPlantilla {
 
 	@Column(name = "activo")
 	private Boolean activo;
-	
-    @Column(name = "id_institucion", nullable = false)
-    private String idInstitucion;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_institucion", insertable = false, updatable = false)
-    private Institucion institucion;
 
 }
 

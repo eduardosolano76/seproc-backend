@@ -1,5 +1,7 @@
 package com.example.demo.config;
 
+import java.util.List;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -10,6 +12,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.example.demo.security.AdminSistemaDetailsService;
 import com.example.demo.security.CustomUserDetailsService;
@@ -20,7 +25,7 @@ import com.example.demo.security.TenantLogoutSuccessHandler;
 @EnableWebSecurity
 public class SecurityConfig {
 
-	// ZONA SÚPER ADMIN (Prioridad 1 - Totalmente Aislada)
+	// Zona super ADMIN (Prioridad 1 - Totalmente Aislada)
 	@Bean
 	@Order(1)
 	SecurityFilterChain superAdminFilterChain(HttpSecurity http, AdminSistemaDetailsService adminSistemaDetailsService,
@@ -54,7 +59,12 @@ public class SecurityConfig {
 		DaoAuthenticationProvider clientProvider = new DaoAuthenticationProvider(customUserDetailsService);
 		clientProvider.setPasswordEncoder(passwordEncoder);
 
-		http.authenticationProvider(clientProvider)
+		http
+	    .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+	    .csrf(csrf -> csrf
+	        .ignoringRequestMatchers("/api/**")
+	    )
+		.authenticationProvider(clientProvider)
 				.addFilterAfter(tenantFilter, UsernamePasswordAuthenticationFilter.class)
 				.authorizeHttpRequests(auth -> auth
 						// ESTÁTICOS
@@ -68,8 +78,7 @@ public class SecurityConfig {
 						        "/auth/**",
 						        "/public/**",
 						        "/registro/**",
-						        "/seproc", "/seproc/**",
-						        "/solicitar-acceso", "/solicitar-acceso/**"
+						        "/api/seproc/**"
 						)
 						.permitAll()
 
@@ -90,7 +99,7 @@ public class SecurityConfig {
 						.requestMatchers("/api/direccion/**").hasRole("DIRECCION")
 
 						.anyRequest().authenticated())
-				.formLogin(form -> form
+						.formLogin(form -> form
 						.loginPage("/login")
 						.loginProcessingUrl("/login")
 						.successHandler(successHandler)
@@ -122,10 +131,42 @@ public class SecurityConfig {
 
 					return http.build();
 	}
+	
+	@Bean
+	CorsConfigurationSource corsConfigurationSource() {
+	    CorsConfiguration configuration = new CorsConfiguration();
+
+	    configuration.setAllowedOrigins(List.of(
+	        "http://localhost:4200",
+	        "http://127.0.0.1:4200"
+	    ));
+
+	    configuration.setAllowedMethods(List.of(
+	        "GET",
+	        "POST",
+	        "PUT",
+	        "DELETE",
+	        "PATCH",
+	        "OPTIONS"
+	    ));
+
+	    configuration.setAllowedHeaders(List.of("*"));
+
+	    configuration.setExposedHeaders(List.of(
+	        "Authorization",
+	        "Content-Type"
+	    ));
+
+	    configuration.setAllowCredentials(false);
+
+	    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+	    source.registerCorsConfiguration("/api/**", configuration);
+
+	    return source;
+	}
 
 	@Bean
 	PasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder();
 	}
-
 }
