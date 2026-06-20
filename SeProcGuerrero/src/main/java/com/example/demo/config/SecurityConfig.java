@@ -2,6 +2,7 @@ package com.example.demo.config;
 
 import java.util.List;
 
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -12,6 +13,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -20,6 +22,10 @@ import com.example.demo.security.AdminSistemaDetailsService;
 import com.example.demo.security.CustomUserDetailsService;
 import com.example.demo.security.RoleRedirectSuccessHandler;
 import com.example.demo.security.TenantLogoutSuccessHandler;
+
+import org.springframework.http.HttpMethod;
+
+import jakarta.servlet.http.HttpServletResponse;
 
 @Configuration
 @EnableWebSecurity
@@ -40,24 +46,30 @@ public class SecurityConfig {
 	    superAdminProvider.setPasswordEncoder(passwordEncoder);
 
 	    http
-	        // Protege las rutas
+	        // Esta cadena SOLO atiende la API del súper admin
 	        .securityMatcher("/api/admin-seproc/**")
 
 	        // Provider exclusivo para el Súper Admin
 	        .authenticationProvider(superAdminProvider)
 
-	        // CORS para permitir llamadas desde Angular
+	        // CORS para Angular
 	        .cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
-	        // Ignoramos CSRF solo para la API que consumirá Angular
+	        // CSRF activo también para el login
 	        .csrf(csrf -> csrf
-	            .ignoringRequestMatchers("/api/admin-seproc/**")
+	            .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
 	        )
+
+	        // Evita guardar peticiones y redireccionar como si fuera una app HTML
+	        .requestCache(cache -> cache.disable())
 
 	        .authorizeHttpRequests(auth -> auth
 
-	            // Login público para Angular
-	            .requestMatchers("/api/admin-seproc/login").permitAll()
+	            // Endpoint público para obtener CSRF
+	            .requestMatchers(HttpMethod.GET, "/api/admin-seproc/csrf").permitAll()
+
+	            // Login público, pero protegido con CSRF
+	            .requestMatchers(HttpMethod.POST, "/api/admin-seproc/login").permitAll()
 
 	            // Recursos estáticos
 	            .requestMatchers(
@@ -68,24 +80,41 @@ public class SecurityConfig {
 	                "/static/**"
 	            ).permitAll()
 
-	            // Todo lo demás de admin-seproc requiere SUPERADMIN
+	            // Todo lo demás requiere SUPERADMIN
 	            .anyRequest().hasRole("SUPERADMIN")
+	        )
+
+	        // Esto evita que la API te mande al login genérico HTML
+	        .exceptionHandling(ex -> ex
+
+	            .authenticationEntryPoint((request, response, authException) -> {
+	                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+	                response.setContentType("application/json;charset=UTF-8");
+	                response.getWriter().write("{\"mensaje\":\"No autenticado\"}");
+	                response.getWriter().flush();
+	            })
+
+	            .accessDeniedHandler((request, response, accessDeniedException) -> {
+	                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+	                response.setContentType("application/json;charset=UTF-8");
+	                response.getWriter().write("{\"mensaje\":\"Acceso denegado o CSRF inválido\"}");
+	                response.getWriter().flush();
+	            })
 	        )
 
 	        .formLogin(form -> form
 
 	            .loginProcessingUrl("/api/admin-seproc/login")
 
-	            // Si el login es correcto, regresamos JSON
 	            .successHandler((request, response, authentication) -> {
-	                response.setStatus(200);
+	                response.setStatus(HttpServletResponse.SC_OK);
 	                response.setContentType("application/json;charset=UTF-8");
 	                response.getWriter().write("{\"mensaje\":\"Login correcto\"}");
+	                response.getWriter().flush();
 	            })
 
-	            // Si falla, regresamos error JSON
 	            .failureHandler((request, response, exception) -> {
-	                response.setStatus(401);
+	                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 	                response.setContentType("application/json;charset=UTF-8");
 	                response.getWriter().write("{\"mensaje\":\"Usuario o contraseña incorrectos\"}");
 	                response.getWriter().flush();
@@ -96,11 +125,10 @@ public class SecurityConfig {
 
 	        .logout(logout -> logout
 
-	            // Esta es la URL que Angular debe llamar para cerrar sesión
 	            .logoutUrl("/api/admin-seproc/logout")
 
 	            .logoutSuccessHandler((request, response, authentication) -> {
-	                response.setStatus(200);
+	                response.setStatus(HttpServletResponse.SC_OK);
 	                response.setContentType("application/json;charset=UTF-8");
 	                response.getWriter().write("{\"mensaje\":\"Sesión cerrada correctamente\"}");
 	                response.getWriter().flush();
