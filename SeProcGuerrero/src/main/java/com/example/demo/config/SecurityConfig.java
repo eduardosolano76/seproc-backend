@@ -28,25 +28,88 @@ public class SecurityConfig {
 	// Zona super ADMIN (Prioridad 1 - Totalmente Aislada)
 	@Bean
 	@Order(1)
-	SecurityFilterChain superAdminFilterChain(HttpSecurity http, AdminSistemaDetailsService adminSistemaDetailsService,
-			PasswordEncoder passwordEncoder) throws Exception {
+	SecurityFilterChain superAdminFilterChain(
+	        HttpSecurity http,
+	        AdminSistemaDetailsService adminSistemaDetailsService,
+	        PasswordEncoder passwordEncoder
+	) throws Exception {
 
-		DaoAuthenticationProvider superAdminProvider = new DaoAuthenticationProvider(adminSistemaDetailsService);
+	    DaoAuthenticationProvider superAdminProvider =
+	            new DaoAuthenticationProvider(adminSistemaDetailsService);
 
-		superAdminProvider.setPasswordEncoder(passwordEncoder);
+	    superAdminProvider.setPasswordEncoder(passwordEncoder);
 
-		http.securityMatcher("/admin-seproc/**").authenticationProvider(superAdminProvider)
-				.authorizeHttpRequests(auth -> auth.requestMatchers("/admin-seproc/login-seproc").permitAll()
-						.requestMatchers("/assets/**", "/css/**", "/js/**", "/images/**").permitAll().anyRequest()
-						.hasRole("SUPERADMIN"))
-				.formLogin(form -> form.loginPage("/admin-seproc/login-seproc")
-						.loginProcessingUrl("/admin-seproc/login-seproc")
-						.defaultSuccessUrl("/admin-seproc/dashboard-seproc", true)
-						.failureUrl("/admin-seproc/login-seproc?error=true").permitAll())
-				.logout(logout -> logout.logoutUrl("/admin-seproc/logout")
-						.logoutSuccessUrl("/admin-seproc/login-seproc?logout=true").permitAll());
+	    http
+	        // Protege las rutas
+	        .securityMatcher("/api/admin-seproc/**")
 
-		return http.build();
+	        // Provider exclusivo para el Súper Admin
+	        .authenticationProvider(superAdminProvider)
+
+	        // CORS para permitir llamadas desde Angular
+	        .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+
+	        // Ignoramos CSRF solo para la API que consumirá Angular
+	        .csrf(csrf -> csrf
+	            .ignoringRequestMatchers("/api/admin-seproc/**")
+	        )
+
+	        .authorizeHttpRequests(auth -> auth
+
+	            // Login público para Angular
+	            .requestMatchers("/api/admin-seproc/login").permitAll()
+
+	            // Recursos estáticos
+	            .requestMatchers(
+	                "/assets/**",
+	                "/css/**",
+	                "/js/**",
+	                "/images/**",
+	                "/static/**"
+	            ).permitAll()
+
+	            // Todo lo demás de admin-seproc requiere SUPERADMIN
+	            .anyRequest().hasRole("SUPERADMIN")
+	        )
+
+	        .formLogin(form -> form
+
+	            .loginProcessingUrl("/api/admin-seproc/login")
+
+	            // Si el login es correcto, regresamos JSON
+	            .successHandler((request, response, authentication) -> {
+	                response.setStatus(200);
+	                response.setContentType("application/json;charset=UTF-8");
+	                response.getWriter().write("{\"mensaje\":\"Login correcto\"}");
+	            })
+
+	            // Si falla, regresamos error JSON
+	            .failureHandler((request, response, exception) -> {
+	                response.setStatus(401);
+	                response.setContentType("application/json;charset=UTF-8");
+	                response.getWriter().write("{\"mensaje\":\"Usuario o contraseña incorrectos\"}");
+	                response.getWriter().flush();
+	            })
+
+	            .permitAll()
+	        )
+
+	        .logout(logout -> logout
+
+	            // Esta es la URL que Angular debe llamar para cerrar sesión
+	            .logoutUrl("/api/admin-seproc/logout")
+
+	            .logoutSuccessHandler((request, response, authentication) -> {
+	                response.setStatus(200);
+	                response.setContentType("application/json;charset=UTF-8");
+	                response.getWriter().write("{\"mensaje\":\"Sesión cerrada correctamente\"}");
+	                response.getWriter().flush();
+	            })
+
+	            .permitAll()
+	        );
+
+	    return http.build();
 	}
 
 	@Bean
@@ -59,12 +122,8 @@ public class SecurityConfig {
 		DaoAuthenticationProvider clientProvider = new DaoAuthenticationProvider(customUserDetailsService);
 		clientProvider.setPasswordEncoder(passwordEncoder);
 
-		http
-	    .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-	    .csrf(csrf -> csrf
-	        .ignoringRequestMatchers("/api/**")
-	    )
-		.authenticationProvider(clientProvider)
+		http.cors(cors -> cors.configurationSource(corsConfigurationSource()))
+				.csrf(csrf -> csrf.ignoringRequestMatchers("/api/**")).authenticationProvider(clientProvider)
 				.addFilterAfter(tenantFilter, UsernamePasswordAuthenticationFilter.class)
 				.authorizeHttpRequests(auth -> auth
 						// ESTÁTICOS
@@ -72,14 +131,8 @@ public class SecurityConfig {
 						.permitAll()
 
 						// PÚBLICOS
-						.requestMatchers(
-						        "/",
-						        "/login", "/login/**",
-						        "/auth/**",
-						        "/public/**",
-						        "/registro/**",
-						        "/api/seproc/**"
-						)
+						.requestMatchers("/", "/login", "/login/**", "/auth/**", "/public/**", "/registro/**",
+								"/api/seproc/**")
 						.permitAll()
 
 						// MÓDULOS POR ROL
@@ -99,12 +152,9 @@ public class SecurityConfig {
 						.requestMatchers("/api/direccion/**").hasRole("DIRECCION")
 
 						.anyRequest().authenticated())
-						.formLogin(form -> form
-						.loginPage("/login")
-						.loginProcessingUrl("/login")
-						.successHandler(successHandler)
+				.formLogin(form -> form.loginPage("/login").loginProcessingUrl("/login").successHandler(successHandler)
 						.failureHandler((request, response, exception) -> {
-							
+
 							// 1. Leemos la empresa que mandamos oculta en el HTML
 							String empresa = request.getParameter("empresa");
 							String redirectUrl = "/login"; // Ruta por defecto (genérica)
@@ -120,49 +170,30 @@ public class SecurityConfig {
 							} else {
 								response.sendRedirect(redirectUrl + "?error=true");
 							}
-						})
-						.permitAll()
-					)
-					.logout(logout -> logout
-						.logoutUrl("/logout")
-						.logoutSuccessHandler(logoutHandler) 
-						.permitAll()
-					);
+						}).permitAll())
+				.logout(logout -> logout.logoutUrl("/logout").logoutSuccessHandler(logoutHandler).permitAll());
 
-					return http.build();
+		return http.build();
 	}
-	
+
 	@Bean
 	CorsConfigurationSource corsConfigurationSource() {
-	    CorsConfiguration configuration = new CorsConfiguration();
+		CorsConfiguration configuration = new CorsConfiguration();
 
-	    configuration.setAllowedOrigins(List.of(
-	        "http://localhost:4200",
-	        "http://127.0.0.1:4200"
-	    ));
+		configuration.setAllowedOrigins(List.of("http://localhost:4200", "http://127.0.0.1:4200"));
 
-	    configuration.setAllowedMethods(List.of(
-	        "GET",
-	        "POST",
-	        "PUT",
-	        "DELETE",
-	        "PATCH",
-	        "OPTIONS"
-	    ));
+		configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
 
-	    configuration.setAllowedHeaders(List.of("*"));
+		configuration.setAllowedHeaders(List.of("*"));
 
-	    configuration.setExposedHeaders(List.of(
-	        "Authorization",
-	        "Content-Type"
-	    ));
+		configuration.setExposedHeaders(List.of("Authorization", "Content-Type"));
 
-	    configuration.setAllowCredentials(false);
+		configuration.setAllowCredentials(true);
 
-	    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-	    source.registerCorsConfiguration("/api/**", configuration);
+		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+		source.registerCorsConfiguration("/api/**", configuration);
 
-	    return source;
+		return source;
 	}
 
 	@Bean
