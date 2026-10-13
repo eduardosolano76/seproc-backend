@@ -45,6 +45,9 @@ public class EtapaPlantilla {
 
 	@Column(name = "descripcion", length = 500)
 	private String descripcion;
+	
+	@Column(name = "imagen_url", columnDefinition = "TEXT")
+	private String imagenUrl;
 
 	@Column(name = "orden_visual")
 	private Integer ordenVisual;

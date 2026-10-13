@@ -29,6 +29,7 @@ import com.itextpdf.text.Document;
 import com.itextpdf.text.Image;
 import com.itextpdf.text.PageSize;
 import com.itextpdf.text.pdf.PdfWriter;
+import com.example.demo.storage.StorageService;
 
 @Service
 @Transactional
@@ -49,14 +50,19 @@ public class ProyectoEtapaService {
 	private final EtapaPlantillaRepository etapaPlantillaRepo;
 
 	private final ProyectoEtapaInteraccionRepository interaccionRepo;
-
+	
+	private final StorageService storageService;
+	
+	
 
 	public ProyectoEtapaService(ProyectoEtapaRepository proyectoEtapaRepo, ProyectoEtapaEntregaRepository entregaRepo,
-			EtapaPlantillaRepository etapaPlantillaRepo, ProyectoEtapaInteraccionRepository interaccionRepo) {
+			EtapaPlantillaRepository etapaPlantillaRepo, ProyectoEtapaInteraccionRepository interaccionRepo,
+			StorageService storageService) {
 		this.proyectoEtapaRepo = proyectoEtapaRepo;
 		this.entregaRepo = entregaRepo;
 		this.etapaPlantillaRepo = etapaPlantillaRepo;
 		this.interaccionRepo = interaccionRepo;
+		this.storageService = storageService;
 	}
 
 	public void inicializarEtapasProyecto(Proyecto proyecto) {
@@ -435,7 +441,8 @@ public class ProyectoEtapaService {
 		Map<String, Object> dto = new LinkedHashMap<>();
 
 		dto.put("estadoEtapa", etapa.getEstado());
-
+		dto.put("notaRecomendacion", etapa.getEtapaPlantilla() != null ? etapa.getEtapaPlantilla().getDescripcion() : null);
+		dto.put("notaImagenUrl", etapa.getEtapaPlantilla() != null ? etapa.getEtapaPlantilla().getImagenUrl() : null);
 		var ultimaEntregaOpt = entregaRepo
 			.findFirstByProyectoEtapa_IdProyectoEtapaOrderByVersionDesc(etapa.getIdProyectoEtapa());
 		if (ultimaEntregaOpt.isPresent()) {
@@ -455,27 +462,32 @@ public class ProyectoEtapaService {
 				entregaMap.put("usuarioNombre", "—");
 			}
 
-			List<Map<String, String>> archivosList = new ArrayList<>();
-			if (entrega.getNombreArchivoOriginal() != null && !entrega.getNombreArchivoOriginal().isEmpty()) {
-				String[] names = entrega.getNombreArchivoOriginal().split("\\|");
-				String[] urls = entrega.getArchivoUrl() != null ? entrega.getArchivoUrl().split("\\|") : new String[0];
-				String[] paths = entrega.getArchivoStoragePath() != null ? entrega.getArchivoStoragePath().split("\\|")
-						: new String[0];
-				String[] notas = entrega.getComentarioConstructor() != null
-						? entrega.getComentarioConstructor().split("\\|") : new String[0];
+			List<Map<String, String>> listaArchivos = new ArrayList<>();
+			if (entrega.getArchivoUrl() != null && !entrega.getArchivoUrl().isEmpty()) {
+			    String[] urls = entrega.getArchivoUrl().split("\\|");
+			    String[] names = entrega.getNombreArchivoOriginal() != null
+			            ? entrega.getNombreArchivoOriginal().split("\\|") : new String[urls.length];
+			    String[] notas = entrega.getComentarioConstructor() != null
+			            ? entrega.getComentarioConstructor().split("\\|") : new String[0];
+			    String[] paths = entrega.getArchivoStoragePath() != null
+			            ? entrega.getArchivoStoragePath().split("\\|") : new String[0];
 
-				for (int i = 0; i < names.length; i++) {
-					Map<String, String> archObj = new HashMap<>();
-					archObj.put("nombre", names[i]);
-					archObj.put("url", i < urls.length ? urls[i] : "");
-					archObj.put("path", i < paths.length ? paths[i] : "");
-					String notaReal = (i < notas.length && !notas[i].equals("SIN_NOTA")) ? notas[i] : "";
-					archObj.put("nota", notaReal);
-					archivosList.add(archObj);
-				}
+			    for (int i = 0; i < urls.length; i++) {
+			        Map<String, String> arch = new HashMap<>();
+			        String urlFinal = (i < paths.length && paths[i] != null && !paths[i].isEmpty())
+			                ? storageService.publicUrl(paths[i])
+			                : urls[i];
+			        arch.put("url", urlFinal);
+			        arch.put("path", i < paths.length ? paths[i] : "");
+			        arch.put("nombre", i < names.length && names[i] != null ? names[i] : "Imagen " + (i + 1));
+			        String notaReal = (i < notas.length && !notas[i].equals("SIN_NOTA")) ? notas[i] : "";
+			        arch.put("nota", notaReal);
+
+			        listaArchivos.add(arch);
+			    }
 			}
 
-			entregaMap.put("archivos", archivosList);
+			entregaMap.put("archivos", listaArchivos);
 
 			dto.put("entregaActual", entregaMap);
 		}
@@ -539,18 +551,23 @@ public class ProyectoEtapaService {
 			if (entrega.getArchivoUrl() != null && !entrega.getArchivoUrl().isEmpty()) {
 				String[] urls = entrega.getArchivoUrl().split("\\|");
 				String[] names = entrega.getNombreArchivoOriginal() != null
-						? entrega.getNombreArchivoOriginal().split("\\|") : new String[urls.length];
+				        ? entrega.getNombreArchivoOriginal().split("\\|") : new String[urls.length];
 				String[] notas = entrega.getComentarioConstructor() != null
-						? entrega.getComentarioConstructor().split("\\|") : new String[0];
+				        ? entrega.getComentarioConstructor().split("\\|") : new String[0];
+				String[] paths = entrega.getArchivoStoragePath() != null
+				        ? entrega.getArchivoStoragePath().split("\\|") : new String[0];
 
 				for (int i = 0; i < urls.length; i++) {
-					Map<String, String> arch = new HashMap<>();
-					arch.put("url", urls[i]);
-					arch.put("nombre", i < names.length && names[i] != null ? names[i] : "Imagen " + (i + 1));
-					String notaReal = (i < notas.length && !notas[i].equals("SIN_NOTA")) ? notas[i] : "";
-					arch.put("nota", notaReal);
+				    Map<String, String> arch = new HashMap<>();
+				    String urlFinal = (i < paths.length && paths[i] != null && !paths[i].isEmpty())
+				            ? storageService.publicUrl(paths[i])
+				            : urls[i];
+				    arch.put("url", urlFinal);
+				    arch.put("nombre", i < names.length && names[i] != null ? names[i] : "Imagen " + (i + 1));
+				    String notaReal = (i < notas.length && !notas[i].equals("SIN_NOTA")) ? notas[i] : "";
+				    arch.put("nota", notaReal);
 
-					listaArchivos.add(arch);
+				    listaArchivos.add(arch);
 				}
 			}
 			eventoBorrador.put("archivos", listaArchivos);
@@ -778,18 +795,19 @@ public class ProyectoEtapaService {
 			throw new IllegalArgumentException("Solo se pueden descargar reportes de etapas APROBADAS.");
 		}
 
-		String[] urls = entrega.getArchivoUrl() != null ? entrega.getArchivoUrl().split("\\|") : new String[0];
-
+		String[] paths = entrega.getArchivoStoragePath() != null ? entrega.getArchivoStoragePath().split("\\|") : new String[0];
+		
 		Document document = new Document(PageSize.LETTER);
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		PdfWriter.getInstance(document, out);
 		document.open();
 
-		for (String urlStr : urls) {
-			if (urlStr == null || urlStr.trim().isEmpty())
+		for (String path : paths) {
+			if (path == null || path.trim().isEmpty())
 				continue;
 			try {
-				Image img = Image.getInstance(new URL(urlStr));
+				String urlFresca = storageService.publicUrl(path);
+				Image img = Image.getInstance(new URL(urlFresca));
 				// Escalar imagen para que quepa en el ancho de la página respetando los
 				// márgenes
 				float scaler = ((document.getPageSize().getWidth() - document.leftMargin() - document.rightMargin())
@@ -799,7 +817,7 @@ public class ProyectoEtapaService {
 				document.add(img);
 			}
 			catch (Exception e) {
-				System.err.println("Error al cargar la imagen para el PDF: " + urlStr);
+				System.err.println("Error al cargar la imagen para el PDF: " + path);
 			}
 		}
 
